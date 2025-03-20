@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vroom", "vroom\vroom.csproj", "{184F3447-EE23-4D6F-A07B-42E25347409A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VROOM", "..\VROOM\VROOM\VROOM.csproj", "{EB14A102-63D7-125B-69B9-E1CFA9A67574}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{184F3447-EE23-4D6F-A07B-42E25347409A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{184F3447-EE23-4D6F-A07B-42E25347409A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{184F3447-EE23-4D6F-A07B-42E25347409A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{184F3447-EE23-4D6F-A07B-42E25347409A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB14A102-63D7-125B-69B9-E1CFA9A67574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB14A102-63D7-125B-69B9-E1CFA9A67574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB14A102-63D7-125B-69B9-E1CFA9A67574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB14A102-63D7-125B-69B9-E1CFA9A67574}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

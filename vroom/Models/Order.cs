@@ -1,54 +1,70 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using YourNamespace.Models;
 
 
-namespace vroom.Models
+namespace YourNamespace.Models
 {
     public class Order
     {
-        public int Id { get; set; } 
+        [Key]
+        public int OrderID { get; set; }
+        public int CustomerID { get; set; }
+        public int RiderID { get; set; }
+        public string ItemsType { get; set; }
+        public string Title { get; set; }
+        public bool IsBreakable { get; set; }
+        public string Notes { get; set; }
         public string Details { get; set; }
-        public OrderState State { get; set; }
-        public decimal  OrderPrice { get; set; }
+        public float Weight { get; set; }
+        public string Priority { get; set; }
+        public string State { get; set; }
+        public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
-        public string Title { get; set; }
-        public float Weight { get; set; }
-        public string? Notes { get; set; }
-        public bool IsBreakable { get; set; }
 
-        public ICollection<OrderPriority>? Priority { get; set; } 
-
-
-        public int RiderId { get; set; } //fk to the rider
-
-        public int BusinessId { get; set; } //fk to the Business Owner
-
-        public int PaymentId { get; set; } //fk to the Payment
-
-
+        public Customer Customer { get; set; }
+        public Rider Rider { get; set; }
+        public Payment Payment { get; set; }
+        public OrderRoute OrderRoute { get; set; }
+        public OrderRider OrderRider { get; set; }
     }
-    public class OrderConfig: IEntityTypeConfiguration<Order>
+}
+
+namespace YourNamespace.Data.Configurations
+{
+    public class OrderConfiguration
     {
-        public void Configure(EntityTypeBuilder<Order> builder)
+        public static void Configure(ModelBuilder modelBuilder)
         {
-            builder.HasKey(o=>o.Id);
-            builder.Property(o => o.Title).HasMaxLength(100).IsRequired();
-            builder.Property(o=>o.Date).IsRequired();
-            builder.Property(e => e.Weight).HasColumnType("decimal(18,2)").IsRequired();
-            builder.Property(o => o.Notes).HasMaxLength(100);
-            builder.Property(o => o.IsBreakable).IsRequired();
-            builder.Property(e => e.Details).HasMaxLength(1000);
-            //builder.Property(e => e.State).HasDefaultValue(0);
-            builder.Property(e => e.OrderPrice).HasColumnType("decimal(18,2)").IsRequired();
+            modelBuilder.Entity<Order>()
+                .HasKey(o => o.OrderID);
 
-            builder.Property(e => e.DeliveryPrice).HasColumnType("decimal(18,2)").IsRequired();
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Customer)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.CustomerID).OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Rider)
+                .WithMany(r => r.OrdersHandled)
+                .HasForeignKey(o => o.RiderID).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Payment)
+                .WithOne(p => p.Order)
+                .HasForeignKey<Payment>(p => p.OrderID);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.OrderRoute)
+                .WithOne(or => or.Order)
+                .HasForeignKey<OrderRoute>(or => or.OrderID);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.OrderRider)
+                .WithOne(or => or.Order)
+                .HasForeignKey<OrderRider>(or => or.OrderID);
         }
     }
 }

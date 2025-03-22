@@ -1,0 +1,22 @@
+﻿@model YourNamespace.Models.BusinessOwner
+
+<h2>Edit Business Owner</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="BusinessID" />
+
+    <div class="form-group">
+        <label class="form-label" asp-for="BankAccount">Bank Account</label>
+        <input type="text" class="form-control" asp-for="BankAccount" />
+        <span class="text-danger" asp-validation-for="BankAccount"></span>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label" asp-for="BusinessType">Business Type</label>
+        <input type="text" class="form-control" asp-for="BusinessType" />
+        <span class="text-danger" asp-validation-for="BusinessType"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary" value="Add New BusinessOwner">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

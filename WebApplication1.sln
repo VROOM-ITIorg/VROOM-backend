@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminArea", "WebApplication1\AdminArea.csproj", "{25814ACE-9462-4561-B983-A653EA8DB06E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vroomModels", "vroomModels\vroomModels.csproj", "{239D4F70-9888-4AED-86DD-68FA33FA232A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModels", "ViewModels\ViewModels.csproj", "{97A3C673-4827-4CEE-A554-40C2CE5BF67A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25814ACE-9462-4561-B983-A653EA8DB06E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25814ACE-9462-4561-B983-A653EA8DB06E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25814ACE-9462-4561-B983-A653EA8DB06E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25814ACE-9462-4561-B983-A653EA8DB06E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{239D4F70-9888-4AED-86DD-68FA33FA232A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{239D4F70-9888-4AED-86DD-68FA33FA232A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{239D4F70-9888-4AED-86DD-68FA33FA232A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{239D4F70-9888-4AED-86DD-68FA33FA232A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97A3C673-4827-4CEE-A554-40C2CE5BF67A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97A3C673-4827-4CEE-A554-40C2CE5BF67A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97A3C673-4827-4CEE-A554-40C2CE5BF67A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97A3C673-4827-4CEE-A554-40C2CE5BF67A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

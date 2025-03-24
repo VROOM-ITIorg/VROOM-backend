@@ -18,7 +18,6 @@ namespace VROOM.Models
                 .HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserID);
-            throw new NotImplementedException();
         }
     }
 }

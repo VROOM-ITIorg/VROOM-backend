@@ -3,29 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using VROOM.Models;
 
+
+
 namespace VROOM.Data
 {
     public class MyDbContext : IdentityDbContext<User>
     {
-        //private readonly IConfiguration _configuration;
-
-        //public MyDbContext(DbContextOptions<MyDbContext> options, IConfiguration configuration)
-        //    : base(options)
-        //{
-        //    _configuration = configuration;
-        //}
-
-        public MyDbContext()
-        {
-
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data source = .; Initial catalog = DataBase_Manager; Integrated security= true; trustservercertificate = true;MultipleActiveResultSets=True");
-            base.OnConfiguring(optionsBuilder);
-
-        }
 
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
@@ -42,7 +25,14 @@ namespace VROOM.Data
         public DbSet<OrderRoute> OrderRoutes { get; set; }
         public DbSet<Shipment> Shipments { get; set; }
         public DbSet<RiderRouteIssue> RiderRouteIssues { get; set; }
-        //SOS
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data Source=.; Initial Catalog=Vroom_DB; Integrated Security=True;TrustServerCertificate=True");
+
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AddressConfiguration());
@@ -60,9 +50,8 @@ namespace VROOM.Data
             modelBuilder.ApplyConfiguration(new OrderRouteConfiguration());
             modelBuilder.ApplyConfiguration(new ShipmentConfiguration());
             modelBuilder.ApplyConfiguration(new RiderRouteIssueConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-
-            //modelBuilder.ApplyConfigurationsFromAssembly(typeof(MyDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
         }
     }

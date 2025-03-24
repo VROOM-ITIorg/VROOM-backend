@@ -7,7 +7,7 @@ namespace VROOM.Models
 {
     public class Address
     {
-        public int UserID { get; set; }
+        public string UserID { get; set; }
         public string Lang { get; set; }
         public float Lat { get; set; }
         public string Area { get; set; }

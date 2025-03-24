@@ -25,8 +25,7 @@ namespace VROOM.Models
             modelBuilder
                 .HasOne(f => f.Customer)
                 .WithMany(c => c.FeedbacksProvided)
-                .HasForeignKey(f => f.CustomerID).OnDelete(DeleteBehavior.NoAction);
-            throw new NotImplementedException();
+                .HasForeignKey(f => f.UserId).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

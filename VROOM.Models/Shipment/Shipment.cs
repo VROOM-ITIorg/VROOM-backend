@@ -10,18 +10,13 @@ namespace VROOM.Models
 {
     public class Shipment
     {
-        [Key]
         public int ShipmentID { get; set; }
-        [Key, ForeignKey("Rider")]
         public int RiderID { get; set; }
         public string Beginning { get; set; }
         public string End { get; set; }
         public int MaxConsecutiveDeliveries { get; set; }
-
         public virtual Rider Rider { get; set; }
         public virtual Route Route { get; set; }
-
-
         public bool IsDeleted { get; set; } = false;
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; } = DateTime.Now;

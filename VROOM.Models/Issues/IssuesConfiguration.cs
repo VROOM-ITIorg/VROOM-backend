@@ -17,7 +17,6 @@ namespace VROOM.Models
                 .HasOne(i => i.Rider)
                 .WithMany(r => r.Issues)
                 .HasForeignKey(i => i.RiderID);
-            throw new NotImplementedException();
         }
     }
 }

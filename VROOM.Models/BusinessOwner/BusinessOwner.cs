@@ -8,7 +8,7 @@ namespace VROOM.Models
     public class BusinessOwner
     {
         public int BusinessID { get; set; }
-        public int UserID { get; set; }
+        public string UserID { get; set; }
         public string BankAccount { get; set; }
         public string BusinessType { get; set; }
 

@@ -10,7 +10,6 @@ namespace VROOM.Models
 {
     public class Route
     {
-        [Key]
         public int RouteID { get; set; }
         public int ShipmentID { get; set; }
         public string Origin { get; set; }

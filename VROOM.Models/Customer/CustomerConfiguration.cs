@@ -10,6 +10,8 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<Customer> modelBuilder)
         {
             modelBuilder
+                .HasKey(u => u.UserID);
+            modelBuilder
               .HasOne(c => c.User)
               .WithOne(u => u.Customer)
               .HasForeignKey<Customer>(c => c.UserID).OnDelete(DeleteBehavior.NoAction);

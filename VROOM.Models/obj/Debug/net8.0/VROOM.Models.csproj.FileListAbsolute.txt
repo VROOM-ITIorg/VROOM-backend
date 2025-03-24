@@ -12,3 +12,17 @@ C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\refint\VROOM
 C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.pdb
 C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.genruntimeconfig.cache
 C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\ref\VROOM.Models.dll
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.AssemblyReference.cache
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.GeneratedMSBuildEditorConfig.editorconfig
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfoInputs.cache
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfo.cs
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.CoreCompileInputs.cache
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.dll
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\refint\VROOM.Models.dll
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.pdb
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\bin\Debug\net8.0\VROOM.Models.deps.json
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\bin\Debug\net8.0\VROOM.Models.runtimeconfig.json
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\bin\Debug\net8.0\VROOM.Models.dll
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\bin\Debug\net8.0\VROOM.Models.pdb
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\VROOM.Models.genruntimeconfig.cache
+G:\ITI Professional Web & BI-Infused (Aswan)\Final Project (VROOM)\New folder\VROOM.Models\obj\Debug\net8.0\ref\VROOM.Models.dll

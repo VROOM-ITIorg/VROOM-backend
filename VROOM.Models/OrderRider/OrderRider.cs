@@ -8,12 +8,10 @@ namespace VROOM.Models
 {
     public class OrderRider
     {
-        [Key]
         public int OrderRiderID { get; set; }
         public int OrderID { get; set; }
         public int RiderID { get; set; }
         public int BusinessID { get; set; }
-        public int UserID { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public bool IsBreakable { get; set; }
@@ -33,6 +31,7 @@ namespace VROOM.Models
 
         public virtual Order Order { get; set; }
         public virtual Rider Rider { get; set; }
+        public virtual BusinessOwner Owner { get; set; }
         public bool IsDeleted { get; set; } = false;
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; } = DateTime.Now;

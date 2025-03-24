@@ -9,9 +9,8 @@ namespace VROOM.Models
 {
     public class Order
     {
-        [Key]
         public int Id { get; set; }
-        public int CustomerID { get; set; }
+        public string CustomerID { get; set; }
         public int RiderID { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }

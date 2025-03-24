@@ -25,10 +25,14 @@ namespace VROOM.Models
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
 
-        public Customer Customer { get; set; }
-        public Rider Rider { get; set; }
-        public Payment Payment { get; set; }
-        public OrderRoute OrderRoute { get; set; }
-        public OrderRider OrderRider { get; set; }
+        public virtual Customer Customer { get; set; }
+        public virtual Rider Rider { get; set; }
+        public virtual Payment Payment { get; set; }
+        public virtual OrderRoute OrderRoute { get; set; }
+        public virtual OrderRider OrderRider { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

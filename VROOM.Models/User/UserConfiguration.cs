@@ -1,45 +1,40 @@
 // UserConfiguration.cs 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VROOM.Models;
 
 namespace VROOM.Models
 {
-    public class UserConfiguration
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public static void Configure(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<User> modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasKey(u => u.UserID);
 
-            modelBuilder.Entity<User>()
+            modelBuilder
                 .HasOne(u => u.Address)
                 .WithOne(a => a.User)
                 .HasForeignKey<Address>(a => a.UserID);
 
-            modelBuilder.Entity<User>()
+            modelBuilder
                 .HasMany(u => u.Notifications)
                 .WithOne(n => n.User)
                 .HasForeignKey(n => n.UserID);
 
-            modelBuilder.Entity<User>()
+            modelBuilder
                 .HasOne(u => u.Customer)
                 .WithOne(c => c.User)
                 .HasForeignKey<Customer>(c => c.UserID);
 
-            modelBuilder.Entity<User>()
+            modelBuilder
                 .HasOne(u => u.BusinessOwner)
                 .WithOne(bo => bo.User)
                 .HasForeignKey<BusinessOwner>(bo => bo.UserID);
 
-            modelBuilder.Entity<User>()
+            modelBuilder
                 .HasOne(u => u.Rider)
                 .WithOne(r => r.User)
                 .HasForeignKey<Rider>(r => r.UserID);
 
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.UserRoles)
-                .WithOne(ur => ur.User)
-                .HasForeignKey(ur => ur.UserID);
         }
     }
 }

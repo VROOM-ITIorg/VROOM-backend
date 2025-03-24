@@ -15,6 +15,9 @@ namespace VROOM.Models
         public string Message { get; set; }
         public DateTime Date { get; set; }
 
-        public User User { get; set; }
+        public virtual User User { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

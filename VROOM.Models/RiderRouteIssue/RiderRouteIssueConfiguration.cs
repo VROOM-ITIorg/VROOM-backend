@@ -6,13 +6,35 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace VROOM.Models.RiderRouteIssue
+namespace VROOM.Models
 {
-    class RiderRouteIssueConfiguration : IEntityTypeConfiguration<RiderRouteIssue>
+    public class RiderRouteIssueConfiguration : IEntityTypeConfiguration<RiderRouteIssue>
     {
-        public void Configure(EntityTypeBuilder<RiderRouteIssue> builder)
+        public void Configure(EntityTypeBuilder<RiderRouteIssue> modelBuilder)
         {
-            
+            modelBuilder
+                .HasKey(rri => rri.RiderRouteIssueID);
+
+            modelBuilder
+                            .HasKey(rri => rri.RiderRouteIssueID);
+
+            modelBuilder
+                .HasOne(rri => rri.Rider)
+                .WithMany(r => r.RiderRouteIssues)
+                .HasForeignKey(rri => rri.RiderID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder
+                .HasOne(rri => rri.Route)
+                .WithMany(r => r.RiderRouteIssues)
+                .HasForeignKey(rri => rri.RouteID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder
+                .HasOne(rri => rri.Issue)
+                .WithOne(i => i.RiderRouteIssue)
+                .HasForeignKey<RiderRouteIssue>(rri => rri.IssueID)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

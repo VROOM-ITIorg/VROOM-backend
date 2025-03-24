@@ -13,6 +13,10 @@ namespace VROOM.Models
         public string Method { get; set; }
         public decimal Amount { get; set; }
 
-        public Order Order { get; set; }
+        public virtual Order Order { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

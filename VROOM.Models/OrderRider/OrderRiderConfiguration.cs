@@ -1,21 +1,23 @@
+using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using VROOM.Models;
 
 namespace VROOM.Models
 {
-    public class OrderRiderConfiguration
+    public class OrderRiderConfiguration : IEntityTypeConfiguration<OrderRider>
     {
-        public static void Configure(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<OrderRider> modelBuilder)
         {
-            modelBuilder.Entity<OrderRider>()
+            modelBuilder
                 .HasKey(or => or.OrderRiderID);
 
-            modelBuilder.Entity<OrderRider>()
+            modelBuilder
                 .HasOne(or => or.Order)
                 .WithOne(o => o.OrderRider)
                 .HasForeignKey<OrderRider>(or => or.OrderID);
 
-            modelBuilder.Entity<OrderRider>()
+            modelBuilder
                 .HasOne(or => or.Rider)
                 .WithMany(r => r.OrderRiders)
                 .HasForeignKey(or => or.RiderID).OnDelete(DeleteBehavior.NoAction);

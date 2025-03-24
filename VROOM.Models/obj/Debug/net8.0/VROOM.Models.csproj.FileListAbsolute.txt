@@ -1,0 +1,14 @@
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\bin\Debug\net8.0\VROOM.Models.deps.json
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\bin\Debug\net8.0\VROOM.Models.runtimeconfig.json
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\bin\Debug\net8.0\VROOM.Models.dll
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\bin\Debug\net8.0\VROOM.Models.pdb
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.AssemblyReference.cache
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfoInputs.cache
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfo.cs
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.CoreCompileInputs.cache
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.dll
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\refint\VROOM.Models.dll
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.pdb
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\VROOM.Models.genruntimeconfig.cache
+C:\Users\PC\source\repos\VROOM.Models\VROOM.Models\obj\Debug\net8.0\ref\VROOM.Models.dll

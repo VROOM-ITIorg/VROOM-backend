@@ -31,7 +31,10 @@ namespace VROOM.Models
         public string ExperienceLevel { get; set; }
         public float Rating { get; set; }
 
-        public Order Order { get; set; }
-        public Rider Rider { get; set; }
+        public virtual Order Order { get; set; }
+        public virtual Rider Rider { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

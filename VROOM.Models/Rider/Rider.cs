@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using VROOM.Models;
 
-
 namespace VROOM.Models
 {
     public class Rider
@@ -19,13 +18,14 @@ namespace VROOM.Models
         public string ExperienceLevel { get; set; }
         public float Rating { get; set; }
 
-        public BusinessOwner BusinessOwner { get; set; }
-        public User User { get; set; }
-        public ICollection<Feedback> Feedbacks { get; set; }
-        public ICollection<Shipment> Shipments { get; set; }
-        public ICollection<Issues> Issues { get; set; }
-        public ICollection<RiderAssignment> RiderAssignments { get; set; }
-        public ICollection<Order> OrdersHandled { get; set; }
-        public ICollection<OrderRider> OrderRiders { get; set; }
+        public virtual BusinessOwner BusinessOwner { get; set; }
+        public virtual User User { get; set; }
+        public virtual ICollection<Feedback> Feedbacks { get; set; }
+        public virtual ICollection<Shipment> Shipments { get; set; }
+        public virtual ICollection<Issues> Issues { get; set; }
+        public virtual ICollection<RiderAssignment> RiderAssignments { get; set; }
+        public virtual ICollection<Order> OrdersHandled { get; set; }
+        public virtual ICollection<OrderRider> OrderRiders { get; set; }
+        public virtual ICollection<RiderRouteIssue> RiderRouteIssues { get; set; }
     }
 }

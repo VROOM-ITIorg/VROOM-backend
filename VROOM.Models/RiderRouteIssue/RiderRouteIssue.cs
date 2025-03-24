@@ -4,17 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VROOM.Models.RiderRouteIssue
+namespace VROOM.Models
 {
-    class RiderRouteIssue
+    public class RiderRouteIssue
     {
-        int Id;
-        int RiderID;
-        int RouteID;
-        int IssueID;
-        string Description;
-        DateTime ReportedAt;
-        string Severity;
-        string Status;
+        public int RiderRouteIssueID { get; set; }
+        public int RiderID { get; set; }
+        public int RouteID { get; set; }
+        public int IssueID { get; set; }
+        public string Description { get; set; }
+        public DateTime ReportedAt { get; set; }
+        public string Severity { get; set; }
+        public string Status { get; set; }
+
+        public virtual Rider Rider { get; set; }
+        public virtual Route Route { get; set; }
+        public virtual Issues Issue { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

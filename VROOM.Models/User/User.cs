@@ -2,25 +2,29 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Principal;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using VROOM.Models;
 
 namespace VROOM.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public int UserID { get; set; }
         public string Name { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? ProfilePicture { get; set; } // URL to profile picture
 
-        public Address Address { get; set; }
-        public ICollection<Notification> Notifications { get; set; }
-        public Customer Customer { get; set; }
-        public BusinessOwner BusinessOwner { get; set; }
-        public Rider Rider { get; set; }
-        public ICollection<UserRole> UserRoles { get; set; }
+
+
+
+        public virtual Address Address { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual Customer? Customer { get; set; }
+        public virtual BusinessOwner? BusinessOwner { get; set; }
+        public virtual Rider? Rider { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

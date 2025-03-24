@@ -21,7 +21,12 @@ namespace VROOM.Models
         public float SafetyIndex { get; set; }
         public DateTime DateTime { get; set; }
 
-        public Shipment Shipment { get; set; }
-        public ICollection<OrderRoute> OrderRoutes { get; set; }
+        public virtual Shipment Shipment { get; set; }
+        public virtual ICollection<OrderRoute> OrderRoutes { get; set; }
+        public virtual ICollection<RiderRouteIssue> RiderRouteIssues { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

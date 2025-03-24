@@ -14,6 +14,10 @@ namespace VROOM.Models
         public string Type { get; set; }
         public DateTime Date { get; set; }
 
-        public Rider Rider { get; set; }
+        public virtual Rider Rider { get; set; }
+        public virtual RiderRouteIssue RiderRouteIssue { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; }
     }
 }

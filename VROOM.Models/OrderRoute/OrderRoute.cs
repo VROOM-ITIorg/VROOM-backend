@@ -14,7 +14,11 @@ namespace VROOM.Models
         public int RouteID { get; set; }
         public string Status { get; set; }
 
-        public Order Order { get; set; }
-        public Route Route { get; set; }
+        public virtual Order Order { get; set; }
+        public virtual Route Route { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

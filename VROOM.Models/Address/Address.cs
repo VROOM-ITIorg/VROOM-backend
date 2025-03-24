@@ -7,12 +7,14 @@ namespace VROOM.Models
 {
     public class Address
     {
-        [Key, ForeignKey("User")]
         public int UserID { get; set; }
         public string Lang { get; set; }
         public float Lat { get; set; }
         public string Area { get; set; }
 
-        public User User { get; set; }
+        public virtual User User { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; }
     }
 }

@@ -16,7 +16,11 @@ namespace VROOM.Models
         public int BusinessID { get; set; }
         public DateTime AssignmentDate { get; set; }
 
-        public Rider Rider { get; set; }
-        public BusinessOwner BusinessOwner { get; set; }
+        public virtual Rider Rider { get; set; }
+        public virtual BusinessOwner BusinessOwner { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public string? ModifiedBy { get; set; }
+        public DateTime? ModifiedAt { get; set; } = DateTime.Now;
     }
 }

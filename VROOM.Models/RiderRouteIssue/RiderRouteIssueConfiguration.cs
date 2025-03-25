@@ -13,10 +13,10 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<RiderRouteIssue> modelBuilder)
         {
             modelBuilder
-                .HasKey(rri => rri.RiderRouteIssueID);
+                .HasKey(rri => rri.Id);
 
             modelBuilder
-                            .HasKey(rri => rri.RiderRouteIssueID);
+                            .HasKey(rri => rri.Id);
 
             modelBuilder
                 .HasOne(rri => rri.Rider)

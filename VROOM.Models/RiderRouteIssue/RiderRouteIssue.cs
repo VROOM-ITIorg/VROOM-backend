@@ -8,7 +8,7 @@ namespace VROOM.Models
 {
     public class RiderRouteIssue
     {
-        public int RiderRouteIssueID { get; set; }
+        public int Id { get; set; }
         public int RiderID { get; set; }
         public int RouteID { get; set; }
         public int IssueID { get; set; }

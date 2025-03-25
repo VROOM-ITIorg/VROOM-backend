@@ -16,7 +16,7 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<Route> modelBuilder)
         {
             modelBuilder
-            .HasKey(r => r.RouteID);
+            .HasKey(r => r.Id);
 
             modelBuilder
                 .HasOne(r => r.Shipment)

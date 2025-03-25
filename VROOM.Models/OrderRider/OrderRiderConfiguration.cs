@@ -10,7 +10,7 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<OrderRider> modelBuilder)
         {
             modelBuilder
-                .HasKey(or => or.OrderRiderID);
+                .HasKey(or => or.Id);
 
             modelBuilder
                 .HasOne(or => or.Order)

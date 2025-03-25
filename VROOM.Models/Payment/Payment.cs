@@ -7,7 +7,7 @@ namespace VROOM.Models
 {
     public class Payment
     {
-        public int PaymentID { get; set; }
+        public int Id { get; set; }
         public int OrderID { get; set; }
         public string Method { get; set; }
         public decimal Amount { get; set; }

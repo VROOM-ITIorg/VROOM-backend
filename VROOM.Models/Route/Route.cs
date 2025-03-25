@@ -10,7 +10,7 @@ namespace VROOM.Models
 {
     public class Route
     {
-        public int RouteID { get; set; }
+        public int Id { get; set; }
         public int ShipmentID { get; set; }
         public string Origin { get; set; }
         public string Destination { get; set; }

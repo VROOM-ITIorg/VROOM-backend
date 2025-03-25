@@ -4312,23 +4312,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\hemam\\.nuget\\packages\\": {},
+    "C:\\Users\\mmss9\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\ITI Professional Web & BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Models\\VROOM.Models.csproj",
+      "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
       "projectName": "VROOM.Models",
-      "projectPath": "G:\\ITI Professional Web & BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Models\\VROOM.Models.csproj",
-      "packagesPath": "C:\\Users\\hemam\\.nuget\\packages\\",
-      "outputPath": "G:\\ITI Professional Web & BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Models\\obj\\",
+      "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
+      "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Models\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\hemam\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],

@@ -10,7 +10,7 @@ namespace VROOM.Models
 {
     public class Shipment
     {
-        public int ShipmentID { get; set; }
+        public int Id{ get; set; }
         public int RiderID { get; set; }
         public string Beginning { get; set; }
         public string End { get; set; }

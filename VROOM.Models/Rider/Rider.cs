@@ -7,7 +7,7 @@ namespace VROOM.Models
 {
     public class Rider
     {
-        public int RiderID { get; set; }
+        public int Id { get; set; }
         public int BusinessID { get; set; }
         public string UserID { get; set; }
         public string Status { get; set; }

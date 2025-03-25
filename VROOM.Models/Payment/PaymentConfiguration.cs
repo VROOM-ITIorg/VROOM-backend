@@ -11,7 +11,7 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<Payment> modelBuilder)
         {
             modelBuilder
-            .HasKey(p => p.PaymentID);
+            .HasKey(p => p.Id);
 
             modelBuilder
                 .HasOne(p => p.Order)

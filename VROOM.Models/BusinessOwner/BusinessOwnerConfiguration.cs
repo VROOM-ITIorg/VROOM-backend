@@ -11,7 +11,7 @@ namespace VROOM.Models
         public void Configure(EntityTypeBuilder<BusinessOwner> modelBuilder)
         {
             modelBuilder
-            .HasKey(bo => bo.BusinessID);
+            .HasKey(bo => bo.Id);
 
             modelBuilder
                 .HasOne(bo => bo.User)

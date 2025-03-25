@@ -1,7 +1,4 @@
 ﻿public class Program
 {
-    static int Main()
-    {
-        return 0;
-    }
+    static int Main() => 0;
 }

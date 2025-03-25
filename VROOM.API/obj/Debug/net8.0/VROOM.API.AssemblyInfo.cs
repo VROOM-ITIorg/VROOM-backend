@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VROOM.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e2d265a38ff63efb662cc459e60d17dbbcc8a97")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11f9edcde414aff3163c44754953ab8002b12153")]
 [assembly: System.Reflection.AssemblyProductAttribute("VROOM.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VROOM.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

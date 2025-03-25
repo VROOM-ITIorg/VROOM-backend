@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VROOM.AdminArea")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+870b27f2c8b4c8d379b5be1546a22d42f37950d1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64ca9aba26ca8a77b21bdbd7f752431114c8a43a")]
 [assembly: System.Reflection.AssemblyProductAttribute("VROOM.AdminArea")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VROOM.AdminArea")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

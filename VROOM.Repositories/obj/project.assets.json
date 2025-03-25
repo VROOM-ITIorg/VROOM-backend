@@ -1635,6 +1635,41 @@
             "rid": "win"
           }
         }
+      },
+      "VROOM.Data/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.14",
+          "Microsoft.EntityFrameworkCore": "8.0.14",
+          "Microsoft.EntityFrameworkCore.Proxies": "8.0.14",
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.14",
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.14",
+          "VROOM.Models": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/VROOM.Data.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/VROOM.Data.dll": {}
+        }
+      },
+      "VROOM.Models/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.14",
+          "Microsoft.EntityFrameworkCore": "8.0.14",
+          "Microsoft.EntityFrameworkCore.Proxies": "8.0.14",
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.14",
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.14"
+        },
+        "compile": {
+          "bin/placeholder/VROOM.Models.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/VROOM.Models.dll": {}
+        }
       }
     }
   },
@@ -4298,6 +4333,16 @@
         "system.windows.extensions.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "VROOM.Data/1.0.0": {
+      "type": "project",
+      "path": "../VROOM.Data/VROOM.Data.csproj",
+      "msbuildProject": "../VROOM.Data/VROOM.Data.csproj"
+    },
+    "VROOM.Models/1.0.0": {
+      "type": "project",
+      "path": "../VROOM.Models/VROOM.Models.csproj",
+      "msbuildProject": "../VROOM.Models/VROOM.Models.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -4308,27 +4353,29 @@
       "Microsoft.EntityFrameworkCore.Proxies >= 8.0.14",
       "Microsoft.EntityFrameworkCore.Relational >= 8.0.14",
       "Microsoft.EntityFrameworkCore.SqlServer >= 8.0.14",
-      "Microsoft.EntityFrameworkCore.Tools >= 8.0.14"
+      "Microsoft.EntityFrameworkCore.Tools >= 8.0.14",
+      "VROOM.Data >= 1.0.0",
+      "VROOM.Models >= 1.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mmss9\\.nuget\\packages\\": {},
+    "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
+      "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
       "projectName": "VROOM.Repositories",
-      "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
-      "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Repositories\\obj\\",
+      "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
+      "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+      "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Repositories\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4342,7 +4389,14 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
+              "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
+            },
+            "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+              "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

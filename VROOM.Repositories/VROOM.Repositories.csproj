@@ -22,4 +22,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\VROOM.Data\VROOM.Data.csproj" />
+    <ProjectReference Include="..\VROOM.Models\VROOM.Models.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -41,3 +41,18 @@ C:\Users\mmss9\Desktop\Final Project\VROOM-backend\VROOM.Models\obj\Debug\net8.0
 C:\Users\mmss9\Desktop\Final Project\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.pdb
 C:\Users\mmss9\Desktop\Final Project\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.genruntimeconfig.cache
 C:\Users\mmss9\Desktop\Final Project\VROOM-backend\VROOM.Models\obj\Debug\net8.0\ref\VROOM.Models.dll
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\bin\Debug\net8.0\VROOM.Models.deps.json
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\bin\Debug\net8.0\VROOM.Models.runtimeconfig.json
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\bin\Debug\net8.0\VROOM.Models.dll
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\bin\Debug\net8.0\VROOM.Models.pdb
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.AssemblyReference.cache
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfoInputs.cache
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.AssemblyInfo.cs
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.csproj.CoreCompileInputs.cache
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.sourcelink.json
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.dll
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\refint\VROOM.Models.dll
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.pdb
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\VROOM.Models.genruntimeconfig.cache
+D:\Programming\ITI\finalProject\VROOM-backend-main\VROOM-backend\VROOM.Models\obj\Debug\net8.0\ref\VROOM.Models.dll

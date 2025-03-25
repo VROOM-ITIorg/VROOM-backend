@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+870b27f2c8b4c8d379b5be1546a22d42f37950d1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e2d265a38ff63efb662cc459e60d17dbbcc8a97")]
 [assembly: System.Reflection.AssemblyProductAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

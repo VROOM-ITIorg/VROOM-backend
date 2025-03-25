@@ -131,10 +131,6 @@
       "RelativeMoniker": "D:0:0:{7DCD50E3-F990-4D14-A2BE-66FDF99CF669}|VROOM.Models\\VROOM.Models.csproj|solutionrelative:vroom.models\\address\\address.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{48549656-C778-42C3-A5CB-475FE9CC2791}|VROOM.Repositories\\VROOM.Repositories.csproj|c:\\pd iti aswan_ intake 45\\vroom\\vroom-backend\\vroom.repositories\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{48549656-C778-42C3-A5CB-475FE9CC2791}|VROOM.Repositories\\VROOM.Repositories.csproj|solutionrelative:vroom.repositories\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{7DCD50E3-F990-4D14-A2BE-66FDF99CF669}|VROOM.Models\\VROOM.Models.csproj|c:\\pd iti aswan_ intake 45\\vroom\\vroom-backend\\vroom.models\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7DCD50E3-F990-4D14-A2BE-66FDF99CF669}|VROOM.Models\\VROOM.Models.csproj|solutionrelative:vroom.models\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -208,6 +204,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{7DCD50E3-F990-4D14-A2BE-66FDF99CF669}|VROOM.Models\\VROOM.Models.csproj|c:\\pd iti aswan_ intake 45\\vroom\\vroom-backend\\vroom.models\\issues\\issuesconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{7DCD50E3-F990-4D14-A2BE-66FDF99CF669}|VROOM.Models\\VROOM.Models.csproj|solutionrelative:vroom.models\\issues\\issuesconfiguration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Repositories\\Class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:VROOM.Repositories\\Class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -229,8 +229,7 @@
               "RelativeToolTip": "VROOM.Repositories\\NotificationRepository.cs",
               "ViewState": "AgIAADEAAAAAAAAAAAAAAB0AAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T19:49:30.135Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T19:49:30.135Z"
             },
             {
               "$type": "Document",
@@ -255,8 +254,7 @@
               "RelativeToolTip": "VROOM.Repositories\\BusinessOwnerRepo.cs",
               "ViewState": "AgIAACUAAAAAAAAAAAAAAA8AAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T18:48:32.866Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T18:48:32.866Z"
             },
             {
               "$type": "Document",
@@ -268,8 +266,7 @@
               "RelativeToolTip": "VROOM.Services\\VROOM.Services.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T11:03:19.438Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T11:03:19.438Z"
             },
             {
               "$type": "Document",
@@ -281,8 +278,7 @@
               "RelativeToolTip": "VROOM.Models\\Payment\\Payment.cs",
               "ViewState": "AgIAAAQAAAAAAAAAAAAswBQAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-24T22:19:43.534Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-24T22:19:43.534Z"
             },
             {
               "$type": "Document",
@@ -294,8 +290,7 @@
               "RelativeToolTip": "VROOM.Models\\Notification\\Notification.cs",
               "ViewState": "AgIAAAgAAAAAAAAAAAAAAA4AAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-24T22:24:45.217Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-24T22:24:45.217Z"
             },
             {
               "$type": "Document",
@@ -307,8 +302,7 @@
               "RelativeToolTip": "VROOM.Repositories\\VROOM.Repositories.csproj",
               "ViewState": "AgIAAAEAAAAAAAAAAAAwwBkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T09:21:43.639Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:21:43.639Z"
             },
             {
               "$type": "Document",
@@ -320,8 +314,7 @@
               "RelativeToolTip": "VROOM.Models\\VROOM.Models.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T09:21:44.5Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:21:44.5Z"
             },
             {
               "$type": "Document",
@@ -333,8 +326,7 @@
               "RelativeToolTip": "VROOM.Data\\VROOM.Data.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T14:01:22.809Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T14:01:22.809Z"
             },
             {
               "$type": "Document",
@@ -358,8 +350,7 @@
               "RelativeToolTip": "VROOM.API\\VROOM.API.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T09:27:48.598Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:27:48.598Z"
             },
             {
               "$type": "Document",
@@ -371,8 +362,7 @@
               "RelativeToolTip": "VROOM.AdminArea\\VROOM.AdminArea.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-03-25T09:23:14.048Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:23:14.048Z"
             },
             {
               "$type": "Document",
@@ -444,8 +434,7 @@
               "RelativeToolTip": "VROOM.Models\\User\\UserConfiguration.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-24T23:00:29.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-24T23:00:29.791Z"
             },
             {
               "$type": "Document",
@@ -457,8 +446,7 @@
               "RelativeToolTip": "VROOM.Data\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T09:01:54.456Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:01:54.456Z"
             },
             {
               "$type": "Document",
@@ -618,7 +606,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 52,
               "Title": "Class1.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Repositories\\Class1.cs",
               "RelativeDocumentMoniker": "VROOM.Repositories\\Class1.cs",
@@ -626,11 +614,11 @@
               "RelativeToolTip": "VROOM.Repositories\\Class1.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T09:21:15.807Z"
+              "WhenOpened": "2025-03-25T20:38:43.732Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 32,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Program.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Program.cs",
@@ -642,7 +630,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 35,
               "Title": "Issues.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Issues\\Issues.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Issues\\Issues.cs",
@@ -654,7 +642,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 33,
               "Title": "MyDbContext.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Data\\MyDbContext.cs",
               "RelativeDocumentMoniker": "VROOM.Data\\MyDbContext.cs",
@@ -666,7 +654,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 36,
               "Title": "PaymentConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Payment\\PaymentConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Payment\\PaymentConfiguration.cs",
@@ -678,7 +666,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 37,
               "Title": "RiderConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Rider\\RiderConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Rider\\RiderConfiguration.cs",
@@ -690,7 +678,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 34,
               "Title": "Feedback.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Feedback\\Feedback.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Feedback\\Feedback.cs",
@@ -702,7 +690,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 38,
               "Title": "RiderAssignment.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\RiderAssignment\\RiderAssignment.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\RiderAssignment\\RiderAssignment.cs",
@@ -714,7 +702,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 39,
               "Title": "RiderRouteIssueConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\RiderRouteIssue\\RiderRouteIssueConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\RiderRouteIssue\\RiderRouteIssueConfiguration.cs",
@@ -726,7 +714,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 40,
               "Title": "RiderRouteIssue.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\RiderRouteIssue\\RiderRouteIssue.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\RiderRouteIssue\\RiderRouteIssue.cs",
@@ -738,7 +726,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 41,
               "Title": "RouteConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Route\\RouteConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Route\\RouteConfiguration.cs",
@@ -750,7 +738,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 42,
               "Title": "RiderAssignmentConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\RiderAssignment\\RiderAssignmentConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\RiderAssignment\\RiderAssignmentConfiguration.cs",
@@ -762,7 +750,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 43,
               "Title": "20250324230747_V1.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Data\\Migrations\\20250324230747_V1.cs",
               "RelativeDocumentMoniker": "VROOM.Data\\Migrations\\20250324230747_V1.cs",
@@ -774,7 +762,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 49,
               "Title": "20250324224559_V2.cs",
               "DocumentMoniker": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324224559_V2.cs",
               "ToolTip": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324224559_V2.cs",
@@ -783,7 +771,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 48,
               "Title": "20250324224748_V3.cs",
               "DocumentMoniker": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324224748_V3.cs",
               "ToolTip": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324224748_V3.cs",
@@ -792,7 +780,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 46,
               "Title": "20250324225156_V4.cs",
               "DocumentMoniker": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324225156_V4.cs",
               "ToolTip": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324225156_V4.cs",
@@ -801,7 +789,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 45,
               "Title": "20250324225636_V5.cs",
               "DocumentMoniker": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324225636_V5.cs",
               "ToolTip": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324225636_V5.cs",
@@ -810,7 +798,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 44,
               "Title": "20250324230631_V6.cs",
               "DocumentMoniker": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324230631_V6.cs",
               "ToolTip": "G:\\ITI Professional Web \u0026 BI-Infused (Aswan)\\Final Project (VROOM)\\New folder\\VROOM.Data\\Migrations\\20250324230631_V6.cs",
@@ -819,7 +807,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 51,
+              "DocumentIndex": 50,
               "Title": "NotificationConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Notification\\NotificationConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Notification\\NotificationConfiguration.cs",
@@ -827,12 +815,11 @@
               "RelativeToolTip": "VROOM.Models\\Notification\\NotificationConfiguration.cs",
               "ViewState": "AgIAAAkAAAAgMzMzMzMvwBQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-24T22:34:25.506Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-24T22:34:25.506Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 47,
               "Title": "FeedbackConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Feedback\\FeedbackConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Feedback\\FeedbackConfiguration.cs",
@@ -844,7 +831,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 52,
+              "DocumentIndex": 51,
               "Title": "IssuesConfiguration.cs",
               "DocumentMoniker": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Models\\Issues\\IssuesConfiguration.cs",
               "RelativeDocumentMoniker": "VROOM.Models\\Issues\\IssuesConfiguration.cs",

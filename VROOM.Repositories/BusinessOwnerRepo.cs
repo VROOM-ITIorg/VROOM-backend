@@ -30,16 +30,10 @@ namespace VROOM.Repositories
            }
 
 
-        public List<BusinessOwner> GetAllBusinessOwners()
-        {
-              return _dbContext.BusinessOwners.ToList();
-        }
+        public List<BusinessOwner> GetAllBusinessOwners() => _dbContext.BusinessOwners.ToList();
 
 
-        public BusinessOwner GetById(int id)
-        {
-             return _dbContext.BusinessOwners.FirstOrDefault(b => b.Id == id);
-        }
+        public BusinessOwner GetById(int id) => _dbContext.BusinessOwners.FirstOrDefault(b => b.Id == id);
 
 
         public void AddBusinessOwner(BusinessOwner businessOwner)
@@ -67,20 +61,14 @@ namespace VROOM.Repositories
         }
 
 
-        public List<BusinessOwner> GetBusinessOwnersByType(string businessType)
-        {
-                return _dbContext.BusinessOwners
+        public List<BusinessOwner> GetBusinessOwnersByType(string businessType) => _dbContext.BusinessOwners
                     .Where(b => b.BusinessType == businessType)
                     .ToList();
-        }
 
 
-        public List<Rider> GetRidersForBusinessOwner(int businessOwnerId)
-        {
-                return _dbContext.Riders
+        public List<Rider> GetRidersForBusinessOwner(int businessOwnerId) => _dbContext.Riders
                     .Where(r => r.BusinessID == businessOwnerId)
                     .ToList();
-        }
 
         public void AssignRiderToBusinessOwner(int businessOwnerId, int riderId)
         {

@@ -21,10 +21,7 @@ namespace VROOM.Repositories
         }
 
         // Read Order by ID
-        public Order GetOrderById(int orderId)
-        {
-            return _context.Orders.Find(orderId);
-        }
+        public Order GetOrderById(int orderId) => _context.Orders.Find(orderId);
 
         // Update Order
         public void UpdateOrder(Order updatedOrder)
@@ -45,28 +42,16 @@ namespace VROOM.Repositories
         }
 
         // Get All Orders
-        public List<Order> GetAllOrders()
-        {
-            return _context.Orders.ToList();
-        }
+        public List<Order> GetAllOrders() => _context.Orders.ToList();
 
         // Find Orders by Customer or Rider
-        public List<Order> GetOrdersByCustomerId(string customerId)
-        {
-            return _context.Orders.Where(o => o.CustomerID == customerId).ToList();
-        }
+        public List<Order> GetOrdersByCustomerId(string customerId) => _context.Orders.Where(o => o.CustomerID == customerId).ToList();
 
-        public List<Order> GetOrdersByRiderId(int riderId)
-        {
-            return _context.Orders.Where(o => o.RiderID == riderId).ToList();
-        }
+        public List<Order> GetOrdersByRiderId(int riderId) => _context.Orders.Where(o => o.RiderID == riderId).ToList();
         // Filter by Date Range
-        public List<Order> GetOrdersByDateRange(DateTime startDate, DateTime endDate)
-        {
-            return _context.Orders
+        public List<Order> GetOrdersByDateRange(DateTime startDate, DateTime endDate) => _context.Orders
                 .Where(o => o.Date >= startDate && o.Date <= endDate)
                 .ToList();
-        }
 
         // We need to AssignOrderToRider with two diffrenet way (Manually and Automatically)
 
@@ -82,10 +67,7 @@ namespace VROOM.Repositories
         }
 
         // Calculate Total Revenue
-        public decimal CalculateTotalRevenue()
-        {
-            return _context.Orders.Sum(o => o.OrderPrice + o.DeliveryPrice);
-        }
+        public decimal CalculateTotalRevenue() => _context.Orders.Sum(o => o.OrderPrice + o.DeliveryPrice);
 
         // Check Order Status
         public string GetOrderState(int orderId)

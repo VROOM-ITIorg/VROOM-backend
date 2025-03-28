@@ -46,20 +46,14 @@ namespace VROOM.Repositories
         }
 
         // Bring Shipments for a specific Rider
-        public List<Shipment> GetByRider(int riderId)
-        {
-            return _context.Shipments
+        public List<Shipment> GetByRider(int riderId) => _context.Shipments
                 .Where(s => s.RiderID == riderId)
                 .ToList();
-        }
 
         // Bring Shipments according to Status
-        public List<Shipment> GetByStatus(ShipmentStatus status)
-        {
-            return _context.Shipments
+        public List<Shipment> GetByStatus(ShipmentStatus status) => _context.Shipments
                 .Where(s => s.Status == status)
                 .ToList();
-        }
 
         // Track a specific Shipment
         //public Shipment TrackShipment(int shipmentId)
@@ -74,13 +68,10 @@ namespace VROOM.Repositories
 
 
         // ✅ متوسط مدة التوصيل بالدقائق
-        public double CalculateAverageDeliveryTime()
-        {
-            return _context.Shipments
+        public double CalculateAverageDeliveryTime() => _context.Shipments
                 .Where(s => s.Status == ShipmentStatus.Delivered)
                 .Select(s => EF.Functions.DateDiffMinute(s.Beginning, s.End))
                 .Average();
-        }
 
         // ✅ شحنات اليوم فقط
         public List<Shipment> GetTodayShipments()
@@ -111,12 +102,9 @@ namespace VROOM.Repositories
         //}
 
         // ✅ Late shipments (more than 24 hours and not delivered)
-        public List<Shipment> GetDelayedShipments()
-        {
-            return _context.Shipments
-                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.Beginning, DateTime.Now) > 24)
+        public List<Shipment> GetDelayedShipments() => _context.Shipments
+                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.ShippedAt, DateTime.Now) > 24)
                 .ToList();
-        }
 
         // ✅ إعادة تعيين الشحنة لـ Rider جديد
         //public void ReassignShipment(int shipmentId, int newRiderId)

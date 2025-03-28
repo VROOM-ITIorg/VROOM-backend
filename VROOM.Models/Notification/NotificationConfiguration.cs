@@ -9,8 +9,7 @@ namespace VROOM.Models
     {
 
 
-        public void Configure(EntityTypeBuilder<Notification> modelBuilder)
-        {
+        public void Configure(EntityTypeBuilder<Notification> modelBuilder) =>
             //modelBuilder.Entity<Notification>()
             //    .HasKey(n => n.Id);
 
@@ -18,6 +17,5 @@ namespace VROOM.Models
                 .HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserID);
-        }
     }
 }

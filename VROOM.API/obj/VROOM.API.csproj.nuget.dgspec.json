@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {}
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {}
   },
   "projects": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
         "projectName": "VROOM.API",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\VROOM-backend\\VROOM.API\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -43,8 +43,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -106,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

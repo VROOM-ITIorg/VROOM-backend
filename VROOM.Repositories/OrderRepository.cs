@@ -47,10 +47,7 @@ namespace VROOM.Repositories
         //}
 
         // Find Orders by Customer or Rider
-        public List<Order> GetOrdersByCustomerId(string customerId)
-        {
-            return _context.Orders.Where(o => o.CustomerID == customerId).ToList();
-        }
+        public List<Order> GetOrdersByCustomerId(string customerId) => _context.Orders.Where(o => o.CustomerID == customerId).ToList();
 
         public List<Order> GetOrdersByRiderId(int riderId)
         {
@@ -60,12 +57,9 @@ namespace VROOM.Repositories
         // Add the getOrderWithBussinessOwnerID
 
         // Filter by Date Range
-        public List<Order> GetOrdersByDateRange(DateTime startDate, DateTime endDate)
-        {
-            return _context.Orders
+        public List<Order> GetOrdersByDateRange(DateTime startDate, DateTime endDate) => _context.Orders
                 .Where(o => o.Date >= startDate && o.Date <= endDate)
                 .ToList();
-        }
 
         // We need to AssignOrderToRider with two diffrenet way (Manually and Automatically)
 
@@ -82,10 +76,7 @@ namespace VROOM.Repositories
         }
 
         // Calculate Total Revenue
-        public decimal CalculateTotalRevenue()
-        {
-            return _context.Orders.Sum(o => o.OrderPrice + o.DeliveryPrice);
-        }
+        public decimal CalculateTotalRevenue() => _context.Orders.Sum(o => o.OrderPrice + o.DeliveryPrice);
 
         // Check Order Status
         public string GetOrderState(int orderId)

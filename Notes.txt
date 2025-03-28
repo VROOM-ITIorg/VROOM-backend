@@ -1,0 +1,2 @@
+
+1 - Lazy loading , Eager loading

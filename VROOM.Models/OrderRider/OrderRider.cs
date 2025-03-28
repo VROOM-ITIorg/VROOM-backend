@@ -15,7 +15,6 @@ namespace VROOM.Models
 
         public virtual Order Order { get; set; }
         public virtual Rider Rider { get; set; }
-        public virtual BusinessOwner Owner { get; set; }
         public bool IsDeleted { get; set; } = false;
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; } = DateTime.Now;

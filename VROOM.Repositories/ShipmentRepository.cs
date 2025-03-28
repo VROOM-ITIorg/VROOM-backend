@@ -114,7 +114,7 @@ namespace VROOM.Repositories
         public List<Shipment> GetDelayedShipments()
         {
             return _context.Shipments
-                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.ShippedAt, DateTime.Now) > 24)
+                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.Beginning, DateTime.Now) > 24)
                 .ToList();
         }
 

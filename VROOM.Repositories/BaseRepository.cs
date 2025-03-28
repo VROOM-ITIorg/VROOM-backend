@@ -19,28 +19,28 @@ namespace VROOM.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public void CustomSaveChanges()
+        public virtual void CustomSaveChanges()
         {
             context.SaveChanges();
         }
 
-        public async Task<T> GetAsync(int id)
+        public virtual async Task<T> GetAsync(int id)
         {
             return await _dbSet.FindAsync(id);
         }
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
         }
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
             _dbSet.Update(entity);
         }
-        public void Delete(T entity)
+        public virtual void Delete(T entity)
         {
             _dbSet.Remove(entity);
         }

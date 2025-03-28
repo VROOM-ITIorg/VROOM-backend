@@ -103,7 +103,7 @@ namespace VROOM.Repositories
 
         // ✅ Late shipments (more than 24 hours and not delivered)
         public List<Shipment> GetDelayedShipments() => _context.Shipments
-                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.ShippedAt, DateTime.Now) > 24)
+                .Where(s => s.Status != ShipmentStatus.Delivered && EF.Functions.DateDiffHour(s.Beginning, DateTime.Now) > 24)
                 .ToList();
 
         // ✅ إعادة تعيين الشحنة لـ Rider جديد

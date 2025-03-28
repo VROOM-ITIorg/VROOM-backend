@@ -1,6 +1,6 @@
 ﻿namespace VROOM.Services
 {
-    public class Class1
+    public class MapModel
     {
 
     }

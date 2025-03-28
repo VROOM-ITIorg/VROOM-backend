@@ -4358,23 +4358,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\gh\\.nuget\\packages\\": {},
+    "C:\\Users\\PC\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.AdminArea\\VROOM.AdminArea.csproj",
+      "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.AdminArea\\VROOM.AdminArea.csproj",
       "projectName": "VROOM.AdminArea",
-      "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.AdminArea\\VROOM.AdminArea.csproj",
-      "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
-      "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.AdminArea\\obj\\",
+      "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.AdminArea\\VROOM.AdminArea.csproj",
+      "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.AdminArea\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4389,8 +4389,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
-              "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
+            "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
+              "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
             }
           }
         }
@@ -4404,7 +4404,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -4462,7 +4463,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

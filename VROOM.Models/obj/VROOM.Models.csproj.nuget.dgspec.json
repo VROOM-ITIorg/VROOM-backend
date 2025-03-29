@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {}
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
         "projectName": "VROOM.Models",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
+        "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\obj\\",
         "projectStyle": "PackageReference",

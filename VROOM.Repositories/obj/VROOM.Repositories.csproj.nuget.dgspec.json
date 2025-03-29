@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {}
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
         "projectName": "VROOM.Data",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
+        "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\obj\\",
         "projectStyle": "PackageReference",
@@ -32,8 +32,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
+              "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -107,12 +107,12 @@
         }
       }
     },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
         "projectName": "VROOM.Models",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
+        "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\obj\\",
         "projectStyle": "PackageReference",
@@ -206,12 +206,12 @@
         }
       }
     },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {
+    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
         "projectName": "VROOM.Repositories",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
+        "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\obj\\",
         "projectStyle": "PackageReference",
@@ -234,11 +234,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
+              "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
+                "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
               },
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
+              "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -290,6 +290,10 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.14, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             }
           },
           "imports": [

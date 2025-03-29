@@ -4341,9 +4341,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
+      "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
       "projectName": "VROOM.Data",
-      "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
+      "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
       "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\obj\\",
       "projectStyle": "PackageReference",
@@ -4366,8 +4366,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-              "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
+            "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
+              "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
             }
           }
         }

@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VROOM.API\VROOM.API.csproj" />
+    <ProjectReference Include="..\VROOM.Data\VROOM.Data.csproj" />
+    <ProjectReference Include="..\VROOM.Models\VROOM.Models.csproj" />
     <ProjectReference Include="..\VROOM.Repositories\VROOM.Repositories.csproj" />
   </ItemGroup>
 

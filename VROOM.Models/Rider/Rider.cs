@@ -5,12 +5,18 @@ using VROOM.Models;
 
 namespace VROOM.Models
 {
+    public enum RiderStatus
+    {
+        Available,
+        OnDelivery,
+        Unavailable
+    }
     public class Rider
     {
         public int Id { get; set; }
         public int BusinessID { get; set; }
         public string UserID { get; set; }
-        public string Status { get; set; }
+        public RiderStatus Status { get; set; } //enum
         public string Type { get; set; }
         public string Vehicle { get; set; }
         public string Location { get; set; }

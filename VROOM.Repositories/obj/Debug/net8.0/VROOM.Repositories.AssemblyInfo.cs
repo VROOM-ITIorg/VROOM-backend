@@ -14,11 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< HEAD
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+756aae116944e4a25c16035ea7ebc2d645acdc08")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2c851d94d23ee5d1696abb545f48cc75c1324c3b")]
->>>>>>> aya-branch
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+95234bb083353da03087f2599e5f2f4bf238b012")]
 [assembly: System.Reflection.AssemblyProductAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VROOM.Repositories")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

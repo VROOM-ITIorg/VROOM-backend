@@ -1,83 +1,71 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using VROOM.Data;
 using VROOM.Repositories;
 
 namespace VROOM.Data.Managers
 {
-	public class RoleRepository : BaseRepository<UserRole>
-	{
-		private readonly RoleManager<IdentityRole<int>> _roleManager;
+    public class RoleRepository : BaseRepository<IdentityRole<int>> // Changed to IdentityRole<int>
+    {
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly MyDbContext _dbContext; // Added for direct access
 
-		public RoleRepository(MyDbContext dbContext, RoleManager<IdentityRole<int>> roleManager)
-			: base(dbContext)
-		{
-			_roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
-		}
+        public RoleRepository(MyDbContext dbContext, RoleManager<IdentityRole<int>> roleManager)
+            : base(dbContext)
+        {
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+        }
 
-		public async Task<IdentityRole<int>> AddRoleAsync(string roleName)
-		{
-			var role = new IdentityRole<int> { Name = roleName };
-			var result = await _roleManager.CreateAsync(role);
-			if (result.Succeeded)
-			{
-				return role;
-			}
-			throw new Exception(""Failed to create role: "" + string.Join("", "", result.Errors.Select(e => e.Description)));
-		}
+        // Add a new role
+        public async Task<IdentityRole<int>> AddRoleAsync(string roleName)
+        {
+            var role = new IdentityRole<int> { Name = roleName };
+            var result = await _roleManager.CreateAsync(role);
+            if (result.Succeeded)
+            {
+                return role;
+            }
+            throw new Exception("Failed to create role: " +
+                string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
 
-		public async Task<UserRole> AssignRoleToUserAsync(int userId, string roleName)
-		{
-			var role = await _roleManager.FindByNameAsync(roleName);
-			if (role == null)
-			{
-				throw new Exception($""Role '{roleName}' not found."");
-			}
+        // Get role by ID (override base method)
+        public override async Task<IdentityRole<int>> GetAsync(int id)
+        {
+            return await _roleManager.FindByIdAsync(id.ToString());
+        }
 
-			var userRole = new UserRole { UserID = userId, Role = roleName };
-			await _dbSet.AddAsync(userRole);
-			await _dbContext.SaveChangesAsync();
-			return userRole;
-		}
+        // Get all roles
+        public override async Task<IEnumerable<IdentityRole<int>>> GetAllAsync()
+        {
+            return await _roleManager.Roles.ToListAsync();
+        }
 
-		public async Task<List<UserRole>> GetRolesForUserAsync(int userId)
-		{
-			return await GetAsync(
-				ur => ur.UserID == userId,
-				q => q.Include(ur => ur.User));
-		}
+        // Delete a role
+        public async Task DeleteRoleAsync(string roleName)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role == null)
+            {
+                throw new Exception($"Role '{roleName}' not found.");
+            }
 
-		public async Task<List<UserRole>> GetUsersInRoleAsync(string roleName)
-		{
-			return await GetAsync(
-				ur => ur.Role == roleName,
-				q => q.Include(ur => ur.User));
-		}
+            var result = await _roleManager.DeleteAsync(role);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Failed to delete role: " +
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
 
-		public async Task RemoveRoleFromUserAsync(int userId, string roleName)
-		{
-			var userRole = await _dbSet.FirstOrDefaultAsync(ur => ur.UserID == userId && ur.Role == roleName);
-			if (userRole != null)
-			{
-				_dbSet.Remove(userRole);
-				await _dbContext.SaveChangesAsync();
-			}
-		}
-
-		public async Task DeleteRoleAsync(string roleName)
-		{
-			var role = await _roleManager.FindByNameAsync(roleName);
-			if (role != null)
-			{
-				var userRoles = await GetUsersInRoleAsync(roleName);
-				_dbSet.RemoveRange(userRoles);
-				var result = await _roleManager.DeleteAsync(role);
-				if (!result.Succeeded)
-				{
-					throw new Exception(""Failed to delete role: "" + string.Join("", "", result.Errors.Select(e => e.Description)));
-				}
-				await _dbContext.SaveChangesAsync();
-			}
-		}
-	}
+        public async Task SaveChangesAsync()
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+    }
 }

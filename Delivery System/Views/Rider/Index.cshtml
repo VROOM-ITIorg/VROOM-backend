@@ -1,0 +1,312 @@
+﻿@using VROOM.ViewModels
+@using ViewModels
+@{
+    ViewBag.Title = "Riders List";
+    var riders = ViewData["Riders"] as PaginationViewModel<RiderViewModel>;
+    var totalPages = (int)Math.Ceiling((double)riders.Total / riders.PageSize);
+    var currentPage = riders.PageNumber;
+    var start = ((riders.PageNumber - 1) * riders.PageSize) + 1;
+    var end = Math.Min(riders.PageNumber * riders.PageSize, riders.Total);
+}
+
+<div class="container-fluid py-4">
+    <!-- Header Section with Title and Add Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <span class="text-primary">Riders</span>
+            <span class="text-secondary"> Management</span>
+        </h3>
+        <a href="/Rider/Create" class="btn btn-primary px-4 d-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i> Add New Rider
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form asp-controller="Rider" asp-action="Index" method="post" class="row align-items-end">
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" name="Name" class="form-control border-start-0" placeholder="Search by name, email, phone...">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Sort By</label>
+                    <select class="form-select" id="sortBy">
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="date_new">Date Added (Newest)</option>
+                        <option value="date_old">Date Added (Oldest)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Items Per Page</label>
+                    <select class="form-select" id="perPage" name="pageSize">
+                        <option value="2">2 Items</option>
+                        <option value="4" selected >4 Items</option>
+                        <option value="8">8 Items</option>
+                        <option value="16">16 Items</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+                    <button class="btn btn-outline-primary me-2" id="applyFilters">
+                        <i class="bi bi-funnel-fill me-1"></i> Apply
+                    </button>
+                    <button class="btn btn-outline-secondary" id="resetFilters">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Riders Cards Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @foreach (var rider in  riders.Data)
+        {
+            <div class="col">
+                <div class="card h-100 border-0 rider-card">
+                    <div class="position-relative">
+                        <div class="rider-image-container">
+                            <img src="@rider.ProfilePicture" class="rider-image" alt="@rider.ProfilePicture">
+                        </div>
+                        <div class="rider-status">
+                            <span class="badge bg-success px-3 py-2 rounded-pill">Active</span>
+                        </div>
+                    </div>
+                    <div class="card-body pt-4">
+                        <h5 class="card-title fw-bold mb-3">@rider.UserName</h5>
+                        <div class="rider-info mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-telephone-fill text-primary me-3"></i>
+                                <span>@rider.PhoneNumber</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-envelope-fill text-primary me-3"></i>
+                                <span>@rider.Email</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0 pb-3">
+                        <div class="d-flex justify-content-between">
+                            <a href="/Rider/Details/@rider.Id" class="btn btn-outline-primary px-3">
+                                <i class="bi bi-eye me-1"></i> View
+                            </a>
+                            <div>
+                                <a href="/Rider/Edit/@rider.Id" class="btn btn-outline-warning me-1">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="/Rider/Delete/@rider.Id" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination Section -->
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@riders.Total</span> riders</p>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="?pageNumber=@(currentPage - 1)&pageSize=@riders.PageSize" aria-label="Previous">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                            @if (totalPages > 1)
+                            {
+                                for (int i = 1; i <= totalPages; i++)
+                                {
+                                    <li class="page-item @(i == riders.PageNumber ? "active" : "")">
+                                        <a class="page-link" href="?pageNumber=@i&pageSize=@riders.PageSize">@i</a>
+                                    </li>
+                                }
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="?pageNumber=@(currentPage + 1)&pageSize=@riders.PageSize" aria-label="Next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Card Styles (from your original) */
+    .rider-card {
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        .rider-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+    .rider-image-container {
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .rider-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .rider-card:hover .rider-image {
+        transform: scale(1.1);
+    }
+
+    .rider-status {
+        position: absolute;
+        bottom: -15px;
+        right: 20px;
+    }
+
+    .rider-info {
+        color: #6c757d;
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-outline-primary:hover, .btn-outline-warning:hover, .btn-outline-danger:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-warning {
+        color: #fd7e14;
+        border-color: #fd7e14;
+    }
+
+        .btn-outline-warning:hover {
+            background-color: #fd7e14;
+            color: white;
+        }
+
+    /* New Filter Styles */
+    .form-select, .form-control {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+    }
+
+        .form-select:focus, .form-control:focus {
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+
+    .input-group-text {
+        border-radius: 8px 0 0 8px;
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        gap: 5px;
+    }
+
+    .page-link {
+        border-radius: 8px;
+        color: #0d6efd;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.85rem;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .page-link:hover {
+        background-color: #f0f2f5;
+        color: #0d6efd;
+    }
+
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
+</style>
+
+<script>
+    // Filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+       
+
+        // Reset Filters Button
+        document.getElementById('resetFilters')?.addEventListener('click', function() {
+            document.getElementById('searchRider').value = '';
+            document.getElementById('statusFilter').value = 'active';
+            document.getElementById('sortBy').value = 'name_asc';
+            document.getElementById('perPage').value = '2';
+
+
+        });
+    });
+
+    // Simple toast notification function
+    function showToast(message) {
+        // Check if a toast container already exists
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toastEl = document.createElement('div');
+        toastEl.className = 'toast show';
+        toastEl.setAttribute('role', 'alert');
+        toastEl.setAttribute('aria-live', 'assertive');
+        toastEl.setAttribute('aria-atomic', 'true');
+
+        toastEl.innerHTML = `
+            <div class="toast-header">
+                <i class="bi bi-info-circle text-primary me-2"></i>
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">${message}</div>
+        `;
+
+        // Add to container
+        toastContainer.appendChild(toastEl);
+
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            toastEl.remove();
+        }, 3000);
+    }
+</script>

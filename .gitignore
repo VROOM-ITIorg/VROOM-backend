@@ -1,0 +1,16 @@
+.DS_Store
+Thumbs.db
+
+bin/
+obj/
+packages/
+node_modules/
+wwwroot/
+
+*.suo
+*.user
+*.vs/
+*.vscode/
+
+appsettings*.json
+secrets.json

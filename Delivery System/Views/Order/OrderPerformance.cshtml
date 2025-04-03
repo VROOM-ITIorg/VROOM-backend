@@ -1,0 +1,32 @@
+﻿@using VROOM.ViewModels
+
+@model List<OrderPerformanceReportViewModel>
+
+@{
+    ViewData["Title"] = "Order Performance Report";
+}
+
+<div class="container mt-4">
+    <h2>Order Performance Report</h2>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Order ID</th>
+                <th>Rider ID</th>
+                <th>Delivery Time (Minutes)</th>
+                <th>Customer Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model)
+            {
+                <tr>
+                    <td>@report.OrderId</td>
+                    <td>@report.RiderId</td>
+                    <td>@report.DeliveryTime</td>
+                    <td>@report.CustomerRating</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

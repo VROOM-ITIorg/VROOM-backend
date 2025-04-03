@@ -1,0 +1,537 @@
+﻿@{
+	Layout = null;
+	ViewData["Title"] = "Admin Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>@ViewData["Title"]</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+	<style>
+		:root {
+			--primary-color: #4361ee;
+			--secondary-color: #3f37c9;
+			--accent-color: #4895ef;
+			--light-bg: #f8f9fa;
+			--dark-bg: #212529;
+			--sidebar-width: 250px;
+			--sidebar-collapsed-width: 70px;
+			--header-height: 60px;
+		}
+
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background-color: var(--light-bg);
+			overflow-x: hidden;
+		}
+
+		/* Improved Sidebar */
+		.sidebar {
+			width: var(--sidebar-width);
+			background-color: var(--dark-bg);
+			color: white;
+			height: 100vh;
+			position: fixed;
+			left: 0;
+			top: 0;
+			transition: all 0.3s ease;
+			z-index: 1030;
+			box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+			overflow-y: auto;
+		}
+
+		.sidebar.collapsed {
+			width: var(--sidebar-collapsed-width);
+		}
+
+		.sidebar-header {
+			height: var(--header-height);
+			display: flex;
+			align-items: center;
+			padding: 0 20px;
+			background-color: rgba(0, 0, 0, 0.2);
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+
+		.sidebar-header h3 {
+			margin: 0;
+			font-size: 1.25rem;
+			font-weight: 600;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+
+		.sidebar-header .logo-icon {
+			font-size: 1.75rem;
+			margin-right: 10px;
+			color: var(--accent-color);
+		}
+
+		.sidebar.collapsed .logo-text {
+			display: none;
+		}
+
+		.sidebar-content {
+			padding: 15px 0;
+		}
+
+		.menu-category {
+			padding: 10px 25px;
+			font-size: 0.75rem;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			color: rgba(255, 255, 255, 0.4);
+			font-weight: 600;
+			margin-top: 10px;
+		}
+
+		.sidebar.collapsed .menu-category {
+			display: none;
+		}
+
+		.menu-item {
+			padding: 12px 20px;
+			display: flex;
+			align-items: center;
+			color: rgba(255, 255, 255, 0.7);
+			transition: all 0.2s;
+			border-left: 3px solid transparent;
+			white-space: nowrap;
+			text-decoration: none;
+		}
+
+		.menu-item:hover {
+			background-color: rgba(255, 255, 255, 0.1);
+			color: white;
+			cursor: pointer;
+			border-left-color: var(--accent-color);
+			text-decoration: none;
+		}
+
+		.menu-item.active {
+			background-color: rgba(67, 97, 238, 0.2);
+			color: white;
+			border-left-color: var(--primary-color);
+		}
+
+		.menu-item i {
+			min-width: 30px;
+			margin-right: 10px;
+			font-size: 1.2rem;
+			text-align: center;
+		}
+
+		.sidebar.collapsed .menu-item span {
+			display: none;
+		}
+
+		.sidebar.collapsed .menu-item {
+			padding: 12px 20px;
+			justify-content: center;
+		}
+
+		.sidebar.collapsed .menu-item i {
+			margin-right: 0;
+			font-size: 1.4rem;
+		}
+
+		.main-content {
+			margin-left: var(--sidebar-width);
+			padding: 20px;
+			transition: all 0.3s ease;
+			min-height: 100vh;
+			padding-top: calc(var(--header-height) + 20px);
+		}
+
+		.main-content.expanded {
+			margin-left: var(--sidebar-collapsed-width);
+		}
+
+		/* Top Navbar */
+		.top-navbar {
+			height: var(--header-height);
+			background-color: white;
+			position: fixed;
+			top: 0;
+			right: 0;
+			left: var(--sidebar-width); 
+			z-index: 1020;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			transition: all 0.3s ease;
+			padding: 0 20px;
+		}
+
+		.sidebar.collapsed ~ .top-navbar {
+			left: var(--sidebar-collapsed-width);
+		}
+
+		.sidebar.collapsed ~ .main-content {
+			margin-left: var(--sidebar-collapsed-width);
+		}
+
+		/* إعدادات عامة للـ Sidebar */
+		.sidebar {
+			/* تأكد من ضبط العرض والارتفاع وغيرها حسب تصميمك */
+			width: var(--sidebar-width);
+			background-color: var(--dark-bg);
+			color: white;
+			height: 100vh;
+			position: fixed;
+			left: 0;
+			top: 0;
+			transition: all 0.3s ease;
+			z-index: 1030;
+			box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+			overflow-y: auto;
+		}
+
+			/* إخفاء شريط التمرير افتراضيًا */
+			.sidebar::-webkit-scrollbar {
+				width: 8px;
+				background: transparent;
+			}
+
+			/* شكل المسار الخلفي لشريط التمرير */
+			.sidebar::-webkit-scrollbar-track {
+				background: rgba(255, 255, 255, 0.1);
+				border-radius: 0px;
+			}
+
+			/* إعدادات مقبض شريط التمرير - مخفي افتراضيًا */
+			.sidebar::-webkit-scrollbar-thumb {
+				background: var(--accent-color);
+				border-radius: 0px;
+				opacity: 0; /* مخفي بشكل افتراضي */
+				transition: opacity 0.3s ease-in-out;
+			}
+
+			/* عند إضافة الكلاس show-scroll يظهر المقبض */
+			.sidebar.show-scroll::-webkit-scrollbar-thumb {
+				opacity: 1;
+			}
+
+
+		.main-content.expanded .top-navbar {
+			margin-left: var(--sidebar-collapsed-width);
+		}
+
+		.search-box {
+			position: relative;
+			max-width: 300px;
+		}
+
+		.search-box input {
+			padding-left: 40px;
+			border-radius: 20px;
+			border: 1px solid #e0e0e0;
+			background-color: #f5f5f5;
+		}
+
+		.search-box input:focus {
+			background-color: white;
+			box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+			border-color: var(--primary-color);
+		}
+
+		.search-icon {
+			position: absolute;
+			left: 15px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #6c757d;
+		}
+
+		.user-dropdown img {
+			width: 36px;
+			height: 36px;
+			object-fit: cover;
+			border: 2px solid var(--primary-color);
+		}
+
+
+
+		/* Other components */
+		.card {
+			border-radius: 10px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+			transition: transform 0.3s;
+			border: none;
+			overflow: hidden;
+			margin-bottom: 20px;
+		}
+
+		.card:hover {
+			transform: translateY(-5px);
+		}
+
+		.stats-card {
+			background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+			color: white;
+		}
+
+		.stats-icon {
+			background: rgba(255, 255, 255, 0.2);
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-bottom: 10px;
+		}
+
+		.page-title {
+			font-weight: 600;
+			margin-bottom: 1.5rem;
+		}
+
+		.table-container {
+			background-color: white;
+			border-radius: 10px;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+			padding: 20px;
+		}
+
+		.status-badge {
+			border-radius: 20px;
+			padding: 5px 10px;
+			font-size: 0.8rem;
+		}
+
+		.custom-btn {
+			border-radius: 5px;
+			padding: 6px 12px;
+			transition: all 0.3s;
+		}
+	</style>
+</head>
+<body>
+	<!-- Mobile Overlay -->
+	<div class="mobile-overlay" id="mobileOverlay"></div>
+
+	<!-- Sidebar -->
+	<div class="sidebar" id="sidebar">
+		<div class="sidebar-header">
+			<i class="bi bi-grid-3x3-gap-fill logo-icon"></i>
+			<h3 class="logo-text">Admin Panel</h3>
+		</div>
+
+		<div class="sidebar-content">
+			<div class="menu-category">Main</div>
+			<a asp-controller="Dashboard" asp-action="Index" class="menu-item">
+				<i class="bi bi-speedometer2"></i>
+				<span>Dashboard</span>
+			</a>
+
+			<div class="menu-category">Management</div>
+			<a asp-controller="Rider" asp-action="Index" class="menu-item">
+				<i class="bi bi-people-fill"></i>
+				<span>Riders</span>
+			</a>
+			<a asp-controller="Business" asp-action="GetAll" class="menu-item">
+				<i class="bi bi-building"></i>
+				<span>Businesses</span>
+			</a>
+			<a asp-controller="Order" asp-action="ActiveOrders" class="menu-item">
+				<i class="bi bi-cart-fill"></i>
+				<span>Orders</span>
+			</a>
+			<a asp-controller="Shipment" asp-action="GetAll" class="menu-item">
+				<i class="bi bi-truck"></i>
+				<span>Shipments</span>
+			</a>
+
+			<div class="menu-category">Analytics</div>
+			<a asp-controller="Report" asp-action="Index" class="menu-item">
+				<i class="bi bi-bar-chart-fill"></i>
+				<span>Reports</span>
+			</a>
+			<a asp-controller="Statistics" asp-action="Index" class="menu-item">
+				<i class="bi bi-graph-up"></i>
+				<span>Statistics</span>
+			</a>
+
+			<div class="menu-category">Settings</div>
+			<a asp-controller="Settings" asp-action="System" class="menu-item">
+				<i class="bi bi-gear-fill"></i>
+				<span>System Settings</span>
+			</a>
+			<a asp-controller="User" asp-action="GetAll" class="menu-item">
+				<i class="bi bi-person-fill"></i>
+				<span>User Management</span>
+			</a>
+			<a asp-controller="Permission" asp-action="GetAll" class="menu-item">
+				<i class="bi bi-shield-lock-fill"></i>
+				<span>Permissions</span>
+			</a>
+
+			<div class="menu-category">Account</div>
+			<a asp-controller="Profile" asp-action="Index" class="menu-item">
+				<i class="bi bi-person-circle"></i>
+				<span>Profile</span>
+			</a>
+			<a asp-controller="Account" asp-action="Logout" class="menu-item">
+				<i class="bi bi-box-arrow-right"></i>
+				<span>Logout</span>
+			</a>
+		</div>
+	</div>
+
+	<!-- Top Navbar -->
+	<div class="top-navbar d-flex align-items-center justify-content-between">
+		<div class="d-flex align-items-center">
+			<button class="btn btn-sm text-dark me-3" id="toggleSidebar">
+				<i class="bi bi-list fs-4"></i>
+			</button>
+			<div class="d-none d-md-block">
+				<h5 class="mb-0">Welcome Back, Admin</h5>
+			</div>
+		</div>
+
+		<div class="d-flex align-items-center">
+			<div class="search-box me-3 d-none d-md-block">
+				<input type="text" class="form-control" placeholder="Search...">
+				<i class="bi bi-search search-icon"></i>
+			</div>
+
+			<div class="dropdown mx-3">
+				<button class="btn btn-link text-dark position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
+					<i class="bi bi-bell-fill fs-5"></i>
+					<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+						3
+					</span>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+					<li><h6 class="dropdown-header">Notifications</h6></li>
+					<li><a class="dropdown-item" href="#">New rider registered</a></li>
+					<li><a class="dropdown-item" href="#">New order received</a></li>
+					<li><a class="dropdown-item" href="#">System update available</a></li>
+					<li><hr class="dropdown-divider"></li>
+					<li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
+				</ul>
+			</div>
+
+			<div class="dropdown">
+				<button class="btn btn-link text-dark d-flex align-items-center p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
+					<img src="https://via.placeholder.com/36" class="rounded-circle" alt="Admin">
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+					<li><h6 class="dropdown-header">John Doe</h6></li>
+					<li><a class="dropdown-item" href="#">Profile</a></li>
+					<li><a class="dropdown-item" href="#">Settings</a></li>
+					<li><hr class="dropdown-divider"></li>
+					<li><a class="dropdown-item" href="#">Logout</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- Main Content Area -->
+	<div class="main-content" id="content">
+		<!-- This is where RenderBody() will go -->
+		@RenderBody()
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const sidebar = document.getElementById('sidebar');
+			const content = document.getElementById('content');
+			const toggleBtn = document.getElementById('toggleSidebar');
+			const mobileOverlay = document.getElementById('mobileOverlay');
+
+			// Toggle sidebar
+			toggleBtn.addEventListener('click', function() {
+				const isMobile = window.innerWidth < 992;
+
+				if (isMobile) {
+					sidebar.classList.toggle('mobile-active');
+					mobileOverlay.classList.toggle('active');
+				} else {
+					sidebar.classList.toggle('collapsed');
+					content.classList.toggle('expanded');
+				}
+			});
+
+			// Close sidebar when clicking on overlay (mobile)
+			mobileOverlay.addEventListener('click', function() {
+				sidebar.classList.remove('mobile-active');
+				mobileOverlay.classList.remove('active');
+			});
+
+			// Resize handler
+			window.addEventListener('resize', function() {
+				const isMobile = window.innerWidth < 992;
+
+				if (isMobile) {
+					sidebar.classList.remove('collapsed');
+					content.classList.remove('expanded');
+
+					if (sidebar.classList.contains('mobile-active')) {
+						mobileOverlay.classList.add('active');
+					}
+				} else {
+					sidebar.classList.remove('mobile-active');
+					mobileOverlay.classList.remove('active');
+				}
+			});
+
+			// For demo purposes - make menu items clickable
+			const menuItems = document.querySelectorAll('.menu-item');
+			menuItems.forEach(item => {
+				item.addEventListener('click', function() {
+					menuItems.forEach(i => i.classList.remove('active'));
+					this.classList.add('active');
+
+					// On mobile, close the sidebar after clicking
+					if (window.innerWidth < 992) {
+						sidebar.classList.remove('mobile-active');
+						mobileOverlay.classList.remove('active');
+					}
+				});
+			});
+		});
+
+		document.addEventListener('DOMContentLoaded', function() {
+
+			const menuItems = document.querySelectorAll('.menu-item');
+			menuItems.forEach(item => {
+				item.addEventListener('click', function(e) {
+					if (this.getAttribute('href') && this.getAttribute('href').indexOf('asp-') === -1) {
+					} else {
+						e.preventDefault();
+					}
+
+					menuItems.forEach(i => i.classList.remove('active'));
+
+					this.classList.add('active');
+
+					if (this.getAttribute('href')) {
+						localStorage.setItem('activeMenuItem', this.getAttribute('href'));
+					}
+
+					if (window.innerWidth < 992) {
+						sidebar.classList.remove('mobile-active');
+						mobileOverlay.classList.remove('active');
+					}
+				});
+			});
+
+			const storedActiveItem = localStorage.getItem('activeMenuItem');
+			if (storedActiveItem) {
+				menuItems.forEach(item => {
+					if (item.getAttribute('href') === storedActiveItem) {
+						item.classList.add('active');
+					}
+				});
+			}
+		});
+	</script>
+
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

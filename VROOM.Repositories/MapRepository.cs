@@ -14,6 +14,7 @@ namespace VROOM.Repositories
 
         public MapRepository(HttpClient httpClient)
         {
+            _httpClient = httpClient;
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
@@ -29,9 +30,9 @@ namespace VROOM.Repositories
             try
             {
                 string requestUrl = string.Format(_radarGeocodeUrl, Uri.EscapeDataString(locationName));
+                HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
                 Console.WriteLine($"Request URL: {requestUrl}");
                 Console.WriteLine($"Authorization Header: {_httpClient.DefaultRequestHeaders.Authorization}");
-                HttpResponseMessage response = await _httpClient.GetAsync(requestUrl);
                 Console.WriteLine($"Response Status Code: {response.StatusCode}");
                 response.EnsureSuccessStatusCode();
 

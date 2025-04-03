@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {}
+    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
+    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
         "projectName": "VROOM.API",
-        "projectPath": "C:\\Users\\PC\\source\\repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
+        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\obj\\",
         "projectStyle": "PackageReference",

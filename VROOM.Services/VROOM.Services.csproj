@@ -22,4 +22,8 @@
     <ProjectReference Include="..\VROOM.Repositories\VROOM.Repositories.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

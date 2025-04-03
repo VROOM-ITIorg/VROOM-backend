@@ -7,8 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <ProjectReference Include="..\Repository\VROOM.Repository.csproj" />
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
+=======
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VROOM.Repositories\VROOM.Repositories.csproj" />
+>>>>>>> 82b2eb49ba98af77bba1b45428386288b23ffc36
   </ItemGroup>
 
 </Project>

@@ -35,6 +35,10 @@ namespace VROOM.Models
                 .HasOne(o => o.OrderRider)
                 .WithOne(or => or.Order)
                 .HasForeignKey<OrderRider>(or => or.OrderID);
+
+            modelBuilder
+                .Property(o => o.State)
+                .HasDefaultValue(OrderState.Pending);
         }
     }
 }

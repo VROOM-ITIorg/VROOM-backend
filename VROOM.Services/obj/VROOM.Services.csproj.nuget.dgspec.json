@@ -1,23 +1,134 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
-        "projectName": "VROOM.API",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\obj\\",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj",
+        "projectName": "VROOM.Data",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj",
+        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "LinqKit": {
+              "target": "Package",
+              "version": "[1.3.8, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore.Proxies": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj",
+        "projectName": "VROOM.Models",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj",
+        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,12 +155,16 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.14, )"
@@ -84,7 +199,7 @@
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.6.2, )"
+              "version": "[6.5.0, )"
             }
           },
           "imports": [
@@ -99,31 +214,28 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
-            "Microsoft.AspNetCore.App": {
-              "privateAssets": "none"
-            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
-        "projectName": "VROOM.Data",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\obj\\",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj",
+        "projectName": "VROOM.Repository",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj",
+        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -138,213 +250,14 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
-      },
-      "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "dependencies": {
-            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Proxies": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Relational": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            }
-          },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
-        "projectName": "VROOM.Models",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net8.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
-            "projectReferences": {}
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
-      },
-      "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "dependencies": {
-            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Proxies": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Relational": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            }
-          },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
-        "projectName": "VROOM.Repositories",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net8.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
-            "projectReferences": {
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj"
               },
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              },
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj"
               }
             }
           }
@@ -359,47 +272,31 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "LinqKit": {
+              "target": "Package",
+              "version": "[1.3.8, )"
+            },
+            "Microsoft.AspNetCore.Identity": {
+              "target": "Package",
+              "version": "[2.3.1, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.14, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.14, )"
+              "version": "[9.0.3, )"
             },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Proxies": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Relational": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.3, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -418,24 +315,115 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj",
+        "projectName": "ViewModels",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj",
+        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "LinqKit": {
+              "target": "Package",
+              "version": "[1.3.8, )"
+            },
+            "Microsoft.AspNetCore.Identity": {
+              "target": "Package",
+              "version": "[2.3.1, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj",
         "projectName": "VROOM.Services",
-        "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Services\\obj\\",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj",
+        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -450,17 +438,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.API\\VROOM.API.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj"
               },
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Data\\VROOM.Data.csproj"
-              },
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Models\\VROOM.Models.csproj"
-              },
-              "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj": {
-                "projectPath": "C:\\Users\\PC\\Source\\Repos\\VROOM-backend\\VROOM.Repositories\\VROOM.Repositories.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj"
               }
             }
           }
@@ -475,27 +457,11 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "dependencies": {
-            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Microsoft.EntityFrameworkCore.Tools": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.14, )"
-            },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.3, )"
-            }
-          },
           "imports": [
             "net461",
             "net462",
@@ -512,7 +478,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

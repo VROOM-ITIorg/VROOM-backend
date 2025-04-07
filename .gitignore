@@ -1,19 +1,16 @@
-.vs/
+.DS_Store
+Thumbs.db
 
-VROOM.AdminArea/bin/
-VROOM.AdminArea/obj/
+bin/
+obj/
+packages/
+node_modules/
+wwwroot/
 
-VROOM.API/bin/
-VROOM.API/obj/
+*.suo
+*.user
+*.vs/
+*.vscode/
 
-VROOM.Data/bin/
-VROOM.Data/obj/
-
-VROOM.Models/bin/
-VROOM.Models/obj/
-
-VROOM.Repositories/bin/
-VROOM.Repositories/obj/
-
-VROOM.Services/bin/
-VROOM.Services/obj/
+appsettings*.json
+secrets.json

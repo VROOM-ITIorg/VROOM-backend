@@ -1,6 +1,0 @@
-@VROOM.API_HostAddress = http://localhost:5217
-
-GET {{VROOM.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

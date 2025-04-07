@@ -18,6 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
+        [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
             int id;
@@ -30,6 +31,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Route("getOrder")]
         public async Task<IActionResult> GetOrderById(int id)
         {
             var order = await orderService.GetOrderByIdAsync(id) ?? NotFound() ;

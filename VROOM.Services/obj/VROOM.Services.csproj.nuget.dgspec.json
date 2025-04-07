@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj": {}
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
   },
   "projects": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
         "projectName": "VROOM.Data",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\obj\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,8 +32,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -115,14 +115,14 @@
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj",
         "projectName": "VROOM.Models",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\obj\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -222,14 +222,14 @@
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
         "projectName": "VROOM.Repository",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\obj\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -250,14 +250,14 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Data Layer\\VROOM.Data.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
               }
             }
           }
@@ -319,14 +319,14 @@
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj",
         "projectName": "ViewModels",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\obj\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -347,8 +347,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Models\\VROOM.Models.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -410,14 +410,14 @@
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj": {
+    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj",
+        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
         "projectName": "VROOM.Services",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\VROOM.Services.csproj",
+        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\VROOM.Services\\obj\\",
+        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -438,11 +438,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\Repository\\VROOM.Repository.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\Delivery System\\Delivery System\\ViewModels\\ViewModels.csproj"
+              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
               }
             }
           }

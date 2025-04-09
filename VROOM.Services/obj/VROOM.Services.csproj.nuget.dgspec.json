@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
   },
   "projects": {
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
         "projectName": "VROOM.Data",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -32,8 +32,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -48,7 +48,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -111,24 +111,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj",
         "projectName": "VROOM.Models",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -155,7 +155,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -218,24 +218,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
         "projectName": "VROOM.Repository",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -250,14 +250,14 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Data Layer\\VROOM.Data.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj"
               }
             }
           }
@@ -272,7 +272,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -315,24 +315,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj",
         "projectName": "ViewModels",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -347,8 +347,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Models\\VROOM.Models.csproj"
               }
             }
           }
@@ -363,7 +363,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -406,24 +406,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
+    "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
+        "projectUniqueName": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
         "projectName": "VROOM.Services",
-        "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
-        "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
-        "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\obj\\",
+        "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
+        "packagesPath": "C:\\Users\\gh\\.nuget\\packages\\",
+        "outputPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\VROOM.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\gh\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -438,11 +438,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\Repository\\VROOM.Repository.csproj"
               },
-              "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
-                "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+              "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "C:\\PD ITI Aswan_ intake 45\\Vroom\\VROOM-backend\\ViewModels\\ViewModels.csproj"
               }
             }
           }
@@ -457,7 +457,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -478,7 +478,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

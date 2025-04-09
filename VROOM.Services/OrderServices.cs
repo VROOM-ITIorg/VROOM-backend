@@ -1,4 +1,5 @@
-﻿using VROOM.Models;
+﻿using System.Threading.Tasks;
+using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.ViewModels;
 
@@ -40,13 +41,15 @@ namespace VROOM.Services
         }
 
         private OrderRepository orderRepository;
+        private NotificationService notificationService;
 
-        public OrderService(OrderRepository _orderRepository)
+        public OrderService(OrderRepository _orderRepository, NotificationService _notificationService)
         {
             orderRepository = _orderRepository;
+            notificationService = _notificationService;
         }
 
-        public void CreateOrder(OrderCreateViewModel orderVM , out int _id)
+        public async Task CreateOrder(OrderCreateViewModel orderVM )
         {
             var order = new Order
             {
@@ -67,8 +70,10 @@ namespace VROOM.Services
 
             orderRepository.Add(order);
             orderRepository.CustomSaveChanges();
+            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id,"Success");
+            await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
-            _id = order.Id;
+            
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)

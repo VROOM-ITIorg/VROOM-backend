@@ -19,8 +19,7 @@ namespace VROOM.Models
         public bool IsDeleted { get; set; } = false;
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; } = DateTime.Now;
-
-
+        public int? OrderID { get; set; }
     }
  
 }

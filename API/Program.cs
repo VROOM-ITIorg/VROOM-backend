@@ -83,6 +83,9 @@ builder.Services.AddScoped(typeof(OrderRepository));
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<NotificationService>();
+
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];

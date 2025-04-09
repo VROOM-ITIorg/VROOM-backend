@@ -21,13 +21,12 @@ namespace API.Controllers
         [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
-            int id;
 
             if (!ModelState.IsValid) return BadRequest(ModelState); 
 
-            orderService.CreateOrder(model, out id); // new method we'll define below
+            await orderService.CreateOrder(model); // new method we'll define below
 
-            return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created", Id = id });
+            return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created" });
         }
 
         [HttpGet("getOrder/{id}")]

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -28,7 +30,7 @@ namespace VROOM.Services
         private readonly OrderRiderRepository orderRiderRepository;
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly UserService _userService;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         //private readonly SignInManager<User> _signInManager;
         public BusinessOwnerService(
@@ -43,7 +45,8 @@ namespace VROOM.Services
 
 
             OrderRiderRepository orderRiderRepository,
-             ILogger<BusinessOwnerService> logger
+             ILogger<BusinessOwnerService> logger,
+              IHttpContextAccessor httpContextAccessor
 
             )
         {
@@ -55,6 +58,7 @@ namespace VROOM.Services
             this.orderRiderRepository = orderRiderRepository;
             _userService = userService;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -265,10 +269,17 @@ namespace VROOM.Services
 
 
 
-        public async Task<OrderRider?> AssignOrderToRiderAsync(int orderId, string riderId, string businessOwnerId)
+        public async Task<OrderRider?> AssignOrderToRiderAsync(int orderId, string riderId)
         {
             try
             {
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    return null; 
+                }
 
                 var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
                 if (businessOwner == null)
@@ -276,31 +287,17 @@ namespace VROOM.Services
                     return null;
                 }
 
-
                 var order = await orderRepository.GetAsync(orderId);
                 if (order == null || order.IsDeleted)
                 {
                     return null;
                 }
 
-
                 var rider = await riderRepository.GetAsync(riderId);
-                if (rider == null)
+                if (rider == null || rider.BusinessID != businessOwner.UserID || rider.Status != RiderStatusEnum.Available)
                 {
                     return null;
                 }
-
-
-                if (rider.BusinessID != businessOwner.UserID)
-                {
-                    return null;
-                }
-
-                if (rider.Status != RiderStatusEnum.Available)
-                {
-                    return null;
-                }
-
 
                 var orderRider = new OrderRider
                 {
@@ -311,16 +308,12 @@ namespace VROOM.Services
                     Owner = businessOwner
                 };
 
-
-
                 using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     try
                     {
-
                         orderRiderRepository.Add(orderRider);
                         await Task.Run(() => orderRiderRepository.CustomSaveChanges());
-
 
                         order.RiderID = riderId;
                         order.State = OrderStateEnum.Confirmed;
@@ -329,22 +322,20 @@ namespace VROOM.Services
                         orderRepository.Update(order);
                         await Task.Run(() => orderRepository.CustomSaveChanges());
 
-
                         rider.Status = RiderStatusEnum.OnDelivery;
                         riderRepository.Update(rider);
                         await Task.Run(() => riderRepository.CustomSaveChanges());
 
-
                         transaction.Complete();
                         return orderRider;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         return null;
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

@@ -4,6 +4,7 @@ using VROOM.Services;
 using VROOM.ViewModels;
 using VROOM.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -13,9 +14,10 @@ namespace API.Controllers
     {
         private readonly BusinessOwnerService _businessOwnerService;
         private readonly UserService _userService;
-        public BusinessOwnerController(BusinessOwnerService businessOwnerService, UserService userService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public BusinessOwnerController(BusinessOwnerService businessOwnerService, UserService userService, IHttpContextAccessor httpContextAccessor)
         {
-
+            _httpContextAccessor = httpContextAccessor;
             _businessOwnerService = businessOwnerService;
             _userService = userService;
         }
@@ -62,7 +64,6 @@ namespace API.Controllers
 
 
 
-
         [Authorize(Roles = "BusinessOwner")]
         [HttpPost("assignOrderManually")]
         public async Task<IActionResult> AssignOrderToRider([FromBody] AssignOrderToRiderRequest request)
@@ -72,15 +73,17 @@ namespace API.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var result = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId, request.BusinessOwnerId);
+            var result = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId);
 
             if (result == null)
             {
                 return NotFound("Unable to assign order to rider. Please check the details.");
             }
 
+  
             return Ok(result);
         }
+
         public class AssignOrderToRiderRequest
         {
 
@@ -89,8 +92,6 @@ namespace API.Controllers
 
             public string RiderId { get; set; }
 
-
-            public string BusinessOwnerId { get; set; }
         }
 
 

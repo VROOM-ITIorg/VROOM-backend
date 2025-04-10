@@ -32,7 +32,7 @@ namespace VROOM.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Server=.;Database=VroomDb;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True;");
+            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data Source = ROZIE\\MSSQLSERVER01; Initial Catalog = Vroom; Integrated Security = True; TrustServerCertificate = True");
 
             base.OnConfiguring(optionsBuilder);
         }

@@ -1,6 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -12,6 +12,8 @@ namespace VROOM.Repository
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private IDbContextTransaction _transaction;
+
         public UserRepository(
             UserManager<User> _userManager,
             SignInManager<User> _signInManager,
@@ -21,6 +23,38 @@ namespace VROOM.Repository
             userManager = _userManager ?? throw new ArgumentNullException(nameof(userManager));
             signInManager = _signInManager ?? throw new ArgumentNullException(nameof(signInManager));
             roleManager = _roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+        }
+
+        // Transaction Management
+        public async Task BeginTransactionAsync()
+        {
+            if (_transaction != null)
+            {
+                throw new InvalidOperationException("A transaction is already in progress.");
+            }
+            _transaction = await context.Database.BeginTransactionAsync();
+        }
+
+        public async Task CommitTransactionAsync()
+        {
+            if (_transaction == null)
+            {
+                throw new InvalidOperationException("No transaction is in progress.");
+            }
+            await _transaction.CommitAsync();
+            _transaction.Dispose();
+            _transaction = null;
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            if (_transaction == null)
+            {
+                throw new InvalidOperationException("No transaction is in progress.");
+            }
+            await _transaction.RollbackAsync();
+            _transaction.Dispose();
+            _transaction = null;
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -40,7 +74,14 @@ namespace VROOM.Repository
 
         public async Task<User?> FindUserByIdAsync(string userId)
         {
-            return await userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                user = await context.Users
+                    .Include(u => u.Address)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            return user;
         }
 
         public async Task<bool> CheckPasswordAsync(User user, string password)

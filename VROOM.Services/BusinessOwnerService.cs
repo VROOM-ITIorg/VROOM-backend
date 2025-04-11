@@ -106,84 +106,106 @@ namespace VROOM.Services
 
 
 
-     
+
 
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
         {
-        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-        {
-            var existingUser = await userManager.FindByEmailAsync(request.Email);
-            if (existingUser != null)
+            _logger.LogInformation("Creating rider with email: {Email}", request.Email);
+
+            // Start transaction
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                return Result<RiderVM>.Failure("A user with this email already exists.");
-            }
-
-            var user = new User
-            {
-                UserName = request.Email,
-                Email = request.Email,
-                Name = request.Name,
-                ProfilePicture = request.ProfilePicture
-            };
-
-            var creationResult = await userManager.CreateAsync(user, request.Password);
-            if (!creationResult.Succeeded)
-            {
-                return Result<RiderVM>.Failure(string.Join(",", creationResult.Errors.Select(e => e.Description)));
-            }
-
-            var role = RoleConstants.Rider;
-            if (!await _roleManager.RoleExistsAsync(role))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(role));
-            }
-
-            await userManager.AddToRoleAsync(user, role);
-
-            var rider = new Rider
-            {
-                UserID = user.Id,
-                BusinessID = request.BusinessID,
-                Status = RiderStatusEnum.Available,
-                VehicleType = request.VehicleType,
-                VehicleStatus = request.VehicleStatus,
-                ExperienceLevel = request.ExperienceLevel,
-                Lat = request.Location.Lat,
-                Lang = request.Location.Lang,
-                Area = request.Location.Area,
-                Rating = 0
-            };
-
-            riderRepository.Add(rider);
-            riderRepository.CustomSaveChanges(); 
-
-            var result = new RiderVM
-            {
-                UserID = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                BusinessID = rider.BusinessID,
-                VehicleType = rider.VehicleType,
-                VehicleStatus = rider.VehicleStatus,
-                ExperienceLevel = rider.ExperienceLevel,
-                Location = new LocationDto
+                // Check if user already exists
+                var existingUser = await userManager.FindByEmailAsync(request.Email);
+                if (existingUser != null)
                 {
-                    Lat = rider.Lat,
-                    Lang = rider.Lang,
-                    Area = rider.Area
-                },
-                Status = rider.Status
-            };
+                    _logger.LogWarning("A user with this email already exists: {Email}", request.Email);
+                    return Result<RiderVM>.Failure("A user with this email already exists.");
+                }
 
-            scope.Complete(); 
+                // Create a new user
+                var user = new User
+                {
+                    UserName = request.Email,
+                    Email = request.Email,
+                    Name = request.Name,
+                    ProfilePicture = request.ProfilePicture
+                };
 
-            return Result<RiderVM>.Success(result);
+                _logger.LogInformation("Attempting to create user: {Email}", request.Email);
+                var creationResult = await userManager.CreateAsync(user, request.Password);
+                if (!creationResult.Succeeded)
+                {
+                    var errorMessages = string.Join(",", creationResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to create user: {Email}. Errors: {Errors}", request.Email, errorMessages);
+                    return Result<RiderVM>.Failure(errorMessages);
+                }
+
+                _logger.LogInformation("User created successfully: {Email}", request.Email);
+
+                // Ensure the Rider role exists
+                var role = RoleConstants.Rider;
+                if (!await _roleManager.RoleExistsAsync(role))
+                {
+                    _logger.LogInformation("Role {Role} does not exist. Creating role...", role);
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                }
+
+                // Add user to Rider role
+                _logger.LogInformation("Assigning role {Role} to user: {Email}", role, request.Email);
+                await userManager.AddToRoleAsync(user, role);
+
+                // Create a new rider
+                var rider = new Rider
+                {
+                    UserID = user.Id,
+                    BusinessID = request.BusinessID,
+                    Status = RiderStatusEnum.Available,
+                    VehicleType = request.VehicleType,
+                    VehicleStatus = request.VehicleStatus,
+                    ExperienceLevel = request.ExperienceLevel,
+                    Lat = request.Location.Lat,
+                    Lang = request.Location.Lang,
+                    Area = request.Location.Area,
+                    Rating = 0
+                };
+
+                _logger.LogInformation("Adding rider to the repository for user: {Email}", request.Email);
+                riderRepository.Add(rider);
+                riderRepository.CustomSaveChanges();
+
+                // Prepare the RiderVM result
+                var result = new RiderVM
+                {
+                    UserID = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    BusinessID = rider.BusinessID,
+                    VehicleType = rider.VehicleType,
+                    VehicleStatus = rider.VehicleStatus,
+                    ExperienceLevel = rider.ExperienceLevel,
+                    Location = new LocationDto
+                    {
+                        Lat = rider.Lat,
+                        Lang = rider.Lang,
+                        Area = rider.Area
+                    },
+                    Status = rider.Status
+                };
+
+                // Complete transaction
+                scope.Complete();
+
+                _logger.LogInformation("Rider created successfully: {Email}", request.Email);
+
+                return Result<RiderVM>.Success(result);
+            }
         }
-    }
 
-    //will be refactored
 
-    public async Task<Result<string>> ChangeRiderPasswordAsync(string riderId, string newPassword)
+        //will be refactored
+
+        public async Task<Result<string>> ChangeRiderPasswordAsync(string riderId, string newPassword)
         {
 
             var updateResult = await _userService.UpdatePasswordAsync(riderId, newPassword);

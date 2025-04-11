@@ -10,16 +10,25 @@ using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
+using Serilog;
+using API;
+
+
+
+Log.Information("Logger configured.");
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add logging configuration
-builder.Services.AddLogging(logging =>
-{
-    logging.AddConsole();
-    logging.AddDebug();
-    logging.SetMinimumLevel(LogLevel.Information);
-});
+
+
+builder.Host.UseSerilog();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -27,6 +36,12 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
 
 
 // Configure Swagger
@@ -80,6 +95,7 @@ builder.Services.AddScoped(typeof(RiderRepository));
 builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
+builder.Services.AddScoped(typeof(IssuesRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();
@@ -89,6 +105,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<IssueService>();
 
 
 
@@ -170,5 +187,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
+Log.Information("Application starting...");
 
 app.Run();

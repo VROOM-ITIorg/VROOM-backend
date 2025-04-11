@@ -39,7 +39,9 @@ namespace VROOM.ViewModels
     }
     public class OrderCreateViewModel
     {
+        // Edit the customerID to CustomerInfo like the username of the customer as it is uniqe then in the orderController 
         public string CustomerID { get; set; }
+        public string CustomerUsername { get; set; }
         public string RiderID { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }

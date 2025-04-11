@@ -63,12 +63,12 @@ namespace VROOM.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // 1. User Registration (Customer, BusinessOwner, Admin only)
+        // 1. User Registration (Customer, BusinessOwner)
         public async Task<Result<UserDto>> RegisterAsync(RegisterRequest request)
         {
             _logger.LogInformation("Registering user with email: {Email}, Role: {Role}", request.Email, request.Role);
 
-            // Validate role (only allow Customer, BusinessOwner, Admin)
+            // Validate role (only allow Customer, BusinessOwner)
             if (request.Role == RoleConstants.Rider)
             {
                 _logger.LogWarning("Registration failed: Rider registration is not allowed through this endpoint.");

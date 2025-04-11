@@ -11,6 +11,12 @@ wwwroot/
 *.user
 *.vs/
 *.vscode/
+*.dll
+*.pdb
+*.cache
+
+
+
 
 appsettings*.json
 secrets.json

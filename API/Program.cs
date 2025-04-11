@@ -80,11 +80,16 @@ builder.Services.AddScoped(typeof(RiderRepository));
 builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
+builder.Services.AddScoped<OrderRiderRepository>();
+
+builder.Services.AddScoped<BusinessOwnerRepository>();
+builder.Services.AddScoped<BusinessOwnerService>();
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
+
 
 
 // Configure JWT Authentication
@@ -132,8 +137,8 @@ app.Use(async (context, next) =>
 });
 
 
-app.UseAuthentication();
-app.UseAuthorization();
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 // Enable Swagger middleware
 app.UseSwagger();
@@ -146,6 +151,10 @@ app.UseSwaggerUI(c =>
 
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");

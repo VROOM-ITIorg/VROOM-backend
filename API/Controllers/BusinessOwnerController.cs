@@ -31,15 +31,15 @@ namespace API.Controllers
             return Ok(result.Value);
         }
 
-        [HttpPost("createRider")]
-        public async Task<IActionResult> CreateRider(RiderRegisterRequest rider)
-        {
-            if (rider == null)
-                return BadRequest();
-            await _businessOwnerService.CreateRiderAsync(rider);
+        //[HttpPost("createRider")]
+        //public async Task<IActionResult> CreateRider(RiderRegisterRequest rider)
+        //{
+        //    if (rider == null)
+        //        return BadRequest();
+        //    await _businessOwnerService.CreateRiderAsync(rider);
 
-            return Ok(new { message = "Rider created successfully", rider });
-        }
+        //    return Ok(new { message = "Rider created successfully", rider });
+        //}
 
         [HttpPost("changePassword")]
         public async Task<IActionResult> ChangeRiderPassword(string riderId, string newPassword)

@@ -106,15 +106,17 @@ namespace VROOM.Services
 
 
 
+     
+
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
         {
-
+        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        {
             var existingUser = await userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
             {
                 return Result<RiderVM>.Failure("A user with this email already exists.");
             }
-
 
             var user = new User
             {
@@ -130,7 +132,6 @@ namespace VROOM.Services
                 return Result<RiderVM>.Failure(string.Join(",", creationResult.Errors.Select(e => e.Description)));
             }
 
-
             var role = RoleConstants.Rider;
             if (!await _roleManager.RoleExistsAsync(role))
             {
@@ -138,7 +139,6 @@ namespace VROOM.Services
             }
 
             await userManager.AddToRoleAsync(user, role);
-
 
             var rider = new Rider
             {
@@ -155,8 +155,7 @@ namespace VROOM.Services
             };
 
             riderRepository.Add(rider);
-            riderRepository.CustomSaveChanges();
-
+            riderRepository.CustomSaveChanges(); 
 
             var result = new RiderVM
             {
@@ -176,13 +175,15 @@ namespace VROOM.Services
                 Status = rider.Status
             };
 
+            scope.Complete(); 
 
             return Result<RiderVM>.Success(result);
         }
+    }
 
-        //will be refactored
+    //will be refactored
 
-        public async Task<Result<string>> ChangeRiderPasswordAsync(string riderId, string newPassword)
+    public async Task<Result<string>> ChangeRiderPasswordAsync(string riderId, string newPassword)
         {
 
             var updateResult = await _userService.UpdatePasswordAsync(riderId, newPassword);

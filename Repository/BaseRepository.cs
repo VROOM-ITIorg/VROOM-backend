@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using VROOM.Data;
 
 namespace VROOM.Repositories
@@ -30,7 +31,7 @@ namespace VROOM.Repositories
         }
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await dbSet.ToListAsync();
+            return await dbSet.ToListAsync() ;
         }
         public IQueryable<T> GetList(Expression<Func<T, bool>> Filter = null)
         {
@@ -48,6 +49,41 @@ namespace VROOM.Repositories
         public void Delete(T entity)
         {
             dbSet.Remove(entity);
+        }
+
+
+
+
+        public IQueryable<T> Get(
+            Expression<Func<T, bool>> filter = null,
+            int pageSize = 4,
+            int pageNumber = 1)
+        {
+            IQueryable<T> quary = dbSet.AsQueryable();
+
+            if (filter != null)
+                quary = quary.Where(filter);
+
+            //Pagination
+            if (pageSize < 0)
+                pageSize = 4;
+
+            if (pageNumber < 0)
+                pageNumber = 1;
+
+            int count = quary.Count();
+
+            if (count < pageSize)
+            {
+                pageSize = count;
+                pageNumber = 1;
+            }
+
+            int ToSkip = (pageNumber - 1) * pageSize;
+
+            quary = quary.Skip(ToSkip).Take(pageSize);
+
+            return quary;
         }
     }
 

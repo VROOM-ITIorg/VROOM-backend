@@ -1,31 +1,385 @@
-﻿﻿@{
+﻿@using ViewModels.Account
+@{
     Layout = null;
 }
-@model UserLoginVM
-
-
-<html>
+@model LoginViewModel
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
 <head>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Control Panel | Login</title>
+    <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        /* Update root variables with VROOM palette */
+        :root {
+            --primary-color: #eb002b; /* Primary */
+            --primary-light: #ff1a43; /* Primary Light */
+            --primary-dark: #cc0026; /* Primary Dark */
+            /* Neutral colors */
+            --neutral-900: #171717; /* Darkest neutral */
+            --neutral-800: #262626;
+            --neutral-700: #404040;
+            --neutral-600: #525252;
+            --neutral-500: #737373;
+            --neutral-400: #a3a3a3;
+            --neutral-300: #d4d4d4;
+            --neutral-200: #e5e5e5;
+            --neutral-100: #f5f5f5;
+            --neutral-50: #fafafa;
+            /* Semantic colors */
+            --success-color: #22c55e; /* Success */
+            --warning-color: #fbbf24; /* Warning */
+            --danger-color: #ef4444; /* Error */
+            --info-color: #3b82f6; /* Info */
+
+            --light-color: #ffffff;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--neutral-100) 0%, var(--neutral-200) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 1200px;
+            min-height: 80vh;
+            background-color: var(--light-color);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Main Content Styles */
+        .admin-content {
+            flex: 1;
+            padding: 2.5rem;
+            background-color: var(--light-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .admin-content::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 200px;
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+                border-radius: 0 0 50% 50% / 0 0 100px 100px;
+                z-index: 0;
+            }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-title h2 {
+            font-size: 2rem;
+            color: var(--light-color);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .content-search {
+            background-color: var(--light-color);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+            .content-search h2 {
+                color: var(--primary-color);
+                font-weight: 700;
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+
+        /* Login Form Styles */
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .login-card::after {
+                content: '';
+                position: absolute;
+                width: 300px;
+                height: 300px;
+                background: linear-gradient(135deg, rgba(235, 0, 43, 0.1) 0%, rgba(255, 26, 67, 0.1) 100%);
+                border-radius: 50%;
+                bottom: -150px;
+                right: -150px;
+                z-index: -1;
+            }
+
+            .login-card::before {
+                content: '';
+                position: absolute;
+                width: 200px;
+                height: 200px;
+                background: linear-gradient(135deg, rgba(235, 0, 43, 0.1) 0%, rgba(255, 26, 67, 0.1) 100%);
+                border-radius: 50%;
+                top: -100px;
+                left: -100px;
+                z-index: -1;
+            }
+
+        .login-header {
+            margin-bottom: 2.5rem;
+        }
+
+            .login-header h3 {
+                font-size: 2rem;
+                color: var(--neutral-800);
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+
+            .login-header p {
+                color: var(--neutral-600);
+                font-size: 1.1rem;
+            }
+
+        .login-form .form-group {
+            margin-bottom: 1.8rem;
+            text-align: right;
+            position: relative;
+        }
+
+        .login-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--neutral-700);
+            font-weight: 500;
+            font-size: 1.05rem;
+            text-align: start;
+        }
+
+        .login-form input[type="email"],
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border-radius: var(--border-radius);
+            border: 2px solid var(--neutral-200);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--neutral-50);
+        }
+
+            .login-form input[type="email"]:focus,
+            .login-form input[type="password"]:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 4px rgba(235, 0, 43, 0.15);
+                background-color: var(--light-color);
+            }
+
+        .validation-error {
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.8rem;
+            justify-content: flex-start;
+        }
+
+            .form-check input[type="checkbox"] {
+                margin-left: 0.5rem;
+                width: 18px;
+                height: 18px;
+                accent-color: var(--primary-color);
+                margin-right: 0.5rem;
+            }
+
+            .form-check label {
+                margin-bottom: 0;
+                font-size: 0.95rem;
+            }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.85rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: var(--light-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(235, 0, 43, 0.3);
+        }
+
+            .btn-login:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(235, 0, 43, 0.4);
+            }
+
+        .forgot-password {
+            margin-top: 1.5rem;
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+            .forgot-password:hover {
+                color: var(--primary-dark);
+                transform: translateY(-2px);
+            }
+
+        /* Responsive Styles */
+        @@media (max-width: 992px) {
+            .admin-container
+
+        {
+            flex-direction: column;
+            min-height: auto;
+            margin: 2rem;
+        }
+
+        .admin-content {
+            padding: 2rem;
+        }
+
+            .admin-content::before {
+                height: 150px;
+            }
+
+        }
+
+        @@media (max-width: 576px) {
+            .admin-container
+
+        {
+            margin: 1rem;
+        }
+
+        .content-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .content-search {
+            margin-top: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-card {
+            padding: 2rem;
+        }
+
+        .admin-content::before {
+            height: 120px;
+        }
+
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-    <div class="container">
-        <form asp-action="Login" asp-controller="Account" method="post">
-            <div asp-validation-summary="All"></div>
+    <div class="admin-container">
 
-            <div class="mb-3">
-                <label asp-for="Method" class="form-label"></label>
-                <input class="form-control" asp-for="Method">
-                <span asp-validation-for="Method" class="text-danger"></span>
+        <!-- Main Content -->
+        <div class="admin-content">
+            <div class="content-header">
+                <div class="content-title">
+                    <h2>Login Dashboard</h2>
+                </div>
+                <div class="content-search">
+                    <h2>VROOM</h2>
+                </div>
             </div>
+            
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h3>Welcome back</h3>
+                        <p>Please enter your login details</p>
+                    </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input class="form-control" asp-for="Password">
-                <span asp-validation-for="Password" class="text-danger"></span>
+                    <form asp-controller="Account" asp-action="Login" method="post" class="login-form">
+                        <div class="form-group">
+                            <label asp-for="Email"></label>
+                            <input type="email" id="email" asp-for="Email">
+                            <span class="validation-error" id="email-error" asp-validation-for="Email"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Password"></label>
+                            <input id="password" asp-for="Password">
+                            <span class="validation-error" id="password-error" asp-validation-for="Password"></span>
+                        </div>
+
+                        <div class="form-check">
+                            <input type="checkbox" id="rememberMe" asp-for="RememberMe">
+                            <label for="">Remember Me</label>
+                        </div>
+
+                        <button type="submit" class="btn-login">Login</button>
+                        <a href="#" class="forgot-password">Forget Password?</a>
+                    </form>
+
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+   
 </body>
 </html>

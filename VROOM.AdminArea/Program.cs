@@ -3,21 +3,32 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore; // For DbContext
 using VROOM.Repositories;
 using VROOM.Services;
+using VROOM.Data; // For MyDbContext
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Register IMapRepository with MapRepository
-builder.Services.AddHttpClient<IMapRepository, MapRepository>((serviceProvider, client) =>
+// Register MyDbContext with SQL Server
+builder.Services.AddDbContext<MyDbContext>(options =>
+    options.UseLazyLoadingProxies()
+           .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register IMapRepository with MapRepository and configure HttpClient
+builder.Services.AddScoped<IMapRepository, MapRepository>(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     string apiKey = configuration["Radar:ApiKey"];
 
-    // Add the Radar API key to the Authorization header
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey);
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey, "");
+
+    var dbContext = serviceProvider.GetRequiredService<MyDbContext>();
+    return new MapRepository(client, dbContext);
 });
 
 // Register MapService
@@ -29,7 +40,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using VROOM.Data;
+﻿using VROOM.Data;
 using VROOM.Models;
 
 namespace VROOM.Repositories
@@ -29,14 +26,14 @@ namespace VROOM.Repositories
             _dbContext.SaveChanges();
         }
 
-     
+
         public int UpdatePayment(Payment payment)
         {
             _dbContext.Payments.Update(payment);
             return _dbContext.SaveChanges();
         }
 
-        
+
         public void DeletePayment(int id, string modifiedBy)
         {
             var payment = _dbContext.Payments.Find(id);

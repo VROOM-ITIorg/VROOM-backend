@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VROOM.Data;
+﻿using VROOM.Data;
 using VROOM.Models;
 
 /*
@@ -20,14 +15,14 @@ using VROOM.Models;
 
 namespace VROOM.Repositories
 {
-    
-        public class BusinessOwnerManager
+
+    public class BusinessOwnerManager
+    {
+        private readonly MyDbContext _dbContext;
+        public BusinessOwnerManager(MyDbContext dbContext)
         {
-           private readonly MyDbContext _dbContext;
-           public BusinessOwnerManager(MyDbContext dbContext)
-           {
-                _dbContext = dbContext;
-           }
+            _dbContext = dbContext;
+        }
 
 
         public List<BusinessOwner> GetAllBusinessOwners() => _dbContext.BusinessOwners.ToList();
@@ -38,26 +33,26 @@ namespace VROOM.Repositories
 
         public void AddBusinessOwner(BusinessOwner businessOwner)
         {
-              _dbContext.BusinessOwners.Add(businessOwner);
-              _dbContext.SaveChanges();
+            _dbContext.BusinessOwners.Add(businessOwner);
+            _dbContext.SaveChanges();
         }
 
 
         public int UpdateBusinessOwner(BusinessOwner businessOwner)
         {
-              _dbContext.BusinessOwners.Update(businessOwner);
-              return _dbContext.SaveChanges();
+            _dbContext.BusinessOwners.Update(businessOwner);
+            return _dbContext.SaveChanges();
         }
 
 
         public void DeleteBusinessOwner(int id)
         {
-             var selectedBusinessOwner = _dbContext.BusinessOwners.FirstOrDefault(b => b.Id == id);
-             if (selectedBusinessOwner != null)
-             {
-                    _dbContext.BusinessOwners.Remove(selectedBusinessOwner);
-                    _dbContext.SaveChanges();
-             }
+            var selectedBusinessOwner = _dbContext.BusinessOwners.FirstOrDefault(b => b.Id == id);
+            if (selectedBusinessOwner != null)
+            {
+                _dbContext.BusinessOwners.Remove(selectedBusinessOwner);
+                _dbContext.SaveChanges();
+            }
         }
 
 
@@ -84,14 +79,14 @@ namespace VROOM.Repositories
 
 
         public void RemoveRiderFromBusinessOwner(int riderId)
+        {
+            var rider = _dbContext.Riders.FirstOrDefault(r => r.Id == riderId);
+            if (rider != null)
             {
-                var rider = _dbContext.Riders.FirstOrDefault(r => r.Id == riderId);
-                if (rider != null)
-                {
-                    _dbContext.Riders.Remove(rider);
-                    _dbContext.SaveChanges();
-                }
+                _dbContext.Riders.Remove(rider);
+                _dbContext.SaveChanges();
             }
+        }
 
 
     }

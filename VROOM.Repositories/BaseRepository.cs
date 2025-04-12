@@ -1,16 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VROOM.Data;
 
 namespace VROOM.Repositories
 {
     public class BaseRepository<T> where T : class
     {
- 
+
         private readonly MyDbContext context;
         private readonly DbSet<T> _dbSet;
         public BaseRepository(MyDbContext context)
@@ -46,5 +41,5 @@ namespace VROOM.Repositories
         }
     }
 
-  
+
 }

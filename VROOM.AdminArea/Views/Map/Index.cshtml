@@ -1,62 +1,136 @@
-﻿@model VROOM.Models.Map.MapModel
-
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Map Search</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Explorer</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        #map {
-            height: 400px;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .error {
-            color: red;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="~/css/Map.css" rel="stylesheet" />
+    <!-- Polyline decoding script -->
+    <script src="https://unpkg.com/@@mapbox/polyline@1.1.1/src/polyline.js"></script>
 </head>
 <body>
-    <h2>Search for a Location</h2>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-map-marked-alt"></i> Route Explorer</h1>
+        </header>
 
-    <form asp-action="Search" method="post">
-        <div>
-            <label for="locationName">Location Name:</label>
-            <input type="text" id="locationName" name="locationName" value="@Model.LocationName" />
-            <button type="submit">Search</button>
-        </div>
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="error">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <p>@error.ErrorMessage</p>
-                }
+        <div class="card">
+            <div class="search-container">
+                <form asp-action="Route" method="post">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="origin" name="origin" placeholder="Enter origin..." />
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="destination" name="destination" placeholder="Enter destination..." />
+                        </div>
+                        <div class="input-wrapper">
+                            <i class="fas fa-truck"></i>
+                            <input type="number" id="shipmentId" name="shipmentId" placeholder="Shipment ID..." />
+                        </div>
+                        <button type="submit">
+                            <i class="fas fa-globe"></i>
+                            Find Route
+                        </button>
+                    </div>
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="error">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p><i class="fas fa-exclamation-circle"></i> @error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+                </form>
             </div>
-        }
-    </form>
 
-    @if (Model.Latitude != 0 && Model.Longitude != 0)
-    {
-        <h3>Results</h3>
-        <p><strong>Location:</strong> @Model.LocationName</p>
-        <p><strong>Latitude:</strong> @Model.Latitude</p>
-        <p><strong>Longitude:</strong> @Model.Longitude</p>
+            @if (Model is VROOM.Models.Route routeModel && routeModel.Id != 0) // Check if a Route is passed
+            {
+                <div class="results">
+                    <h2>Optimized Route Found</h2>
+                    <div class="location-details">
+                        <div class="detail-item">
+                            <h3>Route ID</h3>
+                            <p><i class="fas fa-id-badge"></i> @routeModel.Id</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>Origin</h3>
+                            <p><i class="fas fa-map-pin"></i> @routeModel.Origin</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>Destination</h3>
+                            <p><i class="fas fa-map-pin"></i> @routeModel.Destination</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>Start</h3>
+                            <p><i class="fas fa-clock"></i> @routeModel.Start.ToString("g")</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>End</h3>
+                            <p><i class="fas fa-clock"></i> @routeModel.End.ToString("g")</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>Duration</h3>
+                            <p><i class="fas fa-hourglass-half"></i> @(routeModel.End - routeModel.Start).TotalMinutes.ToString("F2") minutes</p>
+                        </div>
+                        <div class="detail-item">
+                            <h3>Shipment ID</h3>
+                            <p><i class="fas fa-truck"></i> @routeModel.ShipmentID</p>
+                        </div>
+                    </div>
 
-        <div id="map"></div>
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-overlay">
+                            <i class="fas fa-info-circle"></i> Drag to move, scroll to zoom
+                        </div>
+                    </div>
+                </div>
 
-        <script>
-            var map = L.map('map').setView([@Model.Latitude, @Model.Longitude], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            L.marker([@Model.Latitude, @Model.Longitude])
-                .addTo(map)
-                .bindPopup('@Model.LocationName')
-                .openPopup();
-        </script>
-    }
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Decode the polyline from Radar API using the global 'polyline' object
+                        var encodedPolyline = '@Html.Raw(routeModel.Waypoints)';
+                        var coordinates = polyline.decode(encodedPolyline);
+
+                        // Create the map, centered on the first coordinate
+                        var map = L.map('map').setView(coordinates[0], 13);
+
+                        // Add OpenStreetMap tiles
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+
+                        // Add the polyline to the map
+                        var polylineLayer = L.polyline(coordinates, { color: 'blue', weight: 4 }).addTo(map);
+
+                        // Add markers for origin and destination
+                        var originMarker = L.marker(coordinates[0]).addTo(map)
+                            .bindPopup('<strong>Origin: @routeModel.Origin</strong>');
+                        var destMarker = L.marker(coordinates[coordinates.length - 1]).addTo(map)
+                            .bindPopup('<strong>Destination: @routeModel.Destination</strong>').openPopup();
+
+                        // Fit the map to the polyline bounds
+                        map.fitBounds(polylineLayer.getBounds());
+
+                        // Ensure map renders correctly
+                        setTimeout(function() {
+                            map.invalidateSize();
+                        }, 100);
+                    });
+                </script>
+            }
+        </div>
+
+        <div class="attribution">
+            <p>Maps powered by <a href="https://leafletjs.com/">Leaflet</a> | © OpenStreetMap contributors</p>
+        </div>
+    </div>
 </body>
 </html>

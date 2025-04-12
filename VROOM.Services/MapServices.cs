@@ -31,5 +31,22 @@ namespace VROOM.Services
                 throw new Exception($"Error in MapService: {ex.Message}", ex);
             }
         }
+
+        public async Task<Route> FetchOptimizedRouteAsync(string origin, string destination, int shipmentId)
+        {
+            if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
+            {
+                throw new ArgumentException("Origin and destination cannot be empty.");
+            }
+
+            try
+            {
+                return await _mapRepository.GetOptimizedRouteAsync(origin, destination, shipmentId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching optimized route in MapService: {ex.Message}", ex);
+            }
+        }
     }
 }

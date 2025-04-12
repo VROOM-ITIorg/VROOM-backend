@@ -1,23 +1,118 @@
 [
   {
-    "ContainingType": "VROOM.API.Controllers.WeatherForecastController",
-    "Method": "Get",
-    "RelativePath": "WeatherForecast",
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "GetAssignedOrders",
+    "RelativePath": "api/Rider/{riderId}/orders",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
+    "Parameters": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[VROOM.API.WeatherForecast, VROOM.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
+        "Name": "riderId",
+        "Type": "System.Int32",
+        "IsRequired": true
       }
     ],
-    "EndpointName": "GetWeatherForecast"
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "AcceptOrder",
+    "RelativePath": "api/Rider/{riderId}/orders/{orderId}/accept",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "riderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "RejectOrder",
+    "RelativePath": "api/Rider/{riderId}/orders/{orderId}/reject",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "riderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "UpdateDeliveryStatus",
+    "RelativePath": "api/Rider/{riderId}/orders/{orderId}/status",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "riderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "newState",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "GetRiderProfile",
+    "RelativePath": "api/Rider/{riderId}/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "riderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "VROOM.Controllers.RiderController",
+    "Method": "RegisterRider",
+    "RelativePath": "api/Rider/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "rider",
+        "Type": "VROOM.Models.Rider",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

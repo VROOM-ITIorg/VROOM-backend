@@ -7,3 +7,7 @@ C:\Users\PC\Source\Repos\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebasset
 C:\Users\PC\Source\Repos\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\PC\Source\Repos\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\PC\Source\Repos\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\ITI\Documents\Work\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\ITI\Documents\Work\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\ITI\Documents\Work\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\ITI\Documents\Work\VROOM-backend\VROOM.API\obj\Debug\net8.0\staticwebassets.build.json

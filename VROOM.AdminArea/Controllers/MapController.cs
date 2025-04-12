@@ -21,14 +21,14 @@ namespace VROOM.Controllers
             return View(new MapModel());
         }
 
-        // POST: /Map/Search
+        // POST: /Map/Route
         [HttpPost]
-        public async Task<IActionResult> Search(string locationName)
+        public async Task<IActionResult> Route(string origin, string destination, int shipmentId)
         {
             try
             {
-                var mapModel = await _mapService.FetchCoordinatesAsync(locationName);
-                return View("Index", mapModel);
+                var route = await _mapService.FetchOptimizedRouteAsync(origin, destination, shipmentId);
+                return View("Route", route);
             }
             catch (Exception ex)
             {

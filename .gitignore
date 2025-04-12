@@ -11,6 +11,17 @@ wwwroot/
 *.user
 *.vs/
 *.vscode/
-
+VROOM.Services/obj/
+VROOM.Services/bin/
+ViewModels/obj/
+ViewModels/bin/
+Models/obj/
+Models/bin/
+Repository/bin/
+Repository/obj/
+Data Layer/bin/
+Data Layer/obj/
+API/bin/
+API/obj/
 appsettings*.json
 secrets.json

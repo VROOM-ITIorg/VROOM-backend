@@ -56,10 +56,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "root",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
 
+app.MapControllerRoute(
+	name: "default",
+	pattern: "{Controller=account}/{Action=login}/{id?}");
 
 
 app.Run();

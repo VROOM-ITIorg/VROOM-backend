@@ -1,8 +1,9 @@
-﻿@using VROOM.ViewModels
+﻿@using VROOM.Models
+@using VROOM.ViewModels
 @using ViewModels
 @{
     ViewBag.Title = "Riders List";
-    var riders = ViewData["Riders"] as PaginationViewModel<RiderViewModel>;
+    var riders = ViewData["Riders"] as PaginationViewModel<AdminCreateRiderVM>;
     var totalPages = (int)Math.Ceiling((double)riders.Total / riders.PageSize);
     var currentPage = riders.PageNumber;
     var start = ((riders.PageNumber - 1) * riders.PageSize) + 1;
@@ -16,7 +17,7 @@
             <span class="text-primary">Riders</span>
             <span class="text-secondary"> Management</span>
         </h3>
-        <a href="/Rider/Create" class="btn btn-primary px-4 d-flex align-items-center">
+        <a asp-controller="Rider" asp-action="Create" class="btn btn-primary px-4 d-flex align-items-center">
             <i class="bi bi-plus-circle me-2"></i> Add New Rider
         </a>
     </div>
@@ -36,10 +37,9 @@
                 </div>
                 <div class="col-md-2 mb-3 mb-md-0">
                     <label class="form-label fw-semibold text-secondary">Status</label>
-                    <select class="form-select" id="statusFilter">
-                        <option value="all">All Status</option>
-                        <option value="active" selected>Active</option>
-                        <option value="inactive">Inactive</option>
+                    <select class="form-select" id="statusFilter" name="status" asp-items="Html.GetEnumSelectList<RiderStatusEnum>()">
+                        <option value="-1" selected>All Status</option>
+
                     </select>
                 </div>
                 <div class="col-md-3 mb-3 mb-md-0">
@@ -80,10 +80,10 @@
                 <div class="card h-100 border-0 rider-card">
                     <div class="position-relative">
                         <div class="rider-image-container">
-                            <img src="@rider.ProfilePicture" class="rider-image" alt="@rider.ProfilePicture">
+                            <img src="@rider.ImagePath" class="rider-image" alt="@rider.ImagePath">
                         </div>
                         <div class="rider-status">
-                            <span class="badge bg-success px-3 py-2 rounded-pill">Active</span>
+                            <span class="badge @(rider.Status == RiderStatusEnum.Unavailable ? "bg-danger" : rider.Status == RiderStatusEnum.OnDelivery ? "bg-warning" : rider.Status == RiderStatusEnum.Available ? "bg-success" : "")">@rider.Status</span>
                         </div>
                     </div>
                     <div class="card-body pt-4">
@@ -99,21 +99,21 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-3">
-                        <div class="d-flex justify-content-between">
-                            <a href="/Rider/Details/@rider.Id" class="btn btn-outline-primary px-3">
-                                <i class="bi bi-eye me-1"></i> View
-                            </a>
-                            <div>
-                                <a href="/Rider/Edit/@rider.Id" class="btn btn-outline-warning me-1">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a href="/Rider/Delete/@rider.Id" class="btn btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    @* <div class="card-footer bg-white border-0 pt-0 pb-3"> *@
+                    @*     <div class="d-flex justify-content-between"> *@
+                    @*         <a href="/Rider/Details/@rider.UserID" class="btn btn-outline-primary px-3"> *@
+                    @*             <i class="bi bi-eye me-1"></i> View *@
+                    @*         </a> *@
+                    @*         <div> *@
+                    @*             <a href="/Rider/Edit/@rider.UserID" class="btn btn-outline-warning me-1"> *@
+                    @*                 <i class="bi bi-pencil-square"></i> *@
+                    @*             </a> *@
+                    @*             <a href="/Rider/Delete/@rider.UserID" class="btn btn-outline-danger"> *@
+                    @*                 <i class="bi bi-trash"></i> *@
+                    @*             </a> *@
+                    @*         </div> *@
+                    @*     </div> *@
+                    @* </div> *@
                 </div>
             </div>
         }
@@ -157,6 +157,7 @@
 </div>
 
 <style>
+
     /* Card Styles (from your original) */
     .rider-card {
         transition: all 0.3s ease;

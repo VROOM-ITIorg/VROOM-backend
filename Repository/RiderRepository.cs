@@ -13,53 +13,54 @@ namespace VROOM.Repositories
         
         public RiderRepository(VroomDbContext options) : base(options) { }
 
-        
-        //public PaginationViewModel<RiderViewModel> Search(
-        //    string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
-        //{
 
-        //    var builder = PredicateBuilder.New<Rider>();
+        public PaginationViewModel<AdminCreateRiderVM> Search( int status ,
+            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4 )
+        {
 
-        //    var old = builder;
+            var builder = PredicateBuilder.New<Rider>();
 
-        //    if (!Name.IsNullOrEmpty())
-        //        builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
+            var old = builder;
 
-        //    if (!PhoneNumber.IsNullOrEmpty())
-        //        builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
+            if (!Name.IsNullOrEmpty())
+                builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
 
-
-
-        //    if (old == builder)
-        //        builder = null;
+            if (!PhoneNumber.IsNullOrEmpty())
+                builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
+            if (status >= 0)
+                builder = builder.And(i => i.Status == (RiderStatusEnum) status);
 
 
+            if (old == builder)
+                builder = null;
 
-        //    var count = base.GetList(builder).Count();
 
-        //    var resultAfterPagination = base.Get(
-        //         filter: builder,
-        //         pageSize: pageSize,
-        //         pageNumber: pageNumber)
-        //         .Include(r => r.User)
-        //         .ToList()
-        //         .Select(p => p.ToDetailsVModel())
-        //         .ToList();
 
-        //    return new PaginationViewModel<RiderViewModel>
-        //    {
-        //        Data = resultAfterPagination,
-        //        PageNumber = pageNumber,
-        //        PageSize = pageSize,
-        //        Total = count
-        //    };
+            var count = base.GetList(builder).Count();
 
-        //}
+            var resultAfterPagination = base.Get(
+                 filter: builder,
+                 pageSize: pageSize,
+                 pageNumber: pageNumber)
+                 .Include(r => r.User)
+                 .ToList()
+                 .Select(p => p.ToDetailsVModel())
+                 .ToList();
 
-        //public Rider GetBusinessOwnerByRiderId(int id)
-        //{
-        //    return dbcontext.Riders.Where(i => i.Id == id).FirstOrDefault();
+            return new PaginationViewModel<AdminCreateRiderVM>
+            {
+                Data = resultAfterPagination,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Total = count
+            };
 
-        //}
+        }
+
+        public Rider GetBusinessOwnerByRiderId(string id)
+        {
+            return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
+
+        }
     }
 }

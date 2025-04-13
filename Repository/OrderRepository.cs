@@ -61,13 +61,17 @@ namespace VROOM.Repositories
 
             return order.Result.OrderPrice + order.Result.DeliveryPrice;
         }
-
-        public string TrackOrder(int orderId)
+        public async Task<List<Order>> GetOrdersByStatusAsync(OrderStateEnum status)
         {
-            var order = GetAsync(orderId);
-
-            return order?.Result.State.ToString() ?? "Order not found";
+            return await dbSet.Where(o => o.State == status).ToListAsync();
         }
+
+        //public string TrackOrder(int orderId)
+        //{
+        //    var order = GetAsync(orderId);
+
+        //    return order?.Result.State.ToString() ?? "Order not found";
+        //}
 
         // Add the getOrderWithBussinessOwnerID
         //public List<Order> getOrderWithBussinessOwnerID(int riderId)

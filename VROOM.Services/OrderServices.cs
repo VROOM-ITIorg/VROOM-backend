@@ -1,5 +1,8 @@
-﻿using VROOM.Models;
+﻿using System.Threading.Tasks;
+using ViewModels.User;
+using VROOM.Models;
 using VROOM.Repositories;
+using VROOM.Repository;
 using VROOM.ViewModels;
 
 namespace VROOM.Services
@@ -40,17 +43,25 @@ namespace VROOM.Services
         }
 
         private OrderRepository orderRepository;
+        private NotificationService notificationService;
+        private CustomerServices customerService;
 
-        public OrderService(OrderRepository _orderRepository)
+        public OrderService(OrderRepository _orderRepository, NotificationService _notificationService, CustomerServices _customerService)
         {
             orderRepository = _orderRepository;
+            notificationService = _notificationService;
+            customerService = _customerService;
         }
 
-        public void CreateOrder(OrderCreateViewModel orderVM)
+        public async Task CreateOrder(OrderCreateViewModel orderVM )
         {
+            // We will check if the customer is exists 
+
+            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = orderVM.BusinessID});
+
             var order = new Order
             {
-                CustomerID = orderVM.CustomerID,
+                CustomerID = customer.UserID,
                 RiderID = orderVM.RiderID,
                 ItemsType = orderVM.ItemsType,
                 Title = orderVM.Title,
@@ -67,7 +78,10 @@ namespace VROOM.Services
 
             orderRepository.Add(order);
             orderRepository.CustomSaveChanges();
+            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id,"Success");
+            await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
+            
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)
@@ -87,6 +101,8 @@ namespace VROOM.Services
                 Date = order.Date
             };
         }
+
+
         // We need to AssignOrderToRider with two diffrenet way (Manually and Automatically)
 
         // Assign an Order to a Rider
@@ -102,13 +118,41 @@ namespace VROOM.Services
         // Calculate Total Revenue
         public decimal CalculateTotalRevenue(int orderId) => orderRepository.SumOrderRevenue(orderId);
 
-        // Check Order Status
-        public string GetOrderState(int orderId)
+        // update Order Status
+        public async Task<Order> UpdateOrderState(int orderID , OrderStateEnum orderState)
         {
-            var orderStatus = orderRepository.TrackOrder(orderId);
+            Order order = await orderRepository.GetAsync(orderID);
+            if (order == null || order.IsDeleted) return null;
 
-            return orderStatus;
+            order.State = orderState;
 
+            orderRepository.Update(order);
+            orderRepository.CustomSaveChanges();
+
+            return order;
+
+        }
+
+        // cron jobs
+        public async Task TrackOrdersAsync()
+        {
+            try
+            {
+                var orders =  orderRepository.GetOrdersByStatusAsync(OrderStateEnum.Pending).Result;
+                foreach (var order in orders)
+                {
+                    if (order.ModifiedAt.HasValue && order.ModifiedAt.Value.AddMinutes(30) <= DateTime.UtcNow)
+                    {
+                        await UpdateOrderState(order.Id, OrderStateEnum.Shipped);
+                        // Here we will send notification to the bussiness owner tell him that the oreder been too long in pending state
+                        Console.WriteLine($"Order {order.Id} updated to Shipped.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error tracking orders: {ex.Message}");
+            }
         }
 
         // filter by order status

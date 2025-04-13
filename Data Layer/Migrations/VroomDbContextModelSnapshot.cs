@@ -326,6 +326,9 @@ namespace VROOM.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderID")
+                        .HasColumnType("int");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -393,7 +396,6 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RiderID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("State")
@@ -965,8 +967,7 @@ namespace VROOM.Data.Migrations
                     b.HasOne("VROOM.Models.Rider", "Rider")
                         .WithMany("OrdersHandled")
                         .HasForeignKey("RiderID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
 

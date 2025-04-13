@@ -9,7 +9,7 @@ namespace VROOM.Repositories
     {
 
         protected readonly VroomDbContext context;
-        private readonly DbSet<T> dbSet;
+        protected readonly DbSet<T> dbSet;
         public BaseRepository(VroomDbContext _context)
         {
             context = _context;

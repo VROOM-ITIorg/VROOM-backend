@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VROOM.Data.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:Data Layer/Migrations/20250408164016_V1.cs
-    public partial class V1 : Migration
-========
     public partial class test : Migration
->>>>>>>> aafee391ab9d3070f9527627cc6e9e1b4d498d41:Data Layer/Migrations/20250411211027_init.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

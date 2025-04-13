@@ -9,6 +9,8 @@ using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.Services;
+using System.Text.Json.Serialization;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,13 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
     logging.SetMinimumLevel(LogLevel.Information);
 });
+
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
@@ -54,7 +63,6 @@ builder.Services.AddDbContext<VroomDbContext>(options =>
         .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
         .UseLazyLoadingProxies());
 
-
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<VroomDbContext>()
@@ -62,7 +70,16 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
+
+// Add Hangfire server to process background jobs
+builder.Services.AddHangfireServer();
 //builder.Services.AddDbContext<VroomDbContext>
 //    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddIdentity<User, IdentityRole>()
@@ -71,9 +88,19 @@ builder.Services.AddScoped(typeof(RiderRepository));
 builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
+builder.Services.AddScoped<OrderRiderRepository>();
+builder.Services.AddScoped<CustomerRepository>();
+builder.Services.AddScoped<CustomerServices>();
+
+builder.Services.AddScoped<BusinessOwnerRepository>();
+builder.Services.AddScoped<BusinessOwnerService>();
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<NotificationService>();
+
+
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];
@@ -103,10 +130,20 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5169/)
+    });
+}
+
 app.UseHttpsRedirection();
 
-
+// Custom middleware to log request body for /api/user/register
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
@@ -120,8 +157,8 @@ app.Use(async (context, next) =>
 });
 
 
-app.UseAuthentication();
-app.UseAuthorization();
+//app.UseAuthentication();
+//app.UseAuthorization();
 
 // Enable Swagger middleware
 app.UseSwagger();
@@ -134,9 +171,22 @@ app.UseSwaggerUI(c =>
 
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseHangfireDashboard();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
+
+
+// Schedule the recurring job when the application starts
+RecurringJob.AddOrUpdate<OrderService>(
+    "track-order-job",
+    service => service.TrackOrdersAsync(), // Replace with actual job
+    "*/30 * * * * *"); // Every 30 seconds
+
 
 // Seed roles
 using (var scope = app.Services.CreateScope())

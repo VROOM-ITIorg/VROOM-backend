@@ -28,7 +28,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
@@ -63,29 +62,23 @@ builder.Services.AddDbContext<VroomDbContext>(options =>
         .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
         .UseLazyLoadingProxies());
 
-
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<VroomDbContext>()
     .AddDefaultTokenProviders();
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-//builder.Services.AddDbContext<VroomDbContext>
-//    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
-//builder.Services.AddIdentity<User, IdentityRole>()
-//    .AddEntityFrameworkStores<VroomDbContext>();
-builder.Services.AddScoped(typeof(RiderRepository));
-builder.Services.AddScoped(typeof(RoleRepository));
-builder.Services.AddScoped(typeof(AccountManager));
-builder.Services.AddScoped(typeof(OrderRepository));
-builder.Services.AddScoped(typeof(OrderService));
+// Add repositories and services
+builder.Services.AddScoped<RiderRepository>();
+builder.Services.AddScoped<RoleRepository>();
+builder.Services.AddScoped<AccountManager>();
+builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
-
+builder.Services.AddScoped<BusinessOwnerRepository>(); // Ensure this is added for BusinessOwnerService
+builder.Services.AddScoped<BusinessOwnerService>();   // Ensure this is added
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];
@@ -115,10 +108,20 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5169/)
+    });
+}
+
 app.UseHttpsRedirection();
 
-
+// Custom middleware to log request body for /api/user/register
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
@@ -131,24 +134,14 @@ app.Use(async (context, next) =>
     await next();
 });
 
-
+// Configure middleware pipeline in the correct order
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Enable Swagger middleware
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+app.UseEndpoints(endpoints =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
-    c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
+    endpoints.MapControllers();
 });
-//app.UseAuthorization();
-
-app.UseStaticFiles();
-app.UseRouting();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=index}");
 
 // Seed roles
 using (var scope = app.Services.CreateScope())

@@ -13,7 +13,7 @@ namespace VROOM.Repositories
         
         public RiderRepository(VroomDbContext options) : base(options) { }
 
-        
+
         //public PaginationViewModel<RiderViewModel> Search(
         //    string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
         //{
@@ -61,5 +61,14 @@ namespace VROOM.Repositories
         //    return dbcontext.Riders.Where(i => i.Id == id).FirstOrDefault();
 
         //}
+
+
+        public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)
+        {
+            return await context.Riders
+                .Include(r => r.User)
+                .Where(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted)
+                .ToListAsync();
+        }
     }
 }

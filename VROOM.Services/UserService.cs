@@ -408,6 +408,9 @@ namespace VROOM.Services
                 Role = role
             };
         }
+
+
+       
     }
 
     public record RegisterRequest(

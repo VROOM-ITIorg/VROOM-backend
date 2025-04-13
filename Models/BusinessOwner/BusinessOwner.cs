@@ -5,7 +5,7 @@ using VROOM.Models;
 
 namespace VROOM.Models
 {
-    public class BusinessOwner 
+    public class BusinessOwner
     {
 
         public string UserID { get; set; }

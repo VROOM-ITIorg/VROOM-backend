@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using VROOM.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 
@@ -32,7 +33,7 @@ namespace VROOM.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data Source = ROZIE\\MSSQLSERVER01; Initial Catalog = Vroom; Integrated Security = True; TrustServerCertificate = True");
+            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("workstation id=VroomDB.mssql.somee.com;packet size=4096;user id=shams22_SQLLogin_1;pwd=pv93y2dob4;data source=VroomDB.mssql.somee.com;persist security info=False;initial catalog=VroomDB;TrustServerCertificate=True");
 
             base.OnConfiguring(optionsBuilder);
         }

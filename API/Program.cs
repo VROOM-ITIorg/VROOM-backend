@@ -10,6 +10,7 @@ using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,7 +72,16 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
+
+// Add Hangfire server to process background jobs
+builder.Services.AddHangfireServer();
 //builder.Services.AddDbContext<VroomDbContext>
 //    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddIdentity<User, IdentityRole>()
@@ -81,6 +91,8 @@ builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
+builder.Services.AddScoped<CustomerRepository>();
+builder.Services.AddScoped<CustomerServices>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
@@ -155,9 +167,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
+
+
+// Schedule the recurring job when the application starts
+RecurringJob.AddOrUpdate<OrderService>(
+    "track-order-job",
+    service => service.TrackOrdersAsync(), // Replace with actual job
+    "*/30 * * * * *"); // Every 30 seconds
+
 
 // Seed roles
 using (var scope = app.Services.CreateScope())

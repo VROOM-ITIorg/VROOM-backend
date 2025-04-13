@@ -32,7 +32,6 @@ namespace VROOM.Services
         private readonly UserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        //private readonly SignInManager<User> _signInManager;
         public BusinessOwnerService(
             Microsoft.AspNetCore.Identity.UserManager<User> _userManager,
             BusinessOwnerRepository _businessOwnerRepo,
@@ -341,7 +340,133 @@ namespace VROOM.Services
                 return null;
             }
         }
+        
+          public async Task<Result<List<RiderVM>>> GetRiders()
+        {
+            try
+            {
+                // Extract Business Owner ID from the HTTP context
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Business Owner ID not found in token.");
+                    return Result<List<RiderVM>>.Failure("Business Owner ID not found in token.");
+                }
+
+                // Verify Business Owner exists
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                    return Result<List<RiderVM>>.Failure("Business Owner not found.");
+                }
+
+                // Verify the caller is a Business Owner
+                var roles = await userManager.GetRolesAsync(businessOwner.User);
+                if (!roles.Contains(RoleConstants.BusinessOwner))
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                    return Result<List<RiderVM>>.Failure("Caller is not a Business Owner.");
+                }
+
+                // Fetch riders associated with the Business Owner
+                var riders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+
+                // Map riders to RiderVM
+                var riderVMs = riders.Select(r => new RiderVM
+                {
+                    UserID = r.UserID,
+                    Name = r.User.Name,
+                    Email = r.User.Email,
+                    BusinessID = r.BusinessID,
+                    VehicleType = r.VehicleType,
+                    VehicleStatus = r.VehicleStatus,
+                    ExperienceLevel = r.ExperienceLevel,
+                    Location = new LocationDto
+                    {
+                        Lat = r.Lat,
+                        Lang = r.Lang,
+                        Area = r.Area
+                    },
+                    Status = r.Status
+                }).ToList();
+
+                _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
+                return Result<List<RiderVM>>.Success(riderVMs);
+            }
+            catch (Exception ex)
+            {
+              //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
+                return Result<List<RiderVM>>.Failure("An error occurred while retrieving riders.");
+            }
+        }
+
+          public async Task<Result<List<CustomerVM>>> GetCustomers()
+        {
+            try
+            {
+                // Extract Business Owner ID from the HTTP context
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    _logger.LogWarning("Failed to retrieve customers: Business Owner ID not found in token.");
+                    return Result<List<CustomerVM>>.Failure("Business Owner ID not found in token.");
+                }
+
+                // Verify Business Owner exists
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning("Failed to retrieve customers: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                    return Result<List<CustomerVM>>.Failure("Business Owner not found.");
+                }
+
+                // Verify the caller is a Business Owner
+                var roles = await userManager.GetRolesAsync(businessOwner.User);
+                if (!roles.Contains(RoleConstants.BusinessOwner))
+                {
+                    _logger.LogWarning("Failed to retrieve customers: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                    return Result<List<CustomerVM>>.Failure("Caller is not a Business Owner.");
+                }
+
+                // Fetch customers who have placed orders managed by the Business Owner's riders
+                var customers = await _userRepository.GetCustomersByBusinessOwnerIdAsync(businessOwnerId);
+
+                // Map customers to CustomerVM
+                var customerVMs = new List<CustomerVM>();
+                foreach (var customer in customers)
+                {
+                    var customerRoles = await userManager.GetRolesAsync(customer);
+                    if (customerRoles.Contains(RoleConstants.Customer))
+                    {
+                        customerVMs.Add(new CustomerVM
+                        {
+                            UserID = customer.Id,
+                            Name = customer.Name,
+                            Email = customer.Email,
+                            Location = customer.Address != null ? new LocationDto
+                            {
+                                Lat = customer.Address.Lat,
+                                Lang = customer.Address.Lang,
+                                Area = customer.Address.Area
+                            } : null
+                        });
+                    }
+                }
+
+                _logger.LogInformation("Successfully retrieved {CustomerCount} customers for Business Owner with ID {BusinessOwnerId}.", customerVMs.Count, businessOwnerId);
+                return Result<List<CustomerVM>>.Success(customerVMs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving customers for Business Owner with ID ");
+                return Result<List<CustomerVM>>.Failure("An error occurred while retrieving customers.");
+            }
+        }
 
     }
 }

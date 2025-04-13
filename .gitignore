@@ -24,5 +24,12 @@ Data Layer/bin/
 Data Layer/obj/
 API/bin/
 API/obj/
+*.dll
+*.pdb
+*.cache
+
+
+
+
 appsettings*.json
 secrets.json

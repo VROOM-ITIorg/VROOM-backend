@@ -1,6 +1,19 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
+        "projectName": "VROOM.Data",
+        "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
+        "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\obj\\",
+=======
     "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {}
   },
   "projects": {
@@ -12,12 +25,17 @@
         "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
         "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\obj\\",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+<<<<<<< HEAD
+          "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
           "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -32,8 +50,13 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj"
+=======
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
               }
             }
           }
@@ -127,6 +150,16 @@
         }
       }
     },
+<<<<<<< HEAD
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj",
+        "projectName": "VROOM.Models",
+        "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj",
+        "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\obj\\",
+=======
     "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -135,12 +168,17 @@
         "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
         "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\obj\\",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+<<<<<<< HEAD
+          "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
           "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -246,6 +284,16 @@
         }
       }
     },
+<<<<<<< HEAD
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
+        "projectName": "VROOM.Repository",
+        "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
+        "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\obj\\",
+=======
     "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -254,12 +302,17 @@
         "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
         "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\obj\\",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+<<<<<<< HEAD
+          "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
           "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -274,6 +327,16 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Data Layer\\VROOM.Data.csproj"
+              },
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj"
+              },
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+=======
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Data Layer\\VROOM.Data.csproj"
               },
@@ -282,6 +345,7 @@
               },
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
               }
             }
           }
@@ -355,6 +419,16 @@
         }
       }
     },
+<<<<<<< HEAD
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj",
+        "projectName": "ViewModels",
+        "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj",
+        "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\obj\\",
+=======
     "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -363,12 +437,17 @@
         "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
         "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\obj\\",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+<<<<<<< HEAD
+          "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
           "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -383,8 +462,13 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Models\\VROOM.Models.csproj"
+=======
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Models\\VROOM.Models.csproj"
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
               }
             }
           }
@@ -458,6 +542,16 @@
         }
       }
     },
+<<<<<<< HEAD
+    "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
+        "projectName": "VROOM.Services",
+        "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
+        "packagesPath": "C:\\Users\\mmss9\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\VROOM.Services\\obj\\",
+=======
     "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -466,12 +560,17 @@
         "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\VROOM.Services.csproj",
         "packagesPath": "C:\\Users\\EL-YaMaMa\\.nuget\\packages\\",
         "outputPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\VROOM.Services\\obj\\",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
+<<<<<<< HEAD
+          "C:\\Users\\mmss9\\AppData\\Roaming\\NuGet\\NuGet.Config",
+=======
           "C:\\Users\\EL-YaMaMa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -486,11 +585,19 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
+<<<<<<< HEAD
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\Repository\\VROOM.Repository.csproj"
+              },
+              "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
+                "projectPath": "C:\\Users\\mmss9\\Desktop\\Final Project\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+=======
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\Repository\\VROOM.Repository.csproj"
               },
               "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj": {
                 "projectPath": "D:\\Programming\\ITI\\finalProject\\VROOM-backend-main\\newestProject\\VROOM-backend\\ViewModels\\ViewModels.csproj"
+>>>>>>> ba565002821d3f27f23ae9dc840ef2e24717907b
               }
             }
           }

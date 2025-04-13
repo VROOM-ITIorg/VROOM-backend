@@ -29,7 +29,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
@@ -63,7 +62,6 @@ builder.Services.AddDbContext<VroomDbContext>(options =>
     options
         .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
         .UseLazyLoadingProxies());
-
 
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -132,10 +130,20 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5169/)
+    });
+}
+
 app.UseHttpsRedirection();
 
-
+// Custom middleware to log request body for /api/user/register
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")

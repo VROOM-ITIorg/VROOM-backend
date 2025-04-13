@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using VROOM.Data;
@@ -188,6 +187,28 @@ namespace VROOM.Repository
         public async Task SaveChangesAsync()
         {
             await context.SaveChangesAsync();
+        }
+       
+
+        public async Task<List<User>> GetCustomersByBusinessOwnerIdAsync(string businessOwnerId)
+        {
+            // Find riders associated with the Business Owner
+            var riderIds = await context.Riders
+                .Where(r => r.BusinessID == businessOwnerId)
+                .Select(r => r.UserID)
+                .ToListAsync();
+
+            // Find orders assigned to these riders
+            var customerIds = await context.Orders
+                .Where(o => o.RiderID != null && riderIds.Contains(o.RiderID) && !o.IsDeleted)
+                .Select(o => o.CustomerID)
+                .Distinct()
+                .ToListAsync();
+
+            // Fetch customers based on the customer IDs
+            return await context.Users
+                .Where(u => customerIds.Contains(u.Id) && !u.IsDeleted)
+                .ToListAsync();
         }
     }
 }

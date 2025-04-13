@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using static VROOM.Services.BusinessOwnerService;
 using VROOM.Services;
 using VROOM.ViewModels;
@@ -10,6 +10,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "BusinessOwner")]
     public class BusinessOwnerController : Controller
     {
         private readonly BusinessOwnerService _businessOwnerService;
@@ -94,6 +95,28 @@ namespace API.Controllers
 
         }
 
+        
+        [HttpGet("riders")]
+        public async Task<IActionResult> GetRiders()
+        {
+            var result = await _businessOwnerService.GetRiders();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
+        }
+
+        [HttpGet("customers")]
+        public async Task<IActionResult> GetCustomers()
+        {
+            var result = await _businessOwnerService.GetCustomers();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
+        }
 
     }
 

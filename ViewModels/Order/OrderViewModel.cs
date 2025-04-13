@@ -39,8 +39,12 @@ namespace VROOM.ViewModels
     }
     public class OrderCreateViewModel
     {
-        public string CustomerID { get; set; }
-        public string RiderID { get; set; }
+        // Edit the customerID to CustomerInfo like the username of the customer as it is uniqe then in the orderController 
+        public string? CustomerID { get; set; }
+        public string BusinessID { get; set; } // this will be a token 
+        public string? RiderID { get; set; }
+        public string? CustomerUsername { get; set; } // search for dropdown list
+        public string? CustomerPhoneNumber { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public bool IsBreakable { get; set; }

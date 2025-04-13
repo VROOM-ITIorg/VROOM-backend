@@ -9,7 +9,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
-using ViewModels.Rider;
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Models.Dtos;
@@ -21,43 +20,328 @@ namespace VROOM.Services
 {
     public class BusinessOwnerService
     {
+        //private readonly MyDbContext businessOwnerRepo;
         private readonly ILogger<BusinessOwnerService> _logger;
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> userManager;
         private readonly BusinessOwnerRepository businessOwnerRepo;
         private readonly UserService userService;
         private readonly OrderRepository orderRepository;
         private readonly RiderRepository riderRepository;
+        private readonly OrderRiderRepository orderRiderRepository;
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly UserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserRepository _userRepository; // New dependency
 
         public BusinessOwnerService(
             Microsoft.AspNetCore.Identity.UserManager<User> _userManager,
             BusinessOwnerRepository _businessOwnerRepo,
             OrderRepository _orderRepository,
-            RiderRepository _riderRepository,
-            RoleManager<IdentityRole> roleManager,
+            RiderRepository _riderRepository
+            ,
+            RoleManager<IdentityRole> roleManager
+            ,
             UserService userService,
-   
-            ILogger<BusinessOwnerService> logger,
-            IHttpContextAccessor httpContextAccessor,
-            UserRepository userRepository) // Add UserRepository to constructor
+
+
+            OrderRiderRepository orderRiderRepository,
+             ILogger<BusinessOwnerService> logger,
+              IHttpContextAccessor httpContextAccessor
+
+            )
         {
             userManager = _userManager;
             businessOwnerRepo = _businessOwnerRepo;
             orderRepository = _orderRepository;
             riderRepository = _riderRepository;
             _roleManager = roleManager;
-      
+            this.orderRiderRepository = orderRiderRepository;
             _userService = userService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
-            _userRepository = userRepository;
         }
 
+
+        public bool UpdateBusinessRegistration(BusinessOwner updatedBusinessInfo)
+        {
+            var existingBusiness = businessOwnerRepo.GetAsync(updatedBusinessInfo.UserID).Result;
+            if (existingBusiness == null)
+            {
+                return false;
+            }
+            if (!string.IsNullOrEmpty(updatedBusinessInfo.BankAccount))
+            {
+                existingBusiness.BankAccount = updatedBusinessInfo.BankAccount;
+
+            }
+            if (!string.IsNullOrEmpty(existingBusiness.BusinessType))
+            {
+                existingBusiness.BusinessType = updatedBusinessInfo.BusinessType;
+            }
+
+
+            businessOwnerRepo.CustomSaveChanges();
+            return true;
+        }
+
+
+        public async void CreateOrder(Order order)
+        {
+            orderRepository.Add(order);
+            orderRepository.CustomSaveChanges();
+        }
+
+
+        public BusinessOwnerViewModel GetBusinessDetails(string businessOwnerId)
+        {
+            var businessOwner = businessOwnerRepo.GetAsync(businessOwnerId).Result;
+
+            return new BusinessOwnerViewModel
+            {
+                UserID = businessOwner.UserID,
+                BankAccount = businessOwner.BankAccount,
+                BusinessType = businessOwner.BusinessType
+            };
+        }
+
+
+
      
-        public async Task<Result<List<RiderVM>>> GetRiders()
+
+        public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
+        {
+        using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        {
+            var existingUser = await userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return Result<RiderVM>.Failure("A user with this email already exists.");
+            }
+
+            var user = new User
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                Name = request.Name,
+                ProfilePicture = request.ProfilePicture
+            };
+
+            var creationResult = await userManager.CreateAsync(user, request.Password);
+            if (!creationResult.Succeeded)
+            {
+                return Result<RiderVM>.Failure(string.Join(",", creationResult.Errors.Select(e => e.Description)));
+            }
+
+            var role = RoleConstants.Rider;
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            await userManager.AddToRoleAsync(user, role);
+
+            var rider = new Rider
+            {
+                UserID = user.Id,
+                BusinessID = request.BusinessID,
+                Status = RiderStatusEnum.Available,
+                VehicleType = request.VehicleType,
+                VehicleStatus = request.VehicleStatus,
+                ExperienceLevel = request.ExperienceLevel,
+                Lat = request.Location.Lat,
+                Lang = request.Location.Lang,
+                Area = request.Location.Area,
+                Rating = 0
+            };
+
+            riderRepository.Add(rider);
+            riderRepository.CustomSaveChanges(); 
+
+            var result = new RiderVM
+            {
+                UserID = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                BusinessID = rider.BusinessID,
+                VehicleType = rider.VehicleType,
+                VehicleStatus = rider.VehicleStatus,
+                ExperienceLevel = rider.ExperienceLevel,
+                Location = new LocationDto
+                {
+                    Lat = rider.Lat,
+                    Lang = rider.Lang,
+                    Area = rider.Area
+                },
+                Status = rider.Status
+            };
+
+            scope.Complete(); 
+
+            return Result<RiderVM>.Success(result);
+        }
+    }
+
+    //will be refactored
+
+    public async Task<Result<string>> ChangeRiderPasswordAsync(string riderId, string newPassword)
+        {
+
+            var updateResult = await _userService.UpdatePasswordAsync(riderId, newPassword);
+
+            if (!updateResult.IsSuccess)
+            {
+                return Result<string>.Failure(updateResult.Error);
+            }
+
+
+            return Result<string>.Success("Password updated successfully");
+        }
+
+
+
+        public class BusinessOwnerRegisterRequest
+        {
+            public string Name { get; set; }
+            public string Email { get; set; }
+            public string Password { get; set; }
+            public string ProfilePicture { get; set; }
+
+            public string BankAccount { get; set; }
+            public string BusinessType { get; set; }
+        }
+
+
+
+        public async Task<Result<BusinessOwnerViewModel>> CreateBusinessOwnerAsync(BusinessOwnerRegisterRequest request)
+        {
+            var existingUser = await userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return Result<BusinessOwnerViewModel>.Failure("A user with this email already exists.");
+            }
+
+            var user = new User
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                Name = request.Name,
+                ProfilePicture = request.ProfilePicture
+            };
+
+            var creationResult = await userManager.CreateAsync(user, request.Password);
+            if (!creationResult.Succeeded)
+            {
+                return Result<BusinessOwnerViewModel>.Failure(string.Join(",", creationResult.Errors.Select(e => e.Description)));
+            }
+
+
+            var role = RoleConstants.BusinessOwner;
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            await userManager.AddToRoleAsync(user, role);
+
+
+            var businessOwner = new BusinessOwner
+            {
+                UserID = user.Id,
+                User = user,
+                BankAccount = request.BankAccount,
+                BusinessType = request.BusinessType
+            };
+
+            businessOwnerRepo.Add(businessOwner);
+            businessOwnerRepo.CustomSaveChanges();
+
+            var businessowner = new BusinessOwnerViewModel
+            {
+                UserID = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                //ProfilePicture = user.ProfilePicture,
+                BankAccount = request.BankAccount,
+                BusinessType = request.BusinessType
+            };
+
+            return Result<BusinessOwnerViewModel>.Success(businessowner);
+        }
+
+
+
+        public async Task<OrderRider?> AssignOrderToRiderAsync(int orderId, string riderId)
+        {
+            try
+            {
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    return null; 
+                }
+
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    return null;
+                }
+
+                var order = await orderRepository.GetAsync(orderId);
+                if (order == null || order.IsDeleted)
+                {
+                    return null;
+                }
+
+                var rider = await riderRepository.GetAsync(riderId);
+                if (rider == null || rider.BusinessID != businessOwner.UserID || rider.Status != RiderStatusEnum.Available)
+                {
+                    return null;
+                }
+
+                var orderRider = new OrderRider
+                {
+                    OrderID = orderId,
+                    RiderID = riderId,
+                    ModifiedAt = DateTime.Now,
+                    ModifiedBy = businessOwnerId,
+                    Owner = businessOwner
+                };
+
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    try
+                    {
+                        orderRiderRepository.Add(orderRider);
+                        await Task.Run(() => orderRiderRepository.CustomSaveChanges());
+
+                        order.RiderID = riderId;
+                        order.State = OrderStateEnum.Confirmed;
+                        order.ModifiedBy = businessOwnerId;
+                        order.ModifiedAt = DateTime.Now;
+                        orderRepository.Update(order);
+                        await Task.Run(() => orderRepository.CustomSaveChanges());
+
+                        rider.Status = RiderStatusEnum.OnDelivery;
+                        riderRepository.Update(rider);
+                        await Task.Run(() => riderRepository.CustomSaveChanges());
+
+                        transaction.Complete();
+                        return orderRider;
+                    }
+                    catch (Exception)
+                    {
+                        return null;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        
+          public async Task<Result<List<RiderVM>>> GetRiders()
         {
             try
             {
@@ -119,13 +403,7 @@ namespace VROOM.Services
             }
         }
 
-       
-
-        /// <summary>
-        /// Retrieves a list of customers who have placed orders managed by the Business Owner's riders.
-        /// </summary>
-        /// <returns>A Result containing a list of CustomerVMs or an error message if the operation fails.</returns>
-        public async Task<Result<List<CustomerVM>>> GetCustomers()
+          public async Task<Result<List<CustomerVM>>> GetCustomers()
         {
             try
             {
@@ -189,5 +467,6 @@ namespace VROOM.Services
                 return Result<List<CustomerVM>>.Failure("An error occurred while retrieving customers.");
             }
         }
+
     }
 }

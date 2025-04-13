@@ -10,6 +10,7 @@ using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,18 +68,39 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<VroomDbContext>()
     .AddDefaultTokenProviders();
 
-// Add repositories and services
-builder.Services.AddScoped<RiderRepository>();
-builder.Services.AddScoped<RoleRepository>();
-builder.Services.AddScoped<AccountManager>();
-builder.Services.AddScoped<OrderRepository>();
-builder.Services.AddScoped<OrderService>();
+// Add services to the container.
+
+//builder.Services.AddControllers();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
+
+// Add Hangfire server to process background jobs
+builder.Services.AddHangfireServer();
+//builder.Services.AddDbContext<VroomDbContext>
+//    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
+//builder.Services.AddIdentity<User, IdentityRole>()
+//    .AddEntityFrameworkStores<VroomDbContext>();
+builder.Services.AddScoped(typeof(RiderRepository));
+builder.Services.AddScoped(typeof(RoleRepository));
+builder.Services.AddScoped(typeof(AccountManager));
+builder.Services.AddScoped(typeof(OrderRepository));
+builder.Services.AddScoped<OrderRiderRepository>();
+builder.Services.AddScoped<CustomerRepository>();
+builder.Services.AddScoped<CustomerServices>();
+
+builder.Services.AddScoped<BusinessOwnerRepository>();
+builder.Services.AddScoped<BusinessOwnerService>();
+builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddScoped<BusinessOwnerRepository>(); // Ensure this is added for BusinessOwnerService
-builder.Services.AddScoped<BusinessOwnerService>();   // Ensure this is added
+
+
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];
@@ -134,14 +156,37 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Configure middleware pipeline in the correct order
+
+//app.UseAuthentication();
+//app.UseAuthorization();
+
+// Enable Swagger middleware
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+    c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
+});
+//app.UseAuthorization();
+
+app.UseStaticFiles();
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+
+app.UseHangfireDashboard();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=index}");
+
+
+// Schedule the recurring job when the application starts
+RecurringJob.AddOrUpdate<OrderService>(
+    "track-order-job",
+    service => service.TrackOrdersAsync(), // Replace with actual job
+    "*/30 * * * * *"); // Every 30 seconds
+
 
 // Seed roles
 using (var scope = app.Services.CreateScope())

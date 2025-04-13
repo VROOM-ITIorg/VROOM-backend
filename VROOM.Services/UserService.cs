@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repository;
+using Microsoft.Extensions.Configuration;
+using ViewModels.User;
+using Azure.Core;
 
 namespace VROOM.Services
 {
@@ -350,7 +353,46 @@ namespace VROOM.Services
             return Result<UserDto>.Success(MapToDto(user, role));
         }
 
-        private Result<bool> ValidateRoleSpecificRequirements(RegisterRequest request)
+        // 6. Add customer when the bussnisowner create new order 
+
+        public async Task<Customer> AddNewCustomerAsync(CustomerAddViewModel CustomerAddVM)
+        {
+            // Validate email uniqueness
+            if (await _userRepository.EmailExistsAsync(CustomerAddVM.Username))
+            {
+                _logger.LogWarning("Registration failed: Email {Email} already exists.", CustomerAddVM.Username);
+                return null;
+            }
+            var user = new User
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = CustomerAddVM.Username,
+                Email = CustomerAddVM.Username,
+                Name = CustomerAddVM.Name,
+                ModifiedAt = DateTime.Now,
+                IsDeleted = false
+            };
+            await _userRepository.BeginTransactionAsync();
+
+            var result = await _userRepository.CreateUserAsync(user, "Cust@123456");
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("User creation failed for email {Email}: {Errors}", CustomerAddVM.Username, errors);
+                await _userRepository.RollbackTransactionAsync();
+                return null;
+            }
+            await _userRepository.AddUserToRoleAsync(user, RoleConstants.Customer);
+
+            // Add the bussnisowner id 
+            Customer newCustomer = new Customer { UserID = user.Id, User = user };
+
+            await _userRepository.AddCustomerAsync(newCustomer);
+            await _userRepository.CommitTransactionAsync();
+            return newCustomer;
+        }
+          private Result<bool> ValidateRoleSpecificRequirements(RegisterRequest request)
         {
             switch (request.Role)
             {

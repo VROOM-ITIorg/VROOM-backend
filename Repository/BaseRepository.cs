@@ -29,14 +29,14 @@ namespace VROOM.Repositories
         {
             return await dbSet.FindAsync(id);
         }
+    
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await dbSet.ToListAsync() ;
         }
         public IQueryable<T> GetList(Expression<Func<T, bool>> Filter = null)
         {
-            if (Filter == null) return dbSet.AsQueryable();
-            else return dbSet.Where(Filter);
+             return dbSet.Where(Filter);
         }
         public void Add(T entity)
         {

@@ -33,6 +33,7 @@ builder.Services.AddScoped(typeof(SignInManager<User>));
 builder.Services.AddScoped(typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(TransactionWork<>));
 builder.Services.AddScoped(typeof(BusinessOwnerRepository));
+builder.Services.AddScoped(typeof(BusinessOwnerService));
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -57,8 +58,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "root",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    name: "default",
+    pattern: "vroom-admin/{Controller=account}/{Action=Login}/{id?}");
 
 
 

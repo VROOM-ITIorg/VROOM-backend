@@ -46,7 +46,7 @@ namespace VROOM.Services
             orderRepository = _orderRepository;
         }
 
-        public void CreateOrder(OrderCreateViewModel orderVM , out int _id)
+        public void CreateOrder(OrderCreateViewModel orderVM)
         {
             var order = new Order
             {
@@ -68,7 +68,6 @@ namespace VROOM.Services
             orderRepository.Add(order);
             orderRepository.CustomSaveChanges();
 
-            _id = order.Id;
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)

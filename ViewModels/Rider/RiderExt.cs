@@ -15,27 +15,26 @@ namespace ViewModels
             {
                 Rating = 0,
                 ExperienceLevel = rider.ExperienceLevel,
-                //BusinessID = rider.BusinessID,
                 Status = rider.Status,
                 VehicleType = rider.VehicleType,
                 Area = rider.Location,
             };
         }
 
-        public static AdminCreateRiderVM ToDetailsVModel(this Rider rider)
+        public static AdminRiderDetialsVM ToShowVModel(this Rider rider)
         {
             if (rider == null || rider.User == null)
                 return null;
 
-            return new AdminCreateRiderVM
+            return new AdminRiderDetialsVM
             {
-                //UserID = rider.UserID,
+                UserID = rider.UserID,
                 UserName = rider.User?.Name ?? "Unknown",
                 Email = rider.User?.Email ?? "No Email",
                 ImagePath = rider.User.ProfilePicture,
                 PhoneNumber = rider.User?.PhoneNumber ?? "No Phone Number",
-                Status = rider.Status
-             
+                Status = rider.Status,
+                BusinessName = rider.BusinessOwner.User.Name                
             };
         }
 

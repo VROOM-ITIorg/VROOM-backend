@@ -18,16 +18,16 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
-        {
-            int id;
+        //public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
+        //{
+        //    int id;
 
-            if (!ModelState.IsValid) return BadRequest(ModelState); 
+        //    if (!ModelState.IsValid) return BadRequest(ModelState); 
 
-            orderService.CreateOrder(model, out id); // new method we'll define below
+        //    //orderService.CreateOrder(model, out id); // new method we'll define below
 
-            return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created", Id = id });
-        }
+        //    //return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created", Id =  });
+        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)

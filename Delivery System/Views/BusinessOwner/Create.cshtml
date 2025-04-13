@@ -1,0 +1,167 @@
+﻿@using VROOM.ViewModels
+@model AdminCreateBusOnwerVM
+
+@{
+
+
+	ViewData["Title"] = "Create Business Owner";
+
+	Layout= "_Layout";
+
+}
+
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-md-8">
+			<div class="card shadow-lg border-0 rounded-lg">
+				<div class="card-header bg-primary text-white">
+					<h3 class="text-center font-weight-bold my-2">Create New Business Owner</h3>
+				</div>
+				<div class="card-body p-4">
+					<form asp-action= "Create" asp-controller="BusinessOwner" method="post" enctype="multipart/form-data">
+						<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+										
+
+
+						<!-- Basic Information -->
+						<div class="row mb-3">
+							<div class="col-12">
+								<h5 class="border-bottom pb-2">Basic Information</h5>
+							</div>
+						</div>
+
+						<!-- Owner Name & Business Name -->
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<div class="form-floating">
+									<input asp-for="OwnerName" class="form-control" placeholder="Owner Name" required />
+									<label asp-for="OwnerName">Owner Name</label>
+									<span asp-validation-for="OwnerName" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-6 mb-3">
+								<div class="form-floating">
+									<input asp-for="BusinessName" class="form-control" placeholder="Business Name" required />
+									<label asp-for="BusinessName">Business Name</label>
+									<span asp-validation-for="BusinessName" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Contact Information -->
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<div class="form-floating">
+									<input asp-for="Email" class="form-control" placeholder="Email Address" required />
+									<label asp-for="Email">Email Address</label>
+									<span asp-validation-for="Email" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="col-md-6 mb-3">
+								<div class="form-floating">
+									<input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" required />
+									<label asp-for="PhoneNumber">Phone Number</label>
+									<span asp-validation-for="PhoneNumber" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Business Information -->
+						<div class="row mb-3 mt-4">
+							<div class="col-12">
+								<h5 class="border-bottom pb-2">Business Information</h5>
+							</div>
+						</div>
+
+						<!-- Business Type & License Number -->
+						<div class="row">
+							@* <div class="col-md-6 mb-3"> *@
+							@* 	<div class="form-floating"> *@
+							@* 		<select asp-for="BusinessTypeId" class="form-select" asp-items="ViewBag.BusinessTypes" required> *@
+							@* 			<option value="">-- Select Business Type --</option> *@
+							@* 		</select> *@
+							@* 		<label asp-for="BusinessTypeId">Business Type</label> *@
+							@* 		<span asp-validation-for="BusinessTypeId" class="text-danger"></span> *@
+							@* 	</div> *@
+							@* </div> *@
+							<div class="col-md-6 mb-3">
+								<div class="form-floating">
+									<input asp-for="Address" class="form-control" placeholder="Address" />
+									<label asp-for="Address">Address</label>
+									<span asp-validation-for="Address" class="text-danger"></span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Address Information -->
+						<div class="row">
+							<div class="col-md-12 mb-3">
+								<div class="form-floating">
+									
+								</div>
+							</div>
+						</div>
+
+					
+						<!-- Business Logo -->
+						<div class="mb-4">
+							<label asp-for="ProfilePicture" class="form-label fw-bold">Business Logo</label>
+							<div class="input-group">
+								<input asp-for="ProfilePicture" type="file" class="form-control" accept="image/*" />
+								<label class="input-group-text" for="BusinessLogo">
+									<i class="bi bi-upload"></i>
+								</label>
+							</div>
+							<span asp-validation-for="ProfilePicture" class="text-danger"></span>
+
+
+							
+							<img id="logoPreview" class="img-thumbnail mt-2" style="max-height: 100px; display: none;" />
+						</div>
+
+						<!-- Status -->
+						@* <div class="form-check form-switch mb-4"> *@
+						@* 	<input asp-for="IsActive" class="form-check-input" type="checkbox" checked /> *@
+						@* 	<label asp-for="IsActive" class="form-check-label">Active</label> *@
+						@* </div> *@
+
+						@* <!-- Additional Notes --> *@
+						
+
+					    <div class="d-flex justify-content-between mt-4">
+							<a asp-action="Index" class="btn btn-outline-secondary">
+								<i class="bi bi-arrow-left"></i> Back to List
+							</a>
+							<button type="submit" class="btn btn-primary px-4">
+								<i class="bi bi-plus-circle"></i> Create Business Owner 
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		document.querySelector('#BusinessLogo').addEventListener('change', function() {
+			if (this.files && this.files[0]) {
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					document.querySelector('#logoPreview').src = e.target.result;
+					document.querySelector('#logoPreview').style.display = 'block';
+				}
+				reader.readAsDataURL(this.files[0]);
+			}
+		});
+	</script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+
+}

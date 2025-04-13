@@ -1,10 +1,6 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ViewModels;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -20,11 +16,13 @@ namespace API.Controllers
         private readonly VroomDbContext context;
         private readonly RiderRepository riderManager;
         private readonly BusinessOwnerRepository ownerRepository;
-        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerRepository _ownerRepository)
+        private readonly AdminServices adminServices;
+        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerRepository _ownerRepository, AdminServices _adminServices)
         {
             context = _context;
             riderManager = _riderManager;
             ownerRepository = _ownerRepository;
+            adminServices = _adminServices;
         }
 
 
@@ -38,67 +36,23 @@ namespace API.Controllers
 
         [HttpPost]
         [Route("create")]
-        public IActionResult Create(AdminCreateRiderVM model)
+        public async Task<IActionResult> Create(AdminCreateRiderVM model)
         {
             if (ModelState.IsValid)
             {
-                var businessOwnerId = context.BusinessOwners.Where(i => i.User.Name == model.BusinessName).FirstOrDefault().UserID;
 
-                var newUser = new User
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = model.UserName,
-                    Email = model.Email,
-                    UserName = model.UserName,
-                    NormalizedEmail = model.Email.ToUpper(),
-                    NormalizedUserName = model.Email.ToUpper(),
-                    EmailConfirmed = true,
-                    PasswordHash = new PasswordHasher<User>().HashPassword(null, "Default@123"),
-                    PhoneNumber = model.PhoneNumber
-                };
-
-                context.Users.Add(newUser);
-                context.SaveChanges();
-
-                string imagePath = null;
-                if (model.ProfilePicture != null)
-                {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Rider");
-                    Directory.CreateDirectory(uploadsFolder);
-
-                    var fileExt = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = $"{DateTime.Now:yyyyMMddHHmmssfff}{fileExt}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        model.ProfilePicture.CopyTo(fileStream);
-                    }
-
-                    model.ImagePath = $"/Images/Rider/{fileName}";
-                }
-
-                var newRider = new Rider();
-                newRider = model.ToModel();
-                newRider.UserID = newUser.Id;
-                newRider.BusinessID = businessOwnerId;
-                newUser.ProfilePicture = model.ImagePath;
-                context.Riders.Add(newRider);
-                context.SaveChanges();
+                await adminServices.CreateNewRider(model);
 
                 return RedirectToAction("Index");
             }
-
-            ViewBag.UserId = new SelectList(context.Users.ToList(), "Id", "Email");
             return View(model);
         }
 
 
         [Route("Index")]
-        public IActionResult Index(int status = -1 ,string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public IActionResult Index(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
         {
-            var Riders = riderManager.Search( status : status ,Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
-            
+            var Riders = riderManager.Search(status: status, Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
 
             ViewData["Riders"] = Riders;
 
@@ -106,9 +60,9 @@ namespace API.Controllers
         }
 
 
-
-
-        public IActionResult Edit(string id)
+        [HttpGet]
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(string id)
         {
             var rider = context.Riders
                 .Include(r => r.User)
@@ -119,15 +73,21 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            var viewModel = new AdminCreateRiderVM
+            var viewModel = new AdminEditRiderVM
             {
+                UserID = rider.UserID,
                 Status = rider.Status,
                 VehicleType = rider.VehicleType,
                 Location = rider.Area,
                 ExperienceLevel = rider.ExperienceLevel,
                 UserName = rider.User?.UserName,
-                Email = rider.User?.Email
+                Email = rider.User?.Email,
+                PhoneNumber = rider.User.PhoneNumber,
+                ImagePath = rider.User.ProfilePicture
             };
+
+            ViewData["AllOwners"] = await ownerRepository.GetAllAsync();
+
 
             return View(viewModel);
         }
@@ -135,41 +95,42 @@ namespace API.Controllers
 
 
         [HttpPost]
-        //public IActionResult Edit(AdminCreateRiderVM model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(model);
-        //    }
+        [Route("Edit/{id}")]
 
-        //    var rider = context.Riders.FirstOrDefault(r => r.UserID == model.UserID);
-        //    if (rider == null)
-        //    {
-        //        return NotFound();
-        //    }
+        public IActionResult Edit(AdminEditRiderVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
-        //    rider.BusinessID = model.BusinessID;
-        //    rider.UserID = model.UserID;
-        //    rider.Status = model.Status;
-        //    rider.VehicleType = model.VehicleType;
-        //    rider.Area = model.Location;
-        //    rider.ExperienceLevel = model.ExperienceLevel;
-        //    rider.Rating = 0;
+            var rider = context.Riders.FirstOrDefault(r => r.UserID == model.UserID);
+            if (rider == null)
+            {
+                return NotFound();
+            }
 
-        //    context.SaveChanges();
-        //    return RedirectToAction("Index");
-        //}
+            rider.UserID = model.UserID;
+            rider.Status = model.Status;
+            rider.VehicleType = model.VehicleType;
+            rider.Area = model.Location;
+            rider.ExperienceLevel = model.ExperienceLevel;
+            rider.Rating = 0;
+            rider.User.Name = model.UserName;
+            
+
+            context.SaveChanges();
+            return RedirectToAction("Index");
+        }
 
 
-
-
+        [HttpGet]
+        [Route("Delete/{id}")]
         public IActionResult Delete(string id)
         {
-            var Rider = context.Riders.Where(i => i.UserID == id).FirstOrDefault().User;
+            var Rider = context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
-            context.Users.Remove(Rider);
-            context.Riders.Remove(context.Riders.Where(i => i.UserID == id).FirstOrDefault());
-
+            Rider.User.IsDeleted = true;            
             context.SaveChanges();
             return RedirectToAction("Index");
         }

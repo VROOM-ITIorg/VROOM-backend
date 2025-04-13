@@ -6,6 +6,7 @@ using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ViewModels;
+using ViewModels.User;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.ViewModels;
@@ -62,56 +63,58 @@ namespace VROOM.Repositories
                 }
             }
 
+        public BusinessOwner GetBusinessDetails(string businessOwnerUserName)
+        {
+            return context.BusinessOwners.Where(i => i.User.Name == businessOwnerUserName).FirstOrDefault();
+
+        }
 
 
 
-        //public PaginationViewModel<AdminCreateRiderVM> Search(
-        // string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
-        //{
+        public PaginationViewModel<AdminBusOwnerDetialsVM> Search(
+         string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        {
 
-        //    var builder = PredicateBuilder.New<BusinessOwner>();
+            var builder = PredicateBuilder.New<BusinessOwner>();
 
-        //    var old = builder;
+             builder = builder.And(i => i.User.IsDeleted == false);
 
-        //    if (!Name.IsNullOrEmpty())
-        //        builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
+            if (!Name.IsNullOrEmpty())
+            {
+                builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
 
-        //    if (!PhoneNumber.IsNullOrEmpty())
-        //        builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
-   
+            }
 
-
-        //    if (old == builder)
-        //        builder = null;
+            if (!PhoneNumber.IsNullOrEmpty())
+                builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
 
 
+            var count = base.GetList(builder).Count();
 
-        //    var count = base.GetList(builder).Count();
+            var resultAfterPagination = base.Get(
+                 filter: builder,
+                 pageSize: pageSize,
+                 pageNumber: pageNumber)
+                 .Include(r => r.User)
+                 .ToList()
+                 .Select(p => p.ToDetailsVModel())
+                 .ToList();
 
-        //    var resultAfterPagination = base.Get(
-        //         filter: builder,
-        //         pageSize: pageSize,
-        //         pageNumber: pageNumber)
-        //         .Include(r => r.User)
-        //         .ToList()
-        //         .Select(p => p.ToDetailsVModel())
-        //         .ToList();
+            return new PaginationViewModel<AdminBusOwnerDetialsVM>
+            {
+                Data = resultAfterPagination,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Total = count
+            };
 
-        //    return new PaginationViewModel<AdminCreateRiderVM>
-        //    {
-        //        Data = resultAfterPagination,
-        //        PageNumber = pageNumber,
-        //        PageSize = pageSize,
-        //        Total = count
-        //    };
+        }
 
-        //}
+        public Rider GetBusinessOwnerByRiderId(string id)
+        {
+            return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
-        //public Rider GetBusinessOwnerByRiderId(string id)
-        //{
-        //    return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
-
-        //}
+        }
     }
 }
 

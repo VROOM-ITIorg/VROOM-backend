@@ -80,6 +80,7 @@ namespace VROOM.Services
             }; 
         }
 
+        
 
         //riderRepo
         public void CreateRiderAsync(RiderDTO model)

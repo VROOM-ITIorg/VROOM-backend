@@ -31,6 +31,7 @@ namespace VROOM.Services
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly UserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserRepository _userRepository;
 
         public BusinessOwnerService(
             Microsoft.AspNetCore.Identity.UserManager<User> _userManager,
@@ -41,6 +42,7 @@ namespace VROOM.Services
             RoleManager<IdentityRole> roleManager
             ,
             UserService userService,
+            UserRepository userRepository,
 
 
             OrderRiderRepository orderRiderRepository,
@@ -58,6 +60,7 @@ namespace VROOM.Services
             _userService = userService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _userRepository = userRepository;
         }
 
 

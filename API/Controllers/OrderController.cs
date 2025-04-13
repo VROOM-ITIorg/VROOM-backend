@@ -19,7 +19,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "BusinessOwner")]
         [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
@@ -40,6 +40,25 @@ namespace API.Controllers
             var order = await orderService.GetOrderByIdAsync(id) ?? NotFound() ;
 
             return Ok(order);
+        }
+
+        // update order status 
+        [HttpPost("updateOrder/{id}")]
+        public async Task<IActionResult> AccOrRejOrder(int id , [FromBody] OrderStateEnum orderState)
+        {
+            // There are 5 events can we update the state of the order this now 
+            var order = await orderService.UpdateOrderState(id, orderState);
+            // if the order is accepted we will retrun a good massege to the customer if not 
+            return Ok(new { Order = order , Message = "order is updated"});
+        }
+
+        // Track order 
+        [HttpPost("trackOrder/{id}")]
+        public async Task<IActionResult> TrackOrder(int id)
+        {
+            //var order = await orderService.UpdateOrderState(id);
+
+            return Ok();
         }
     }
 

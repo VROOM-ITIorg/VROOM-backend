@@ -17,7 +17,7 @@ namespace Delivery_System.Controllers
             adminService = _adminService;
         }
 
-        [Route("login")]
+        //[Route("login")]
         [HttpGet]
         public IActionResult login()
         {

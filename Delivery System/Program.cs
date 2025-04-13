@@ -58,10 +58,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "vroom-admin/{Controller=account}/{Action=Login}/{id?}");
 
+app.MapControllerRoute(
+	name: "default",
+	pattern: "{Controller=account}/{Action=login}/{id?}");
 
 
 app.Run();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using VROOM.Models;
+using VROOM.Models.Map;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 

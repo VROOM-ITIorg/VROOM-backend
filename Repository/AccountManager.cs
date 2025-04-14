@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using ViewModels.Account;
 using VROOM.Data;
 using VROOM.Models;
 
@@ -27,14 +28,18 @@ namespace VROOM.Repositories
         //    return await UserManager.CreateAsync(userRegister.ToModel(), userRegister.Password);
         //}
 
-        //public async Task<SignInResult> Login(UserLoginVM vmodel)
-        //{
-        //    //if correct Email
-        //    var User = await UserManager.FindByEmailAsync(vmodel.Method);
-        //    if (User != null)
-        //        return await signInManager.PasswordSignInAsync(User, vmodel.Password, true, true);
-        //    else
-        //        return await signInManager.PasswordSignInAsync(vmodel.Method, vmodel.Password, true, true);
-        //}
+        public async Task<SignInResult> Login(LoginViewModel vmodel)
+        {
+            var User = await UserManager.FindByEmailAsync(vmodel.Email);
+            if(User != null)
+             return await signInManager.PasswordSignInAsync(User, vmodel.Password, vmodel.RememberMe,true);
+            else
+                return SignInResult.Failed;
+        }
+
+        public async Task Signout()
+        {
+            await signInManager.SignOutAsync();
+        }
     }
 }

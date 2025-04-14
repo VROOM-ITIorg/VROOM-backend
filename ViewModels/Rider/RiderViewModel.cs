@@ -4,25 +4,49 @@ using VROOM.Models;
 
 namespace VROOM.ViewModels
 {
-    public record RiderViewModel
+    public interface UserProfile
     {
-        public int Id { get; init; }
+        [Display(Name = "Profile Picture")]
+        IFormFile? ProfilePicture { get; init; }
 
-        public int BusinessID { get; init; }
+        string? ImagePath { get; set; }
+    }
+    public class AdminCreateRiderVM : UserProfile
+    {
 
-        public string UserID { get; init; }
+        public string BusinessName { get; init; }
 
-        public string Status { get; init; }
+        public RiderStatusEnum Status { get; init; }
 
-        public string Type { get; init; }
-
-        public string Vehicle { get; init; }
+        public VehicleTypeEnum VehicleType { get; init; }
 
         public string Location { get; init; }
 
-        public string ExperienceLevel { get; init; }
+        public float ExperienceLevel { get; init; }
 
-        public int Rating { get; init; }
+        public string UserName { get; init; }
+
+        public string Email { get; init; }
+
+        public string PhoneNumber { get; init; }
+        public IFormFile? ProfilePicture { get; init; }
+        public string? ImagePath { get; set ; }
+    }
+
+    public record AdminEditRiderVM : UserProfile
+    {
+
+        public string BusinessName { get; init; }
+
+        public string? UserID { get; init; }
+
+        public RiderStatusEnum Status { get; init; }
+
+        public VehicleTypeEnum VehicleType { get; init; }
+
+        public string Location { get; init; }
+
+        public float ExperienceLevel { get; init; }
 
         public string UserName { get; init; }
 
@@ -33,9 +57,36 @@ namespace VROOM.ViewModels
         [Display(Name = "Profile Picture")]
         public IFormFile? ProfilePicture { get; init; }
 
-        public string? ImagePath { get; init; }
+        public string? ImagePath { get; set; }
     }
 
+
+    public class AdminRiderDetialsVM
+    {
+
+        public string BusinessName { get; init; }
+
+        public string? UserID { get; init; }
+
+        public RiderStatusEnum Status { get; init; }
+
+        public VehicleTypeEnum VehicleType { get; init; }
+
+        public string Location { get; init; }
+
+        public float ExperienceLevel { get; init; }
+
+        public string UserName { get; init; }
+
+        public string Email { get; init; }
+
+        public string PhoneNumber { get; init; }
+
+        [Display(Name = "Profile Picture")]
+        public IFormFile? ProfilePicture { get; init; }
+
+        public string? ImagePath { get; set; }
+    }
     public record RiderDTO
     {
         public string UserID { get; init; }

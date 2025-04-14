@@ -87,21 +87,7 @@ namespace API.Controllers
 
 
 
-        [HttpGet("assigned/{orderId}")]
-        [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> ViewAssignedOrder(int orderId)
-        {
-            var result = await _businessOwnerService.ViewAssignedOrderAsync(orderId);
-
-            if (result == null)
-                return NotFound(new { message = "Order not found or not assigned to you." });
-
-            return Ok(result);
-        }
-
-
-
-
+   
 
 
 

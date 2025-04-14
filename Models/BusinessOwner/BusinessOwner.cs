@@ -5,12 +5,12 @@ using VROOM.Models;
 
 namespace VROOM.Models
 {
-    public class BusinessOwner 
+    public class BusinessOwner
     {
 
         public string UserID { get; set; }
-        public string BankAccount { get; set; }
-        public string BusinessType { get; set; }
+        public string BankAccount { get; set; } = "df";
+        public string BusinessType { get; set; } 
 
         public virtual User User { get; set; }
         public virtual ICollection<Rider> Riders { get; set; }

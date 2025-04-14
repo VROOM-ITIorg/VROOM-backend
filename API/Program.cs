@@ -10,13 +10,14 @@ using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
-using Serilog;
+using Hangfire;
+// using Serilog;
 using API;
 //using VROOM.Services.Mapping;
 
 
 
-Log.Information("Logger configured.");
+// Log.Information("Logger configured.");
 
 
 
@@ -24,11 +25,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-builder.Host.UseSerilog();
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .CreateLogger();
+// builder.Host.UseSerilog();
+// Log.Logger = new LoggerConfiguration()
+//     .ReadFrom.Configuration(builder.Configuration)
+//     .Enrich.FromLogContext()
+//     .CreateLogger();
 
 
 // Add services to the container
@@ -43,7 +44,6 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
     logging.SetMinimumLevel(LogLevel.Information);
 });
-
 
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
@@ -76,9 +76,8 @@ builder.Services.AddSwaggerGen(c =>
 // Configure DbContext with lazy loading
 builder.Services.AddDbContext<VroomDbContext>(options =>
     options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
         .UseLazyLoadingProxies());
-
 
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -87,7 +86,16 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+//builder.Services.AddControllers();
+
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Hangfire server to process background jobs
+builder.Services.AddHangfireServer();
 //builder.Services.AddDbContext<VroomDbContext>
 //    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddIdentity<User, IdentityRole>()
@@ -98,6 +106,8 @@ builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
 builder.Services.AddScoped(typeof(IssuesRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
+builder.Services.AddScoped<CustomerRepository>();
+builder.Services.AddScoped<CustomerServices>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
@@ -142,10 +152,20 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+        c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5169/)
+    });
+}
+
 app.UseHttpsRedirection();
 
-
+// Custom middleware to log request body for /api/user/register
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
@@ -177,9 +197,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
+
+
+// Schedule the recurring job when the application starts
+RecurringJob.AddOrUpdate<OrderService>(
+    "track-order-job",
+    service => service.TrackOrdersAsync(), // Replace with actual job
+    "*/30 * * * * *"); // Every 30 seconds
+
 
 // Seed roles
 using (var scope = app.Services.CreateScope())
@@ -192,6 +221,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
-Log.Information("Application starting...");
+// Log.Information("Application starting...");
 
 app.Run();

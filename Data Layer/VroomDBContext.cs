@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using VROOM.Models;
+using VROOM.Models.Map;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 
@@ -30,12 +32,6 @@ namespace VROOM.Data
         public DbSet<Shipment> Shipments { get; set; }
         public DbSet<RiderRouteIssue> RiderRouteIssues { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data Source = ROZIE\\MSSQLSERVER01; Initial Catalog = Vroom; Integrated Security = True; TrustServerCertificate = True");
-
-            base.OnConfiguring(optionsBuilder);
-        }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

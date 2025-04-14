@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250409155552_model")]
-    partial class model
+    [Migration("20250414173933_added-MapModel")]
+    partial class addedMapModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -329,7 +329,7 @@ namespace VROOM.Data.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrderID")
+                    b.Property<int?>("OrderID")
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
@@ -399,7 +399,6 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("RiderID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("State")
@@ -971,8 +970,7 @@ namespace VROOM.Data.Migrations
                     b.HasOne("VROOM.Models.Rider", "Rider")
                         .WithMany("OrdersHandled")
                         .HasForeignKey("RiderID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
 

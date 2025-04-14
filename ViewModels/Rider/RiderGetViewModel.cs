@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using VROOM.Models;
 using VROOM.ViewModels;
 
-namespace ViewModels.Rider
+namespace ViewModels
 {
     public record RiderVM
     {

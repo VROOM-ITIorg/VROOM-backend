@@ -14,9 +14,9 @@ namespace VROOM.Repositories
         public RiderRepository(VroomDbContext options) : base(options) { }
 
 
-        //public PaginationViewModel<RiderViewModel> Search(
-        //    string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
-        //{
+        public PaginationViewModel<AdminRiderDetialsVM> Search( int status,
+            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        {
 
             var builder = PredicateBuilder.New<Rider>();
 
@@ -58,7 +58,7 @@ namespace VROOM.Repositories
         {
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
-        //}
+        }
 
 
         public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)

@@ -4,7 +4,6 @@ using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Repository;
-using VROOM.Repository;
 using VROOM.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +34,14 @@ builder.Services.AddScoped(typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(TransactionWork<>));
 builder.Services.AddScoped(typeof(BusinessOwnerRepository));
 builder.Services.AddScoped(typeof(BusinessOwnerService));
+builder.Services.AddScoped(typeof(NotificationService));
+builder.Services.AddScoped(typeof(NotificationRepository));
+builder.Services.AddScoped(typeof(CustomerServices));
+builder.Services.AddScoped(typeof(CustomerRepository));
+builder.Services.AddScoped(typeof(UserService));
+builder.Services.AddScoped(typeof(OrderRiderRepository));
+
+
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

@@ -9,7 +9,7 @@ namespace VROOM.Repositories
     {
 
         protected readonly VroomDbContext context;
-        private readonly DbSet<T> dbSet;
+        protected readonly DbSet<T> dbSet;
         public BaseRepository(VroomDbContext _context)
         {
             context = _context;
@@ -29,14 +29,14 @@ namespace VROOM.Repositories
         {
             return await dbSet.FindAsync(id);
         }
+    
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await dbSet.ToListAsync() ;
         }
         public IQueryable<T> GetList(Expression<Func<T, bool>> Filter = null)
         {
-            if (Filter == null) return dbSet.AsQueryable();
-            else return dbSet.Where(Filter);
+             return dbSet.Where(Filter);
         }
         public void Add(T entity)
         {

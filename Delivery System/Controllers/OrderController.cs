@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VROOM.Services;
+using VROOM.ViewModels;
 
 namespace Delivery_System.Controllers
 {
     [Authorize(Roles = "Admin")]
-    [Route("vroom-admin/{controller}")]
+    [Route("vroom-admin/[controller]")]
     public class OrderController : Controller
     {
         private readonly OrderService orderServices;
@@ -21,6 +22,16 @@ namespace Delivery_System.Controllers
         {
             return View(orderServices.GetActiveOrder());
         }
+
+        [HttpPost]
+        [Route("createOrder")]
+        public IActionResult CreateOrders([FromBody] OrderCreateViewModel model)
+        {
+
+            orderServices.CreateOrder(model);
+            return View(orderServices.GetActiveOrder());
+        }
+
 
         public IActionResult OrderPerformance(int id)
         {

@@ -14,13 +14,13 @@ namespace VROOM.Repositories
         public RiderRepository(VroomDbContext options) : base(options) { }
 
 
-        public PaginationViewModel<AdminCreateRiderVM> Search( int status ,
-            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4 )
+        public PaginationViewModel<AdminRiderDetialsVM> Search( int status,
+            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
         {
 
             var builder = PredicateBuilder.New<Rider>();
 
-            var old = builder;
+            builder = builder.And(i => i.User.IsDeleted == false);
 
             if (!Name.IsNullOrEmpty())
                 builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
@@ -30,9 +30,6 @@ namespace VROOM.Repositories
             if (status >= 0)
                 builder = builder.And(i => i.Status == (RiderStatusEnum) status);
 
-
-            if (old == builder)
-                builder = null;
 
 
 
@@ -44,10 +41,10 @@ namespace VROOM.Repositories
                  pageNumber: pageNumber)
                  .Include(r => r.User)
                  .ToList()
-                 .Select(p => p.ToDetailsVModel())
+                 .Select(p => p.ToShowVModel())
                  .ToList();
 
-            return new PaginationViewModel<AdminCreateRiderVM>
+            return new PaginationViewModel<AdminRiderDetialsVM>
             {
                 Data = resultAfterPagination,
                 PageNumber = pageNumber,
@@ -61,6 +58,15 @@ namespace VROOM.Repositories
         {
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
+        }
+
+
+        public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)
+        {
+            return await context.Riders
+                .Include(r => r.User)
+                .Where(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted)
+                .ToListAsync();
         }
     }
 }

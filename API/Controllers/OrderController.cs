@@ -24,7 +24,7 @@ namespace API.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
 
-            if (!ModelState.IsValid) return BadRequest(ModelState); 
+        //    if (!ModelState.IsValid) return BadRequest(ModelState); 
 
             // Take CustomerInfo and call a func to check if the user exist or not and return id
             // and if the customer is not exsit we will create a customer

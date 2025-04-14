@@ -3,85 +3,55 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using VROOM.Repositories;
+using VROOM.Services;
+using ViewModels.Account;
+using VROOM.Models;
 
 namespace Delivery_System.Controllers
 {
     public class AccountController : Controller
     {
-        private AccountManager accountManager;
-        private RoleRepository roleManager;
-        public AccountController(AccountManager _accountManager, RoleRepository roleManager)
+        private AdminServices adminService;
+        public AccountController(AdminServices _adminService)
         {
-            accountManager = _accountManager;
-            this.roleManager = roleManager;
+            adminService = _adminService;
         }
 
-        //[HttpGet]
-        //public IActionResult Register()
-        //{
-        //    var list = roleManager.GetList(r => r.Name != "Admin")
-        //        .Select(r => new SelectListItem(r.Name, r.Name)).ToList();
-        //    ViewData["roles"] = list;
-        //    return View();
-        //}
-        //[HttpPost]
-        //public async Task<IActionResult> Register(UserRegisterVM user)
-        //{
-        //    var list = roleManager.GetList(r => r.Name != "Admin")
-        //     .Select(r => new SelectListItem(r.Name, r.Name)).ToList();
-        //    ViewData["roles"] = list;
-        //    if (ModelState.IsValid)
-        //    {
-        //        var res = await accountManager.Register(user);
-        //        if (res.Succeeded)
-        //        {
-        //            return RedirectToAction("login");
-        //        }
-        //        else
-        //        {
-        //            foreach (var item in res.Errors)
-        //            {
-        //                ModelState.AddModelError("", item.Description);
-        //            }
-
-        //            return View();
-        //        }
-        //    }
-        //    return View();
-        //}
+        //[Route("login")]
+        [HttpGet]
+        public IActionResult login()
+        {
+            return View();
+        }
 
 
-        //[HttpGet]
-        //public IActionResult Login()
-        //{
-        //    return View();
-        //}
-        //[HttpPost]
-        //public async Task<IActionResult> Login(UserLoginVM vmodel)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        var res = await accountManager.Login(vmodel);
-        //        if (res.Succeeded)
-        //        {
-        //            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value;
-        //            if (role == "Vendor")
-        //                return RedirectToAction("index", "Product");
-        //            return RedirectToAction("index", "Home");
+        [Route("login")]
+        [HttpPost]
+        public async Task<IActionResult> loginAsync(LoginViewModel admin)
+        {
+            if (ModelState.IsValid)
+            {
+                var res = await adminService.Login(admin);
+                if (res.Succeeded)
+                {
+                    var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value;
+                    if (role == "Admin")
+                    return RedirectToAction(controllerName:"order", actionName: "ActiveOrder");
 
-        //        }
-        //        else if (res.IsLockedOut || res.IsNotAllowed)
-        //        {
-        //            ModelState.AddModelError("", "Sorry try again Later!!!!");
-        //        }
-        //        else
-        //        {
-        //            ModelState.AddModelError("", "Sorry Invalid Email Or User Name Or Password");
-        //        }
-        //        return View();
-        //    }
-        //    return View();
+                }
+                else if (res.IsLockedOut || res.IsNotAllowed)
+                {
+                    ModelState.AddModelError("", "Sorry try again Later!!!!");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Sorry Invalid Email Or User Name Or Password");
+                }
+            }
+            return View(admin);
 
-        //}
+        }
+
+
     }
 }

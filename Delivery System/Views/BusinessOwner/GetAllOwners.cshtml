@@ -2,30 +2,30 @@
 @using VROOM.ViewModels
 @using ViewModels
 @{
-    ViewBag.Title = "Riders List";
-    var riders = ViewData["Riders"] as PaginationViewModel<AdminRiderDetialsVM>;
-    var totalPages = (int)Math.Ceiling((double)riders.Total / riders.PageSize);
-    var currentPage = riders.PageNumber;
-    var start = ((riders.PageNumber - 1) * riders.PageSize) + 1;
-    var end = Math.Min(riders.PageNumber * riders.PageSize, riders.Total);
+    ViewBag.Title = "Owners List";
+    var owners = ViewData["Owners"] as PaginationViewModel<AdminBusOwnerDetialsVM>;
+    var totalPages = (int)Math.Ceiling((double)owners.Total / owners.PageSize);
+    var currentPage = owners.PageNumber;
+    var start = ((owners.PageNumber - 1) * owners.PageSize) + 1;
+    var end = Math.Min(owners.PageNumber * owners.PageSize, owners.Total);
 }
 
 <div class="container-fluid py-4">
     <!-- Header Section with Title and Add Button -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold">
-            <span class="text-primary">Riders</span>
+            <span class="text-primary">Owners</span>
             <span class="text-secondary"> Management</span>
         </h3>
-        <a asp-controller="Rider" asp-action="Create" class="btn btn-primary px-4 d-flex align-items-center">
-            <i class="bi bi-plus-circle me-2"></i> Add New Rider
+        <a asp-controller="BusinessOwner" asp-action="Create" class="btn btn-primary px-4 d-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i> Add New Business Owner
         </a>
     </div>
 
     <!-- Filter Section -->
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body p-4">
-            <form asp-controller="Rider" asp-action="Index" method="post" class="row align-items-end">
+            <form asp-controller="BusinessOwner" asp-action="Index" method="post" class="row align-items-end">
                 <div class="col-md-3 mb-3 mb-md-0">
                     <label class="form-label fw-semibold text-secondary">Search</label>
                     <div class="input-group">
@@ -55,7 +55,7 @@
                     <label class="form-label fw-semibold text-secondary">Items Per Page</label>
                     <select class="form-select" id="perPage" name="pageSize">
                         <option value="2">2 Items</option>
-                        <option value="4" selected >4 Items</option>
+                        <option value="4" selected>4 Items</option>
                         <option value="8">8 Items</option>
                         <option value="16">16 Items</option>
                     </select>
@@ -72,50 +72,48 @@
         </div>
     </div>
 
-    <!-- Riders Cards Grid -->
+    <!-- owners Cards Grid -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-        @foreach (var rider in  riders.Data)
+        @foreach (var owner in owners.Data)
         {
             <div class="col">
                 <div class="card h-100 border-0 rider-card">
                     <div class="position-relative">
                         <div class="rider-image-container">
-                            <img src="@rider.ImagePath" class="rider-image" alt="@rider.ImagePath">
+                            <img src="@owner.ImagePath" class="rider-image" alt="@owner.ImagePath">
                         </div>
-                        <div class="rider-status">
-                            <span class="badge @(rider.Status == RiderStatusEnum.Unavailable ? "bg-danger" : rider.Status == RiderStatusEnum.OnDelivery ? "bg-warning" : rider.Status == RiderStatusEnum.Available ? "bg-success" : "")">@rider.Status</span>
-                        </div>
+
                     </div>
                     <div class="card-body pt-4">
-                        <h5 class="card-title fw-bold mb-3">@rider.UserName</h5>
-                        <div class="rider-info mb-3">
+                        <h5 class="card-title fw-bold mb-3">@owner.OwnerName</h5>
+                        <div class="owner-info mb-3">
                             <div class="d-flex align-items-center mb-2">
                                 <i class="bi bi-telephone-fill text-primary me-3"></i>
-                                <span>@rider.PhoneNumber</span>
+                                <span>@owner.PhoneNumber</span>
                             </div>
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-envelope-fill text-primary me-3"></i>
-                                <span>@rider.Email</span>
+                                <span>@owner.Email</span>
                             </div>
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-person-workspace text-primary me-3"></i>
-                                <span>@rider.BusinessName</span>
+                                <span>@owner.BusinessName</span>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-3"> 
+                    <div class="card-footer bg-white border-0 pt-0 pb-3">
                         <div class="d-flex justify-content-between">
 
                             <div>
-                                <a href="Edit/@rider.UserID" class="btn btn-outline-warning me-1">
-                                    <i class="bi bi-pencil-square"></i> 
+                                <a href="Edit/@owner.UserID" class="btn btn-outline-warning me-1">
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <a href="Delete/@rider.UserID" class="btn btn-outline-danger">
-                                    <i class="bi bi-trash"></i> 
-                                </a> 
-                            </div> 
-                        </div> 
-                    </div> 
+                                <a href="Delete/@owner.UserID" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         }
@@ -126,13 +124,13 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-6 mb-3 mb-md-0">
-                    <p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@riders.Total</span> riders</p>
+                    <p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@owners.Total</span> owners</p>
                 </div>
                 <div class="col-md-6">
                     <nav aria-label="Page navigation">
                         <ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
                             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="?pageNumber=@(currentPage - 1)&pageSize=@riders.PageSize" aria-label="Previous">
+                                <a class="page-link" href="?pageNumber=@(currentPage - 1)&pageSize=@owners.PageSize" aria-label="Previous">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
                             </li>
@@ -140,13 +138,13 @@
                             {
                                 for (int i = 1; i <= totalPages; i++)
                                 {
-                                    <li class="page-item @(i == riders.PageNumber ? "active" : "")">
-                                        <a class="page-link" href="?pageNumber=@i&pageSize=@riders.PageSize">@i</a>
+                                    <li class="page-item @(i == owners.PageNumber ? "active" : "")">
+                                        <a class="page-link" href="?pageNumber=@i&pageSize=@owners.PageSize">@i</a>
                                     </li>
                                 }
                             }
                             <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                <a class="page-link" href="?pageNumber=@(currentPage + 1)&pageSize=@riders.PageSize" aria-label="Next">
+                                <a class="page-link" href="?pageNumber=@(currentPage + 1)&pageSize=@owners.PageSize" aria-label="Next">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
                             </li>
@@ -265,7 +263,7 @@
 <script>
     // Filter functionality
     document.addEventListener('DOMContentLoaded', function() {
-       
+
 
         // Reset Filters Button
         document.getElementById('resetFilters')?.addEventListener('click', function() {

@@ -112,10 +112,10 @@ namespace VROOM.Services
         {
             _logger.LogInformation("Creating rider with email: {Email}", request.Email);
 
-            // Start transaction
+          
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                // Check if user already exists
+            
                 var existingUser = await userManager.FindByEmailAsync(request.Email);
                 if (existingUser != null)
                 {
@@ -123,7 +123,6 @@ namespace VROOM.Services
                     return Result<RiderVM>.Failure("A user with this email already exists.");
                 }
 
-                // Create a new user
                 var user = new User
                 {
                     UserName = request.Email,
@@ -143,7 +142,7 @@ namespace VROOM.Services
 
                 _logger.LogInformation("User created successfully: {Email}", request.Email);
 
-                // Ensure the Rider role exists
+              
                 var role = RoleConstants.Rider;
                 if (!await _roleManager.RoleExistsAsync(role))
                 {
@@ -151,11 +150,10 @@ namespace VROOM.Services
                     await _roleManager.CreateAsync(new IdentityRole(role));
                 }
 
-                // Add user to Rider role
+              
                 _logger.LogInformation("Assigning role {Role} to user: {Email}", role, request.Email);
                 await userManager.AddToRoleAsync(user, role);
 
-                // Create a new rider
                 var rider = new Rider
                 {
                     UserID = user.Id,
@@ -174,7 +172,7 @@ namespace VROOM.Services
                 riderRepository.Add(rider);
                 riderRepository.CustomSaveChanges();
 
-                // Prepare the RiderVM result
+           
                 var result = new RiderVM
                 {
                     UserID = user.Id,
@@ -193,7 +191,6 @@ namespace VROOM.Services
                     Status = rider.Status
                 };
 
-                // Complete transaction
                 scope.Complete();
 
                 _logger.LogInformation("Rider created successfully: {Email}", request.Email);
@@ -292,7 +289,11 @@ namespace VROOM.Services
 
 
 
-        public async Task<OrderRider?> AssignOrderToRiderAsync(int orderId, string riderId)
+
+
+
+
+        public async Task<bool> AssignOrderToRiderAsync(int orderId, string riderId)
         {
             try
             {
@@ -301,68 +302,217 @@ namespace VROOM.Services
 
                 if (string.IsNullOrEmpty(businessOwnerId))
                 {
-                    return null; 
+                    _logger.LogWarning("Assign failed: BusinessOwner ID not found in context.");
+                    return false;
                 }
 
                 var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
                 if (businessOwner == null)
                 {
+                    _logger.LogWarning($"Assign failed: No BusinessOwner found with ID {businessOwnerId}");
+                    return false;
+                }
+
+                var order = await orderRepository.GetAsync(orderId);
+                if (order == null || order.IsDeleted)
+                {
+                    _logger.LogWarning($"Assign failed: Order ID {orderId} not found or deleted.");
+                    return false;
+                }
+
+                if (order.State != OrderStateEnum.Created && order.State != OrderStateEnum.Pending)
+                {
+                    _logger.LogWarning($"Assign failed: Order ID {orderId} is in invalid state: {order.State}");
+                    return false;
+                }
+
+                var rider = await riderRepository.GetAsync(riderId);
+                if (rider == null || rider.BusinessID != businessOwner.UserID || rider.Status != RiderStatusEnum.Available)
+                {
+                    _logger.LogWarning($"Assign failed: Rider ID {riderId} is invalid or unavailable.");
+                    return false;
+                }
+
+                order.RiderID = riderId;
+                order.State = OrderStateEnum.Pending;
+                order.ModifiedBy = businessOwnerId;
+                order.ModifiedAt = DateTime.Now;
+
+                orderRepository.Update(order);
+                await Task.Run(() => orderRepository.CustomSaveChanges());
+
+                _logger.LogInformation($"Order {orderId} successfully assigned to Rider {riderId} by BusinessOwner {businessOwnerId}.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception occurred while assigning Order {orderId} to Rider {riderId}.");
+                return false;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        public async Task<OrderDetailsViewModel?> ViewAssignedOrderAsync(int orderId)
+        {
+            try
+            {
+                var riderId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    _logger.LogWarning("View failed: Rider ID not found in context.");
+                    return null;
+                }
+
+                var rider = await riderRepository.GetAsync(riderId);
+                if (rider == null || rider.Status != RiderStatusEnum.Available)
+                {
+                    _logger.LogWarning($"View failed: Rider ID {riderId} not found or not available.");
                     return null;
                 }
 
                 var order = await orderRepository.GetAsync(orderId);
                 if (order == null || order.IsDeleted)
                 {
+                    _logger.LogWarning($"View failed: Order ID {orderId} not found or deleted.");
                     return null;
+                }
+
+                if (order.RiderID != riderId)
+                {
+                    _logger.LogWarning($"View failed: Rider {riderId} attempted to view unassigned Order {orderId}.");
+                    return null;
+                }
+
+                _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
+
+                return new OrderDetailsViewModel
+                {
+                    Id = order.Id,
+                    Title = order.Title,
+                    State = order.State,
+                    Notes = order.Notes,
+                    Weight = order.Weight,
+                    OrderPrice = order.OrderPrice,
+                    DeliveryPrice = order.DeliveryPrice,
+                    Date = order.Date
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception occurred while Rider was viewing Order {orderId}.");
+                return null;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public async Task<bool> ViewOrder(int orderId, string riderId, bool isAccepted)
+        {
+            try
+            {
+                var order = await orderRepository.GetAsync(orderId);
+                if (order == null || order.IsDeleted || order.State != OrderStateEnum.Pending || order.RiderID != riderId)
+                {
+                    return false;
                 }
 
                 var rider = await riderRepository.GetAsync(riderId);
-                if (rider == null || rider.BusinessID != businessOwner.UserID || rider.Status != RiderStatusEnum.Available)
+                if (rider == null || rider.Status != RiderStatusEnum.Available)
                 {
-                    return null;
+                    return false;
                 }
 
-                var orderRider = new OrderRider
+                var orderRiderList = await orderRiderRepository.GetAllAsync();
+                var orderRider = orderRiderList
+                    .FirstOrDefault(or => or.OrderID == orderId && or.RiderID == riderId && !or.IsDeleted);
+
+                if (orderRider == null)
                 {
-                    OrderID = orderId,
-                    RiderID = riderId,
-                    ModifiedAt = DateTime.Now,
-                    ModifiedBy = businessOwnerId,
-                    Owner = businessOwner
-                };
+                    return false;
+                }
 
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                if (isAccepted)
                 {
-                    try
+                    order.State = OrderStateEnum.Confirmed;
+                    order.ModifiedBy = riderId;
+                    order.ModifiedAt = DateTime.Now;
+
+                    rider.Status = RiderStatusEnum.OnDelivery;
+
+                    orderRider.ModifiedBy = riderId;
+                    orderRider.ModifiedAt = DateTime.Now;
+
+                    orderRepository.Update(order);
+                    riderRepository.Update(rider);
+                    orderRiderRepository.Update(orderRider);
+
+                    await Task.Run(() =>
                     {
-                        orderRiderRepository.Add(orderRider);
-                        await Task.Run(() => orderRiderRepository.CustomSaveChanges());
+                        orderRepository.CustomSaveChanges();
+                        riderRepository.CustomSaveChanges();
+                        orderRiderRepository.CustomSaveChanges();
+                    });
 
-                        order.RiderID = riderId;
-                        order.State = OrderStateEnum.Confirmed;
-                        order.ModifiedBy = businessOwnerId;
-                        order.ModifiedAt = DateTime.Now;
-                        orderRepository.Update(order);
-                        await Task.Run(() => orderRepository.CustomSaveChanges());
+                    return true;
+                }
+                else
+                {
+                    order.State = OrderStateEnum.Pending;
+                    //order.RiderID = "null";
+                    order.ModifiedBy = riderId;
+                    order.ModifiedAt = DateTime.Now;
 
-                        rider.Status = RiderStatusEnum.OnDelivery;
-                        riderRepository.Update(rider);
-                        await Task.Run(() => riderRepository.CustomSaveChanges());
+                    rider.Status = RiderStatusEnum.Available;
 
-                        transaction.Complete();
-                        return orderRider;
-                    }
-                    catch (Exception)
+                    orderRider.IsDeleted = true;
+                    orderRider.ModifiedBy = riderId;
+                    orderRider.ModifiedAt = DateTime.Now;
+
+                    orderRepository.Update(order);
+                    riderRepository.Update(rider);
+                    orderRiderRepository.Update(orderRider);
+
+                    await Task.Run(() =>
                     {
-                        return null;
-                    }
+                        orderRepository.CustomSaveChanges();
+                        riderRepository.CustomSaveChanges();
+                        orderRiderRepository.CustomSaveChanges();
+                    });
+
+                    return true;
                 }
             }
             catch (Exception)
             {
-                return null;
+                return false;
             }
         }
+
+
+
 
 
     }

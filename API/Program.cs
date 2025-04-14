@@ -12,6 +12,7 @@ using VROOM.Services;
 using System.Text.Json.Serialization;
 using Serilog;
 using API;
+//using VROOM.Services.Mapping;
 
 
 
@@ -107,6 +108,10 @@ builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
 
+
+
+
+//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 
 // Configure JWT Authentication

@@ -10,9 +10,12 @@ namespace VROOM.Models
 
     public class Order
     {
+        // Shipment will be created when the order is create but we check if the same order have a shipment before 
         public int Id { get; set; }
+
+        //public string BusinessID { get; set; }
         public string CustomerID { get; set; }
-        public string RiderID { get; set; }
+        public string? RiderID { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public OrderStateEnum State { get; set; } = OrderStateEnum.Created;

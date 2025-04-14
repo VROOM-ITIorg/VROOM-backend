@@ -20,6 +20,9 @@ using API;
 // Log.Information("Logger configured.");
 
 
+=========
+using Hangfire;
+>>>>>>>>> Temporary merge branch 2
 
 var builder = WebApplication.CreateBuilder(args);
 

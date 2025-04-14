@@ -22,6 +22,8 @@ builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(OrderRepository));
 builder.Services.AddScoped(typeof(OrderService));
+builder.Services.AddScoped(typeof(CustomerRepository));
+builder.Services.AddScoped(typeof(CustomerServices));
 builder.Services.AddScoped<OrderRiderRepository>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();

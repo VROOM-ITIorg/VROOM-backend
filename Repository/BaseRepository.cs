@@ -4,7 +4,7 @@ using VROOM.Data;
 
 namespace VROOM.Repositories
 {
-    public class BaseRepository<T> where T : class
+    public abstract class BaseRepository<T> where T : class
     {
 
         protected readonly VroomDbContext context;

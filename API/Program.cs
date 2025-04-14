@@ -60,7 +60,7 @@ builder.Services.AddSwaggerGen(c =>
 // Configure DbContext with lazy loading
 builder.Services.AddDbContext<VroomDbContext>(options =>
     options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
         .UseLazyLoadingProxies());
 
 // Configure Identity
@@ -76,7 +76,7 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 
 // Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();

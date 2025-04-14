@@ -23,13 +23,17 @@ builder.Services.AddScoped<IMapRepository, MapRepository>(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     string apiKey = configuration["Radar:ApiKey"];
+    if (string.IsNullOrEmpty(apiKey))
+    {
+        throw new InvalidOperationException("Radar:ApiKey is missing in configuration.");
+    }
 
     var client = new HttpClient();
-    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiKey, "");
-
+    client.DefaultRequestHeaders.Add("Authorization", apiKey);
     var dbContext = serviceProvider.GetRequiredService<MyDbContext>();
     return new MapRepository(client, dbContext);
 });
+
 
 // Register MapService
 builder.Services.AddScoped<MapService>();

@@ -19,7 +19,7 @@ namespace VROOM.Models
         public string Details { get; set; }
         public float Weight { get; set; }
         public string Priority { get; set; }
-        public string State { get; set; }
+        public OrderState State { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }

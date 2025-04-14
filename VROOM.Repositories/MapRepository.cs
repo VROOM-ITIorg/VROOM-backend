@@ -13,7 +13,7 @@ namespace VROOM.Repositories
         private readonly string _radarGeocodeUrl = "https://api.radar.io/v1/geocode/forward?query={0}";
         private readonly string _radarRouteOptimizeUrl = "https://api.radar.io/v1/route/optimize?locations={0}&mode=car&units=imperial";
         private readonly HttpClient _httpClient;
-        private readonly MyDbContext _dbContext; // Use MyDbContext instead of VroomDbContext
+        private readonly MyDbContext _dbContext; // Use MyDbContext
 
         public MapRepository(HttpClient httpClient, MyDbContext dbContext)
         {

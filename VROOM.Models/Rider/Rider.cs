@@ -10,7 +10,7 @@ namespace VROOM.Models
         public int Id { get; set; }
         public int BusinessID { get; set; }
         public string UserID { get; set; }
-        public string Status { get; set; }
+        public RiderStatus Status { get; set; }
         public string Type { get; set; }
         public string Vehicle { get; set; }
         public string Location { get; set; }

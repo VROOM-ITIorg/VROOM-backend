@@ -11,16 +11,29 @@ using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+// using Serilog;
+using API;
+//using VROOM.Services.Mapping;
+
+
+
+// Log.Information("Logger configured.");
+
+
+=========
+using Hangfire;
+>>>>>>>>> Temporary merge branch 2
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add logging configuration
-builder.Services.AddLogging(logging =>
-{
-    logging.AddConsole();
-    logging.AddDebug();
-    logging.SetMinimumLevel(LogLevel.Information);
-});
+
+
+// builder.Host.UseSerilog();
+// Log.Logger = new LoggerConfiguration()
+//     .ReadFrom.Configuration(builder.Configuration)
+//     .Enrich.FromLogContext()
+//     .CreateLogger();
+
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -28,6 +41,12 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
 
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
@@ -88,6 +107,7 @@ builder.Services.AddScoped(typeof(RiderRepository));
 builder.Services.AddScoped(typeof(RoleRepository));
 builder.Services.AddScoped(typeof(AccountManager));
 builder.Services.AddScoped(typeof(OrderRepository));
+builder.Services.AddScoped(typeof(IssuesRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<CustomerServices>();
@@ -99,7 +119,12 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<IssueService>();
 
+
+
+
+//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 
 // Configure JWT Authentication
@@ -199,5 +224,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
+// Log.Information("Application starting...");
 
 app.Run();

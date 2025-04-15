@@ -26,7 +26,7 @@
                                 <div class="form-floating mb-3">
                                     <select asp-for="BusinessName" class="form-select">
                                         @foreach(var item in owners){
-                                            <option value="@item.User.Name">@item.User.Name</option>
+                                            <option value="@item.User?.Name">@item.User?.Name</option>
                                         }
                                     </select>
                                     <label asp-for="BusinessName"></label>
@@ -35,9 +35,9 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-floating mb-3">
-                                    <input asp-for="UserName" class="form-control" placeholder="User Name" />
-                                    <label asp-for="UserName"></label>
-                                    <span asp-validation-for="UserName" class="text-danger"></span>
+                                    <input asp-for="Name" class="form-control" placeholder="User Name" />
+                                    <label asp-for="Name"></label>
+                                    <span asp-validation-for="Name" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>

@@ -23,11 +23,6 @@ namespace VROOM.Repositories
         }
 
 
-        //public async Task<IdentityResult> Register(UserRegisterVM userRegister)
-        //{
-        //    return await UserManager.CreateAsync(userRegister.ToModel(), userRegister.Password);
-        //}
-
         public async Task<SignInResult> Login(LoginViewModel vmodel)
         {
             var User = await UserManager.FindByEmailAsync(vmodel.Email);

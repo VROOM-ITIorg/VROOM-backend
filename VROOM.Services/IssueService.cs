@@ -82,7 +82,7 @@ namespace VROOM.Services
                     var activeOrder = await orderRepository.GetActiveConfirmedOrderByRiderIdAsync(rider.UserID);
                     if (activeOrder != null)
                     {
-                        activeOrder.State = OrderStateEnum.Pending;
+                        activeOrder.State = OrderStateEnum.Created;
                         orderRepository.Update(activeOrder);
                     }
                 }

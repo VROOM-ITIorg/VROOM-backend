@@ -108,3 +108,25 @@ C:\Users\ITI\source\repos\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Se
 C:\Users\ITI\source\repos\VROOM-backend\VROOM.Services\obj\Debug\net8.0\refint\VROOM.Services.dll
 C:\Users\ITI\source\repos\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.pdb
 C:\Users\ITI\source\repos\VROOM-backend\VROOM.Services\obj\Debug\net8.0\ref\VROOM.Services.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Services.deps.json
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Services.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Services.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\ViewModels.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Data.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Models.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Repository.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Repository.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\ViewModels.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Data.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\bin\Debug\net8.0\VROOM.Models.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.csproj.AssemblyReference.cache
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.GeneratedMSBuildEditorConfig.editorconfig
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.AssemblyInfoInputs.cache
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.AssemblyInfo.cs
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.csproj.CoreCompileInputs.cache
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.sourcelink.json
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Se.9C297746.Up2Date
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\refint\VROOM.Services.dll
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\VROOM.Services.pdb
+R:\I will prepare myself to be the best in this world\back\LASTTTTT\VROOM-backend\VROOM.Services\obj\Debug\net8.0\ref\VROOM.Services.dll

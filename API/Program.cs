@@ -11,8 +11,8 @@ using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+
 // using Serilog;
-using API;
 //using VROOM.Services.Mapping;
 
 
@@ -20,9 +20,6 @@ using API;
 // Log.Information("Logger configured.");
 
 
-=========
-using Hangfire;
->>>>>>>>> Temporary merge branch 2
 
 var builder = WebApplication.CreateBuilder(args);
 

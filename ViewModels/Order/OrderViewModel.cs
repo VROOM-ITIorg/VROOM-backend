@@ -41,7 +41,7 @@ namespace VROOM.ViewModels
     {
         // Edit the customerID to CustomerInfo like the username of the customer as it is uniqe then in the orderController 
         public string? CustomerID { get; set; }
-        public string BusinessID { get; set; } // this will be a token 
+        //public string? BusinessID { get; set; } // this will be a token 
         public string? RiderID { get; set; }
         public string? CustomerUsername { get; set; } // search for dropdown list
         public string? CustomerPhoneNumber { get; set; }

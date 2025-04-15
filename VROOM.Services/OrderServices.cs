@@ -53,11 +53,11 @@ namespace VROOM.Services
             customerService = _customerService;
         }
 
-        public async Task CreateOrder(OrderCreateViewModel orderVM )
+        public async Task CreateOrder(OrderCreateViewModel orderVM , string BussinsId)
         {
             // We will check if the customer is exists 
 
-            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = orderVM.BusinessID});
+            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
 
             var order = new Order
             {

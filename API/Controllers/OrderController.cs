@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using VROOM.Models;
 using VROOM.Services;
 using VROOM.ViewModels;
@@ -24,12 +25,23 @@ namespace API.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
 
-        //    if (!ModelState.IsValid) return BadRequest(ModelState); 
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Decode the JWT token
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // Access token claims (e.g., user ID, roles, etc.)
+            var BussinsId = jwtToken.Claims.FirstOrDefault()?.Value;
+
 
             // Take CustomerInfo and call a func to check if the user exist or not and return id
             // and if the customer is not exsit we will create a customer
             // func here
-            await orderService.CreateOrder(model); // new method we'll define below
+            await orderService.CreateOrder(model, BussinsId); // new method we'll define below
 
             return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created" });
         }
@@ -37,6 +49,7 @@ namespace API.Controllers
         [HttpGet("getOrder/{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
+
             var order = await orderService.GetOrderByIdAsync(id) ?? NotFound() ;
 
             return Ok(order);

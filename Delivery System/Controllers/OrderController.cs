@@ -28,7 +28,7 @@ namespace Delivery_System.Controllers
         public IActionResult CreateOrders([FromBody] OrderCreateViewModel model)
         {
 
-            orderServices.CreateOrder(model);
+            //orderServices.CreateOrder(model);
             return View(orderServices.GetActiveOrder());
         }
 

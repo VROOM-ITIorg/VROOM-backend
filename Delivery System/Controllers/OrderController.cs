@@ -6,17 +6,15 @@ using VROOM.ViewModels;
 namespace Delivery_System.Controllers
 {
     [Authorize(Roles = "Admin")]
-    [Route("vroom-admin/[controller]")]
     public class OrderController : Controller
     {
         private readonly OrderService orderServices;
-
-
         public OrderController(OrderService _orderServices)
         {
             orderServices = _orderServices;
         }
 
+        [HttpGet]
         [Route("ActiveOrder")]
         public IActionResult ActiveOrders()
         {

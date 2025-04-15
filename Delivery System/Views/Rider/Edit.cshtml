@@ -28,7 +28,7 @@
                                     <select asp-for="BusinessName" class="form-select">
                                         @foreach (var item in owners)
                                         {
-                                            <option value="@item.User.Name">@item.User.Name</option>
+                                            <option value="@item.User?.Name">@item.User?.Name</option>
                                         }
                                     </select>
                                     <label asp-for="BusinessName"></label>

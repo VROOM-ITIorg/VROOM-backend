@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
 using VROOM.Models;
-using VROOM.Models;
+
 
 namespace VROOM.Repositories
 {
@@ -94,7 +94,19 @@ namespace VROOM.Repositories
                 .ToList();
             return ActOrder;
         }
-         
+
+
+
+        public async Task<Order?> GetActiveConfirmedOrderByRiderIdAsync(string riderId)
+        {
+            return await context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Rider)
+                .Include(o => o.OrderRider)
+                .Include(o => o.OrderRoute)
+                .Where(o => o.Rider.UserID == riderId && o.State == OrderStateEnum.Confirmed)
+                .FirstOrDefaultAsync();
+        }
         public List<Order> GetOrderPerformance(int id)
         {
             var orderReports = context.Orders

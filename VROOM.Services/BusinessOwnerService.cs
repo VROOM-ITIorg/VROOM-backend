@@ -87,7 +87,7 @@ namespace VROOM.Services
         }
 
 
-        public async void CreateOrder(Order order)
+        public  void CreateOrder(Order order)
         {
             orderRepository.Add(order);
             orderRepository.CustomSaveChanges();

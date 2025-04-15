@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -18,6 +20,21 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddDbContext<VroomDbContext>(i =>
     i.UseLazyLoadingProxies()
      .UseSqlServer(builder.Configuration.GetConnectionString("DB")));
+
+builder.Services.AddScoped<IMapRepository, MapRepository>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    string apiKey = "prj_live_pk_7735fee5f11db4ba5e136a953720e8ea33a52447";
+    if (string.IsNullOrEmpty(apiKey))
+    {
+        throw new InvalidOperationException("Radar:ApiKey is missing in configuration.");
+    }
+
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Add("Authorization", apiKey);
+    var dbContext = serviceProvider.GetRequiredService<VroomDbContext>();
+    return new MapRepository(client, dbContext);
+});
 
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<VroomDbContext>();
 
@@ -40,6 +57,7 @@ builder.Services.AddScoped(typeof(CustomerServices));
 builder.Services.AddScoped(typeof(CustomerRepository));
 builder.Services.AddScoped(typeof(UserService));
 builder.Services.AddScoped(typeof(OrderRiderRepository));
+builder.Services.AddScoped<MapService>();
 
 
 
@@ -50,6 +68,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,7 +76,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
-
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 
@@ -69,6 +88,11 @@ app.UseAuthorization();
 app.MapControllerRoute(
 	name: "default",
 	pattern: "{Controller=account}/{Action=login}/{id?}");
+
+app.MapControllerRoute(
+
+    name: "map",
+    pattern: "{Controller=map}/{Action=index}/{id?}");
 
 
 app.Run();

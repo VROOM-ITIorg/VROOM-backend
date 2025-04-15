@@ -69,30 +69,77 @@ namespace API.Controllers
         [HttpPost("assignOrderManually")]
         public async Task<IActionResult> AssignOrderToRider([FromBody] AssignOrderToRiderRequest request)
         {
-            if (request == null)
+            if (request == null || request.OrderId <= 0 || string.IsNullOrEmpty(request.RiderId))
             {
-                return BadRequest("Invalid data.");
+                return BadRequest(new { message = "Invalid order or rider details." });
             }
 
-            var result = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId);
+            var success = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId);
 
-            if (result == null)
+            if (!success)
             {
-                return NotFound("Unable to assign order to rider. Please check the details.");
+                return NotFound(new { message = "Unable to assign the order to the rider. Please check the details." });
             }
 
-  
-            return Ok(result);
+            return Ok(new { message = "Order successfully assigned to the rider." });
+        
+
         }
+
+
+
+   
+
+
+
+
+
+
+
 
         public class AssignOrderToRiderRequest
         {
-
             public int OrderId { get; set; }
-
-
             public string RiderId { get; set; }
+        }
 
+
+
+
+
+
+
+
+
+
+        //[Authorize(Roles = "Rider")]
+        //[HttpPost("respondToOrder")]
+        //public async Task<IActionResult> RespondToOrder([FromBody] RespondToOrderRequest request)
+        //{
+        //    if (request == null || request.OrderId <= 0 || string.IsNullOrEmpty(request.RiderId))
+        //    {
+        //        return BadRequest(new { message = "Invalid order or rider details." });
+        //    }
+
+        //    var result = await _businessOwnerService.RespondToOrderAsync(request.OrderId, request.RiderId, request.IsAccepted);
+
+        //    if (result)
+        //    {
+        //        return Ok(new { message = request.IsAccepted ? "Order accepted." : "Order rejected." });
+        //    }
+        //    else
+        //    {
+        //        return BadRequest(new { message = "Unable to respond to the order. Please check the order status or rider." });
+        //    }
+        //}
+
+
+
+        public class RespondToOrderRequest
+        {
+            public int OrderId { get; set; }
+            public string RiderId { get; set; }
+            public bool IsAccepted { get; set; }
         }
 
         

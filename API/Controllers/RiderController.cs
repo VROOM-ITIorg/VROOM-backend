@@ -1,24 +1,46 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using VROOM.Data;
 using VROOM.Repositories;
+using VROOM.Services;
 
 namespace API.Controllers
 {
-    //[ApiController]
-    //[Route("api/{Controller}")]
+    [ApiController]
+    [Route("api/[controller]")]
     public class RiderController : ControllerBase
     {
+
         private readonly VroomDbContext  context;
         private readonly RiderRepository riderManager;
-        public RiderController(VroomDbContext _context, RiderRepository _riderManager)
+        private readonly BusinessOwnerService _businessOwnerService;
+        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerService businessOwnerService)
         {
             _context = context;
             _riderManager = riderManager;
+            _businessOwnerService = businessOwnerService;
         }
+
+
+
+        [HttpGet("assigned/{orderId}")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> ViewAssignedOrder(int orderId)
+        {
+            var result = await _businessOwnerService.ViewAssignedOrderAsync(orderId);
+
+            if (result == null)
+                return NotFound(new { message = "Order not found or not assigned to you." });
+
+            return Ok(result);
+        }
+
+
+
 
 
         [HttpGet]

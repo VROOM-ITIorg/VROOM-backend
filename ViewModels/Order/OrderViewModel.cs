@@ -61,12 +61,17 @@ namespace VROOM.ViewModels
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public string BusinessOwner { get; set; }
+        public string CustomerName { get; set; }
+        public string RiderName { get; set; }
+        public string Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
         public OrderStateEnum State { get; set; }
-        public string Notes { get; set; }
-        public float Weight { get; set; }
+        public bool IsBreakable { get; set; }
+        public string Details { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
     }
+
 }
 

@@ -86,7 +86,7 @@ namespace VROOM.Repositories
         public List<Order> GetActiveOrder()
         {
            var ActOrder = context.Orders
-                .Where(o => o.State == OrderStateEnum.Shipped || o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Created)
+                .Where(o => o.State ==  OrderStateEnum.Shipped || o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Created)
                 .Include(o => o.Customer)
                 .Include(o => o.Rider)
                 .Include(o => o.OrderRider)

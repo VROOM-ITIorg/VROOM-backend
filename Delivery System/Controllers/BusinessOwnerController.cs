@@ -44,9 +44,9 @@ namespace Delivery_System.Controllers
 
         [HttpGet]
         [Route("GetAllOwners")]
-        public IActionResult GetAllOwners(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public IActionResult GetAllOwners(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
-            var Owners = adminServices.ShowAllOwners( Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
+            var Owners = adminServices.ShowAllOwners( Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort : sort);
             ViewData["Owners"] = Owners;
             return View();
         }

@@ -82,6 +82,7 @@ namespace VROOM.Services
                 };
                 newUser.ProfilePicture = UploadImageProfile<AdminCreateRiderVM>(model);
 
+                
                 var res = await userManager.CreateAsync(newUser);
 
                 var newRider = new Rider();
@@ -175,13 +176,13 @@ namespace VROOM.Services
         {
             return await ownerRepository.GetAllAsync();
         }
-        public PaginationViewModel<AdminRiderDetialsVM> ShowAllRiders(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public async Task<(PaginationViewModel<AdminRiderDetialsVM> Riders, IEnumerable<BusinessOwner> owners)> ShowAllRiders(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc", string owner = "All")
         {
-            return riderRepository.Search(status: status, Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
+            return (riderRepository.Search(status: status, Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort : sort, owner : owner), await ownerRepository.GetAllAsync());
         }
-        public PaginationViewModel<AdminBusOwnerDetialsVM> ShowAllOwners(string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public PaginationViewModel<AdminBusOwnerDetialsVM> ShowAllOwners(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
-            return ownerRepository.Search(Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
+            return ownerRepository.Search(Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort :sort);
         }
         public async Task EditOwner(AdminEditBusOwnerVM OwnerVM)
         {

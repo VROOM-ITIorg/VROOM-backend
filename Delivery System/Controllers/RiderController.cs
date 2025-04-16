@@ -40,13 +40,16 @@ namespace API.Controllers
             return View(model);
         }
 
-
-        [Route("Index")]
-        public IActionResult Index(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        [HttpGet]
+        [Route("GetAllRiders")]
+        public IActionResult Index(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc", string owner= "All")
         {
-            var Riders = adminServices.ShowAllRiders(status, Name, PhoneNumber, pageNumber, pageSize);
+            var res = adminServices.ShowAllRiders(status, Name, PhoneNumber, pageNumber, pageSize, sort, owner);
+            var Riders = res.Result.Riders;
+            var Owners = res.Result.owners;
 
             ViewData["Riders"] = Riders;
+            ViewData["Owners"] = Owners;
 
             return View("index");
         }
@@ -65,7 +68,7 @@ namespace API.Controllers
 
         [HttpPost]
         [Route("Edit/{id}")]
-        public async Task<IActionResult> Edit(AdminEditRiderVM model)
+        public async Task<IActionResult> Edit(AdminEditRiderVM model) 
         {
             if (!ModelState.IsValid)
             {

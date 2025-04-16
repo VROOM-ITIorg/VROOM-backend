@@ -54,7 +54,6 @@ namespace API.Controllers
             return View("index");
         }
 
-
         [HttpGet]
         [Route("Edit/{id}")]
         public async Task<IActionResult> Edit(string id)
@@ -72,7 +71,7 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                  return View(model);
             }
             await adminServices.EditRider(model);
             return RedirectToAction("Index");

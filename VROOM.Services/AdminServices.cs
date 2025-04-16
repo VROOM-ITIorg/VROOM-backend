@@ -85,6 +85,7 @@ namespace VROOM.Services
                 
                 var res = await userManager.CreateAsync(newUser);
 
+
                 var newRider = new Rider();
                 newRider = model.ToModel();
                 newRider.UserID = newUser.Id;

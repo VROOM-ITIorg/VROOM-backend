@@ -87,6 +87,38 @@ namespace VROOM.Services
             
         }
 
+
+        public async Task CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
+        {
+            // We will check if the customer is exists 
+
+            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername, Name = orderVM.CustomerUsername, PhoneNumber = orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
+
+            var order = new Order
+            {
+                CustomerID = customer.UserID,
+                RiderID = orderVM.RiderID,
+                ItemsType = orderVM.ItemsType,
+                Title = orderVM.Title,
+                IsBreakable = orderVM.IsBreakable,
+                Notes = orderVM.Notes,
+                Details = orderVM.Details,
+                Weight = orderVM.Weight,
+                OrderPriority = orderVM.OrderPriority,
+                CustomerPriority = orderVM.CustomerPriority,
+                OrderPrice = orderVM.OrderPrice,
+                DeliveryPrice = orderVM.DeliveryPrice,
+                Date = DateTime.Now
+            };
+
+            orderRepository.Add(order);
+            orderRepository.CustomSaveChanges();
+            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
+            await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
+
+
+        }
+
         public async Task<object> GetOrderByIdAsync(int orderId)
         {
             Order order = await orderRepository.GetAsync(orderId);

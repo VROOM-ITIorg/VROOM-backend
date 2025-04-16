@@ -97,16 +97,17 @@ namespace VROOM.Repositories
 
 
 
-        public async Task<Order?> GetActiveConfirmedOrderByRiderIdAsync(string riderId)
+        public async Task<List<Order>> GetActiveConfirmedOrdersByRiderIdAsync(string riderId)
         {
             return await context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.Rider)
                 .Include(o => o.OrderRider)
                 .Include(o => o.OrderRoute)
-                .Where(o => o.Rider.UserID == riderId && o.State == OrderStateEnum.Confirmed)
-                .FirstOrDefaultAsync();
+                .Where(o => o.Rider.UserID == riderId && (o.State == OrderStateEnum.Shipped || o.State == OrderStateEnum.Confirmed))
+                .ToListAsync();
         }
+
         public List<Order> GetOrderPerformance(int id)
         {
             var orderReports = context.Orders

@@ -1,66 +1,78 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using ViewModels;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using VROOM.Models;
-using VROOM.Repository;
+using ViewModels;
 using VROOM.Services;
 
-namespace API.Controllers
+[ApiController]
+[Route("api/issues")]
+public class IssuesController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class IssuesController : Controller
+    private readonly IssueService _issueService;
+    private readonly ILogger<IssuesController> _logger;
+
+    public IssuesController(IssueService issueService, ILogger<IssuesController> logger)
     {
-        private readonly IssueService issueService;
-        public IssuesController(IssueService _issueService)
+        _issueService = issueService;
+        _logger = logger;
+    }
+
+    [HttpPost("report")]
+    public async Task<IActionResult> ReportIssue([FromBody] IssuesViewModel request)
+    {
+        if (!ModelState.IsValid)
         {
-            issueService = _issueService;
+            _logger.LogWarning("Invalid issue report model.");
+            return BadRequest(new
+            {
+                Status = "Error",
+                Message = "Invalid request data.",
+                Details = string.Join("; ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage))
+            });
         }
 
-
-
-
-        [HttpPost("report")]
-        [Authorize(Roles = "Rider")] 
-        public async Task<IActionResult> ReportIssue([FromBody] IssuesViewModel issue)
+        try
         {
-            var result = await issueService.ReportIssue(issue);
+            _logger.LogInformation("Reporting issue for RiderID: {RiderID}", request.RiderID);
 
-            if (!result.IsSuccess)
-                return BadRequest(new { message = result.Error });
+            var result = await _issueService.ReportIssue(new IssuesViewModel
+            {
+                RiderID = request.RiderID,
+                Type = request.Type,
+                Severity = request.Severity,
+                Note = request.Note,
+                ReportedAt = DateTime.UtcNow
+            });
 
-            return Ok(result.Value);
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = result.Error ?? "Failed to report issue."
+                });
+            }
+
+            return Ok(new
+            {
+                Status = "Success",
+                Issue = result.Value
+            });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> ReportingIssue(IssuesViewModel issues)
-        //{
-
-        //    var result = await issueService.ReportIssue(issues);
-
-
-        //    if (!result.IsSuccess)
-        //    {
-
-        //        return BadRequest(result.Error);
-        //    }
-
-
-        //    return Ok(result.Value);
-        //}
-
-
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while reporting issue.");
+            return StatusCode(500, new
+            {
+                Status = "Error",
+                Message = "An internal server error occurred.",
+                Details = ex.Message
+            });
+        }
     }
 }

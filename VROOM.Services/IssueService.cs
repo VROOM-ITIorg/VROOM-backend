@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 using ViewModels;
@@ -17,83 +14,119 @@ namespace VROOM.Services
     {
         private readonly IssuesRepository issuesRepository;
         private readonly RiderRepository riderRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly BusinessOwnerService businessOwnerService;
         private readonly OrderRepository orderRepository;
         private readonly ILogger<IssueService> _logger;
-        public IssueService( IssuesRepository _issuesRepository, RiderRepository _riderRepository, ILogger<IssueService> logger, IHttpContextAccessor httpContextAccessor, OrderRepository _orderRepository)
+
+        public IssueService(
+            IssuesRepository _issuesRepository,
+            RiderRepository _riderRepository,
+            ILogger<IssueService> logger,
+            OrderRepository _orderRepository,
+            BusinessOwnerService businessOwnerService)
         {
-           issuesRepository = _issuesRepository;
+            issuesRepository = _issuesRepository;
             riderRepository = _riderRepository;
             _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
-            _orderRepository = orderRepository;
-
+            orderRepository = _orderRepository;
+            this.businessOwnerService = businessOwnerService;
         }
+
         public async Task<Result<Issues>> ReportIssue(IssuesViewModel issues)
         {
-           
-            var riderIdClaim = _httpContextAccessor.HttpContext?.User?.FindFirst("RiderID")?.Value;
-
-            if (string.IsNullOrEmpty(riderIdClaim) || !int.TryParse(riderIdClaim, out int riderId))
+            if (issues == null || issues.RiderID == null)
             {
-                _logger.LogWarning("Invalid or missing RiderID in token.");
-                return Result<Issues>.Failure("Unauthorized access: Rider ID is missing.");
+                _logger.LogWarning("Invalid or missing RiderID in request.");
+                return Result<Issues>.Failure("Invalid request: Rider ID is required.");
             }
 
-            _logger.LogInformation("Started reporting issue for RiderID: {RiderID}", riderId);
+            _logger.LogInformation("Started reporting issue for RiderID: {RiderID}", issues.RiderID);
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                var rider = await riderRepository.GetAsync(riderId);
-
-                if (rider == null)
+                try
                 {
-                    _logger.LogWarning("Rider not found with RiderID: {RiderID}", riderId);
-                    return Result<Issues>.Failure("Rider not found");
-                }
-
-                var reportedIssue = new Issues
-                {
-                    RiderID = rider.UserID,
-                    Note = issues.Note,
-                    Severity = issues.Severity,
-                    Type = issues.Type,
-                };
-
-                _logger.LogInformation("Creating issue for RiderID: {RiderID}, Severity: {Severity}, Type: {Type}",
-                                        riderId, issues.Severity, issues.Type);
-
-                issuesRepository.Add(reportedIssue);
-
-        
-                if (issues.Type == IssueTypeEnum.Crash ||
-                    issues.Type == IssueTypeEnum.Police ||
-                    issues.Type == IssueTypeEnum.StalledVehicle)
-                {
-                    _logger.LogInformation("Rider-related issue detected. Updating Rider and Order statuses.");
-
-                    if (rider.Status == RiderStatusEnum.OnDelivery)
+                    var rider = await riderRepository.GetAsync(issues.RiderID);
+                    if (rider == null)
                     {
-                        rider.Status = RiderStatusEnum.Available;
-                        riderRepository.Update(rider);
+                        _logger.LogWarning("Rider not found with RiderID: {RiderID}", issues.RiderID);
+                        return Result<Issues>.Failure("Rider not found");
                     }
 
-                   
-                    var activeOrder = await orderRepository.GetActiveConfirmedOrderByRiderIdAsync(rider.UserID);
-                    if (activeOrder != null)
+                    var reportedIssue = new Issues
                     {
-                        activeOrder.State = OrderStateEnum.Created;
-                        orderRepository.Update(activeOrder);
+                        RiderID = rider.UserID,
+                        Note = issues.Note,
+                        Severity = issues.Severity,
+                        Type = issues.Type,
+                        ReportedAt = DateTime.UtcNow
+                    };
+                    //route issue
+                    issuesRepository.Add(reportedIssue);
+
+
+                    if (IsCriticalIssue(issues.Type))
+                    {
+                        await HandleCriticalIssue(rider, reportedIssue);
                     }
+
+             
+                     issuesRepository.CustomSaveChanges();
+                    scope.Complete();
+
+                    return Result<Issues>.Success(reportedIssue);
                 }
-
-                issuesRepository.CustomSaveChanges();
-
-                scope.Complete();
-                return Result<Issues>.Success(reportedIssue); 
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing issue report for RiderID: {RiderID}", issues.RiderID);
+                    return Result<Issues>.Failure("An error occurred while processing the issue");
+                }
             }
         }
 
+        private bool IsCriticalIssue(IssueTypeEnum issueType)
+        {
+            return issueType == IssueTypeEnum.Crash ||
+                 //  issueType == IssueTypeEnum.Police ||
+                   issueType == IssueTypeEnum.StalledVehicle;
+        }
 
+        private async Task HandleCriticalIssue(Rider rider, Issues reportedIssue)
+        {
+            _logger.LogInformation("Critical issue detected. Attempting rider reassignment.");
+  
+            if (rider.Status == RiderStatusEnum.OnDelivery)
+            {
+                rider.Status = RiderStatusEnum.Unavailable;
+
+                riderRepository.Update(rider);
+                _logger.LogInformation("Updated rider {RiderID} status to Available", rider.UserID);
+            }
+
+
+           
+  
+            var activeOrders = await orderRepository.GetActiveConfirmedOrdersByRiderIdAsync(rider.UserID);
+            if (activeOrders == null)
+            {
+                _logger.LogInformation("No active rider found for order {RiderID}", rider.UserID);
+                return;
+            }
+
+
+            foreach (var activeOrder in activeOrders) {
+                activeOrder.State = OrderStateEnum.Pending;
+                orderRepository.Update(activeOrder);
+                orderRepository.CustomSaveChanges();
+                _logger.LogInformation("Reset order {OrderID} state to Created", activeOrder.Id);
+
+
+                //route start point is the same place the rider is at right now>>>
+
+               
+            }
+        }
+
+  
     }
-}
+    }

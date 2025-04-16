@@ -62,7 +62,7 @@ namespace VROOM.Services
             ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _jwtSecret = configuration["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret is missing in configuration.");
+            _jwtSecret = "ShampooShampooShampooShampooShampooShampoo" ?? throw new ArgumentNullException("Jwt:Secret is missing in configuration.");
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 

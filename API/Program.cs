@@ -60,7 +60,7 @@ builder.Services.AddSwaggerGen(c =>
 // Configure DbContext with lazy loading
 builder.Services.AddDbContext<VroomDbContext>(options =>
     options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSqlServer("Data Source=.;Initial Catalog=Vroom_DB;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True")
         .UseLazyLoadingProxies());
 
 // Configure Identity
@@ -76,7 +76,7 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServerStorage("Data Source=.;Initial Catalog=Vroom_DB;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True"));
 
 // Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();
@@ -103,7 +103,7 @@ builder.Services.AddScoped<NotificationService>();
 
 
 // Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"];
+var jwtSecret = "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
 {
     throw new InvalidOperationException("JWT Secret is missing or too short in configuration. It must be at least 16 characters long.");

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using VROOM.Data;
+using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
 
@@ -17,12 +18,15 @@ namespace API.Controllers
 
         private readonly VroomDbContext  context;
         private readonly RiderRepository riderManager;
+        private readonly RiderService ridService;
+
         private readonly BusinessOwnerService _businessOwnerService;
-        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerService businessOwnerService)
+        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerService businessOwnerService, RiderService _riderService)
         {
             _context = context;
             _riderManager = riderManager;
             _businessOwnerService = businessOwnerService;
+            _riderService = ridService
         }
 
 
@@ -40,6 +44,47 @@ namespace API.Controllers
         }
 
 
+
+
+        [HttpPost("start-delivery")]
+        public async Task<IActionResult> StartDelivery([FromQuery] string riderId, [FromQuery] int orderId)
+        {
+            var result = await ridService.StartDeliveryAsync(riderId, orderId);
+            if (result == null)
+                return BadRequest("Unable to start delivery. Check rider status or order state.");
+
+            return Ok(new
+            {
+                Message = "Delivery started successfully.",
+                Order = result
+            });
+        }
+
+        [HttpPost("update-delivery-status")]
+        public async Task<IActionResult> UpdateDeliveryStatus([FromQuery] string riderId, [FromQuery] int orderId, [FromQuery] OrderStateEnum newState)
+        {
+            if (string.IsNullOrEmpty(riderId) || orderId <= 0)
+                return BadRequest(new { Message = "Invalid rider ID or order ID." });
+
+            try
+            {
+                var updatedOrder = await ridService.UpdateDeliveryStatusAsync(riderId, orderId, newState);
+
+                return Ok(new
+                {
+                    Message = $"Order delivery status successfully updated to {newState}.",
+                    Order = updatedOrder
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new {ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { ex.Message });
+            }
+        }
 
 
 

@@ -55,15 +55,15 @@ namespace API.Controllers
             return Ok(order);
         }
 
-        // update order status 
-        [HttpPost("updateOrder/{id}")]
-        public async Task<IActionResult> AccOrRejOrder(int id , [FromBody] OrderStateEnum orderState)
-        {
-            // There are 5 events can we update the state of the order this now 
-            var order = await orderService.UpdateOrderState(id, orderState);
-            // if the order is accepted we will retrun a good massege to the customer if not 
-            return Ok(new { Order = order , Message = "order is updated"});
-        }
+        //// update order status 
+        //[HttpPost("updateOrder/{id}")]
+        //public async Task<IActionResult> AccOrRejOrder(int id , [FromBody] OrderStateEnum orderState)
+        //{
+        //    // There are 5 events can we update the state of the order this now 
+        //    var order = await orderService.UpdateOrderState(id, orderState);
+        //    // if the order is accepted we will retrun a good massege to the customer if not 
+        //    return Ok(new { Order = order , Message = "order is updated"});
+        //}
 
         // Track order 
         [HttpPost("trackOrder/{id}")]

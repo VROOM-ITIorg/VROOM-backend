@@ -96,6 +96,7 @@ builder.Services.AddHangfire(configuration => configuration
 
 // Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();
+builder.Services.AddHttpClient();
 //builder.Services.AddDbContext<VroomDbContext>
 //    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddIdentity<User, IdentityRole>()
@@ -111,6 +112,12 @@ builder.Services.AddScoped<CustomerServices>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
+builder.Services.AddScoped<RouteRepository>();
+builder.Services.AddScoped<RouteServices>();
+builder.Services.AddScoped<OrderRouteRepository>();
+builder.Services.AddScoped<OrderRouteServices>();
+builder.Services.AddScoped<ShipmentRepository>();
+builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();

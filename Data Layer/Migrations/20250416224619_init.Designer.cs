@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250414173933_added-MapModel")]
-    partial class addedMapModel
+    [Migration("20250416224619_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -641,9 +641,6 @@ namespace VROOM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("DestinationArea")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -654,7 +651,7 @@ namespace VROOM.Data.Migrations
                     b.Property<double>("DestinationLat")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
@@ -679,15 +676,17 @@ namespace VROOM.Data.Migrations
                     b.Property<float>("SafetyIndex")
                         .HasColumnType("real");
 
-                    b.Property<int>("ShipmentID")
+                    b.Property<int?>("ShipmentID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Start")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Waypoints")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("dateTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -718,14 +717,14 @@ namespace VROOM.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EndId")
-                        .HasColumnType("int");
-
                     b.Property<double>("EndLang")
                         .HasColumnType("float");
 
                     b.Property<double>("EndLat")
                         .HasColumnType("float");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -743,8 +742,8 @@ namespace VROOM.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("StartId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("startTime")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -1104,8 +1103,7 @@ namespace VROOM.Data.Migrations
                     b.HasOne("VROOM.Models.Shipment", "Shipment")
                         .WithMany("Routes")
                         .HasForeignKey("ShipmentID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Shipment");
                 });

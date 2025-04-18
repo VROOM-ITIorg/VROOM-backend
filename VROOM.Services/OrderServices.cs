@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ViewModels;
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -46,14 +47,27 @@ namespace VROOM.Services
         }
 
         private OrderRepository orderRepository;
+        private RiderRepository riderRepository;
         private NotificationService notificationService;
         private CustomerServices customerService;
+        private OrderRouteServices orderRouteServices;
+        private RouteServices routeService;
 
-        public OrderService(OrderRepository _orderRepository, NotificationService _notificationService, CustomerServices _customerService)
+        public OrderService(
+            OrderRepository _orderRepository, 
+            NotificationService _notificationService,
+            CustomerServices _customerService,
+            RouteServices _routeServices,
+            RiderRepository _riderRepository,
+            OrderRouteServices _orderRouteServices
+            )
         {
             orderRepository = _orderRepository;
             notificationService = _notificationService;
             customerService = _customerService;
+            routeService = _routeServices;
+            riderRepository = _riderRepository;
+            orderRouteServices = _orderRouteServices;
         }
 
         public async Task CreateOrder(OrderCreateViewModel orderVM , string BussinsId)
@@ -61,6 +75,8 @@ namespace VROOM.Services
             // We will check if the customer is exists 
 
             var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
+
+            var route = await routeService.CreateRoute(orderVM.RouteLocation);
 
             var order = new Order
             {
@@ -81,6 +97,9 @@ namespace VROOM.Services
 
             orderRepository.Add(order);
             orderRepository.CustomSaveChanges();
+
+            await orderRouteServices.CreateOrderRoute(order.Id, route.Id);
+
             await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id,"Success");
             await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
@@ -115,21 +134,31 @@ namespace VROOM.Services
         // In service section
 
         // Automatically
-        public void AssignOrderToRiderAuto(int orderId)
-        {
-            var order = orderRepository.GetAsync(orderId);
+        //public async void AssignOrderToRider(int orderId , string riderID)
+        //{
+        //    var rider = await riderRepository.GetAsync(riderID);
 
-        }
+        //    await UpdateOrderState(orderId, OrderStateEnum.Confirmed);
+
+
+
+        //}
 
         // Calculate Total Revenue
         public decimal CalculateTotalRevenue(int orderId) => orderRepository.SumOrderRevenue(orderId);
 
         // update Order Status
-        public async Task<Order> UpdateOrderState(int orderID , OrderStateEnum orderState)
+        public async Task<Order> UpdateOrderState(int orderID , OrderStateEnum orderState , string riderId, string businessOwnerId)
         {
             Order order = await orderRepository.GetAsync(orderID);
             if (order == null || order.IsDeleted) return null;
 
+
+
+            order.RiderID = riderId;
+            order.State = OrderStateEnum.Pending;
+            order.ModifiedBy = businessOwnerId;
+            order.ModifiedAt = DateTime.Now;
             order.State = orderState;
 
             orderRepository.Update(order);
@@ -149,7 +178,7 @@ namespace VROOM.Services
                 {
                     if (order.ModifiedAt.HasValue && order.ModifiedAt.Value.AddMinutes(30) <= DateTime.UtcNow)
                     {
-                        await UpdateOrderState(order.Id, OrderStateEnum.Shipped);
+                        //await UpdateOrderState(order.Id, OrderStateEnum.Shipped);
                         // Here we will send notification to the bussiness owner tell him that the oreder been too long in pending state
                         Console.WriteLine($"Order {order.Id} updated to Shipped.");
                     }

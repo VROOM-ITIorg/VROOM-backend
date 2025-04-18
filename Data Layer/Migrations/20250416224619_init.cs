@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VROOM.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class addedMapModel : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -402,8 +402,8 @@ namespace VROOM.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StartId = table.Column<int>(type: "int", nullable: false),
-                    EndId = table.Column<int>(type: "int", nullable: false),
+                    startTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RiderID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BeginningLang = table.Column<double>(type: "float", nullable: false),
                     BeginningLat = table.Column<double>(type: "float", nullable: false),
@@ -491,18 +491,18 @@ namespace VROOM.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ShipmentID = table.Column<int>(type: "int", nullable: false),
+                    ShipmentID = table.Column<int>(type: "int", nullable: true),
                     OriginLang = table.Column<double>(type: "float", nullable: false),
                     OriginLat = table.Column<double>(type: "float", nullable: false),
                     OriginArea = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DestinationLang = table.Column<double>(type: "float", nullable: false),
                     DestinationLat = table.Column<double>(type: "float", nullable: false),
                     DestinationArea = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Waypoints = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Waypoints = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Start = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    End = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    End = table.Column<DateTime>(type: "datetime2", nullable: true),
                     SafetyIndex = table.Column<float>(type: "real", nullable: false),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true)

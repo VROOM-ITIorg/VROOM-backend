@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ViewModels.Route;
 using VROOM.Models;
 
 
@@ -45,6 +46,7 @@ namespace VROOM.ViewModels
         public string? RiderID { get; set; }
         public string? CustomerUsername { get; set; } // search for dropdown list
         public string? CustomerPhoneNumber { get; set; }
+        public RouteLocation RouteLocation { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public bool IsBreakable { get; set; }
@@ -68,6 +70,8 @@ namespace VROOM.ViewModels
         public OrderStateEnum State { get; set; }
         public bool IsBreakable { get; set; }
         public string Details { get; set; }
+        public string Notes { get; set; }
+        public float Weight { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }

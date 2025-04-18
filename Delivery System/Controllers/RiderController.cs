@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
@@ -14,9 +15,11 @@ namespace API.Controllers
     public class RiderController : Controller
     {
         private readonly AdminServices adminServices;
-        public RiderController(AdminServices _adminServices)
+        private readonly UserManager<User> userManager;
+        public RiderController(AdminServices _adminServices, UserManager<User> _userManager)
         {
             adminServices = _adminServices;
+            userManager = _userManager;
         }
 
         [HttpGet]
@@ -32,6 +35,12 @@ namespace API.Controllers
         [Route("Create")]
         public async Task<IActionResult> Create(AdminCreateRiderVM model)
         {
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already Exist");
+                return View(model);
+            }
             if (ModelState.IsValid)
             {
                 await adminServices.CreateNewRider(model);
@@ -75,6 +84,13 @@ namespace API.Controllers
         [Route("Edit/{id}")]
         public async Task<IActionResult> Edit(AdminEditRiderVM model) 
         {
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already Exist");
+                return View(model);
+            }
+
             if (!ModelState.IsValid)
             {
                   return View(model);

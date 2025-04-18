@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
@@ -14,9 +15,12 @@ namespace Delivery_System.Controllers
     {
 
         private readonly AdminServices adminServices;
-        public BusinessOwnerController(AdminServices _adminServices)
+        private readonly UserManager<User> userManager;
+
+        public BusinessOwnerController(AdminServices _adminServices, UserManager<User> _userManager)
         {
             adminServices = _adminServices;
+            userManager = _userManager;
         }
 
 
@@ -34,6 +38,12 @@ namespace Delivery_System.Controllers
         {
             if (ModelState.IsValid)
             {
+                var existingUser = await userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Email", "Email is already Exist");
+                    return View(model);
+                }
 
                 await adminServices.CreateNewOwner(model);
 
@@ -73,6 +83,12 @@ namespace Delivery_System.Controllers
 
         public async Task<IActionResult> Edit(AdminEditBusOwnerVM model)
         {
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already Exist");
+                return View(model);
+            }
             await adminServices.EditOwner(model);
             return RedirectToAction("GetAllOwners");
         }

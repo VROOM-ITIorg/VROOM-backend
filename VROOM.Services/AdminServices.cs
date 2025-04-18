@@ -23,8 +23,8 @@ namespace VROOM.Services
         private readonly RiderRepository riderRepository;
         private readonly TransactionWork<Rider> transactionWork;
         private readonly TransactionWork<BusinessOwner> transactionWorkBO;
-
-        public AdminServices(AccountManager _accountManager, BusinessOwnerRepository _ownerRepository, TransactionWork<Rider> _transactionWork, UserManager<User> _userManager, TransactionWork<BusinessOwner> _transactionWorkBO, RiderRepository _riderRepository)
+        private readonly BusinessOwnerService ownerService;
+        public AdminServices(AccountManager _accountManager, BusinessOwnerRepository _ownerRepository, TransactionWork<Rider> _transactionWork, UserManager<User> _userManager, TransactionWork<BusinessOwner> _transactionWorkBO, RiderRepository _riderRepository, BusinessOwnerService _ownerService)
         {
             accountManager = _accountManager;
             ownerRepository = _ownerRepository;
@@ -32,6 +32,7 @@ namespace VROOM.Services
             userManager = _userManager;
             transactionWorkBO = _transactionWorkBO;
             riderRepository = _riderRepository;
+            ownerService = _ownerService;
         }
         public async Task<SignInResult> Login(LoginViewModel user)
         {
@@ -111,6 +112,7 @@ namespace VROOM.Services
         }
         public async Task CreateNewOwner(AdminCreateBusOnwerVM model)
         {
+            
 
             await transactionWorkBO.BeginTransactionAsync();
             try
@@ -141,6 +143,16 @@ namespace VROOM.Services
                 transactionWorkBO.User.Add(newOwner);
                 transactionWorkBO.User.CustomSaveChanges();
                 await transactionWorkBO.CommitAsync();
+
+                if (model.SubscriptionType == SubscriptionTypeEnum.Trial)
+                {
+                    await ownerService.StartTrial(newOwner.UserID);
+                }
+                else
+                {
+                    await ownerService.ActivatePaidAsync(newOwner.UserID);
+                }
+
             }
             catch (Exception ex)
             {
@@ -168,6 +180,9 @@ namespace VROOM.Services
             };
             return (Rider: viewModel, BusinessName: await ownerRepository.GetAllAsync());
         }
+
+
+
         public async Task EditRider(AdminEditRiderVM Rider)
         {
             var rider = await riderRepository.GetAsync(Rider.UserID);

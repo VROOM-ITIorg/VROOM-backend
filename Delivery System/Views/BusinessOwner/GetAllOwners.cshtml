@@ -103,10 +103,29 @@
                                     <i class="bi bi-envelope-fill text-primary me-3"></i>
                                     <span>@owner.Email</span>
                                 </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-person-workspace text-primary me-3"></i>
-                                    <span>@owner.BusinessName</span>
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-workspace text-primary me-2"></i>
+                                        <span>@owner.BusinessName</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-stars text-primary me-2"></i>
+                                        <span>@owner.SubscriptionName</span>
+                                    </div>
+                                    @{
+                                        var isExpired = owner.SubscriptionExpiryDate < DateTime.Now;
+                                        var isExpiringSoon = owner.SubscriptionExpiryDate >= DateTime.Now && owner.SubscriptionExpiryDate <= DateTime.Now.AddDays(7);
+                                        var dateClass = isExpired ? "text-danger fw-bold" : isExpiringSoon ? "text-warning fw-bold" : "text-success";
+                                    }
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-calendar-check-fill text-primary me-2"></i>
+                                        <span class="@dateClass">
+                                            @owner.SubscriptionExpiryDate.ToString("yyyy-MM-dd")
+                                        </span>
+                                    </div>
+
                                 </div>
+
                             </div>
                         </div>
                         <div class="card-footer bg-white border-0 pt-0 pb-3">

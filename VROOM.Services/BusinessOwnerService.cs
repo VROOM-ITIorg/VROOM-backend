@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NuGet.Protocol.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -645,6 +646,50 @@ namespace VROOM.Services
 
 
 
+        // Subscription
+
+
+        public async Task StartTrial(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Trial;
+            owner.SubscriptionStartDate = DateTime.Now;
+            owner.SubscriptionEndDate = DateTime.Now.AddDays(7);
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
+
+        public async Task ActivatePaidAsync(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Paid;
+            owner.SubscriptionStartDate = DateTime.Now;
+            owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
+
+        public async Task RenewSubscriptionAsync(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            if (owner.SubscriptionEndDate.HasValue && owner.SubscriptionEndDate > DateTime.Now)
+                owner.SubscriptionEndDate = owner.SubscriptionEndDate.Value.AddMonths(1);
+            else
+                owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Paid;
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
 
     }
 }

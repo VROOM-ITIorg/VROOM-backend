@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using ViewModels.Shipment;
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Models.Dtos;
@@ -27,9 +28,13 @@ namespace VROOM.Services
         private readonly UserService userService;
         private readonly OrderRepository orderRepository;
         private readonly RiderRepository riderRepository;
+        private readonly RouteRepository routeRepository;
+        private readonly ShipmentServices shipmentServices;
         private readonly OrderRiderRepository orderRiderRepository;
+        private readonly OrderRouteRepository orderRouteRepository;
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly UserService _userService;
+        private readonly OrderService orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserRepository _userRepository;
 
@@ -44,10 +49,13 @@ namespace VROOM.Services
             UserService userService,
             UserRepository userRepository,
 
-
             OrderRiderRepository orderRiderRepository,
-             ILogger<BusinessOwnerService> logger,
-              IHttpContextAccessor httpContextAccessor
+            ILogger<BusinessOwnerService> logger,
+            IHttpContextAccessor httpContextAccessor,
+            OrderRouteRepository _orderRouteRepository,
+            OrderService _orderService,
+            RouteRepository _routeRepository,
+            ShipmentServices _shipmentServices
 
             )
         {
@@ -55,12 +63,17 @@ namespace VROOM.Services
             businessOwnerRepo = _businessOwnerRepo;
             orderRepository = _orderRepository;
             riderRepository = _riderRepository;
+            orderRouteRepository = _orderRouteRepository;
+            orderService = _orderService;
+            routeRepository = _routeRepository;
             _roleManager = roleManager;
             this.orderRiderRepository = orderRiderRepository;
             _userService = userService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
+            shipmentServices = _shipmentServices;
+
         }
 
 
@@ -336,13 +349,36 @@ namespace VROOM.Services
                     return false;
                 }
 
-                order.RiderID = riderId;
-                order.State = OrderStateEnum.Pending;
-                order.ModifiedBy = businessOwnerId;
-                order.ModifiedAt = DateTime.Now;
+                //order.RiderID = riderId;
+                //order.State = OrderStateEnum.Pending;
+                //order.ModifiedBy = businessOwnerId;
+                //order.ModifiedAt = DateTime.Now;
 
-                orderRepository.Update(order);
-                await Task.Run(() => orderRepository.CustomSaveChanges());
+                await orderService.UpdateOrderState(order.Id, OrderStateEnum.Pending, riderId, businessOwnerId);
+
+                //orderRepository.Update(order);
+                //await Task.Run(() => orderRepository.CustomSaveChanges());
+
+
+                // Create Shipment
+                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
+
+                var route = await routeRepository.GetAsync(orderRoute.RouteID);
+
+
+                await shipmentServices.CreateShipment(new AddShipmentVM
+                {
+                    startTime = route.Start,
+                    EndTime = DateTime.Now,
+                    RiderID = riderId,
+                    BeginningLang = route.OriginLang,
+                    BeginningLat = route.OriginLat,
+                    BeginningArea = route.OriginArea,
+                    EndLang = route.DestinationLang,
+                    EndLat = route.DestinationLat,
+                    EndArea = route.DestinationArea,
+                    MaxConsecutiveDeliveries = 1
+                },route);
 
                 _logger.LogInformation($"Order {orderId} successfully assigned to Rider {riderId} by BusinessOwner {businessOwnerId}.");
                 return true;

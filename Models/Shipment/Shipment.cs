@@ -11,8 +11,8 @@ namespace VROOM.Models
     public class Shipment
     {
         public int Id { get; set; }
-        public int StartId{ get; set; }
-        public int EndId{ get; set; }
+        public DateTime startTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public string  RiderID { get; set; }
 
         public double BeginningLang { get; set; }

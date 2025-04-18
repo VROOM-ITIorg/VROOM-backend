@@ -98,7 +98,7 @@ namespace VROOM.Repositories
                     Start = DateTime.Now,
                     End = DateTime.Now.AddMinutes(routeResponse.Route.Duration.Value), // Duration in minutes
                     SafetyIndex = 0.0f, // Placeholder
-                    DateTime = DateTime.Now,
+                    dateTime = DateTime.Now,
                     ModifiedBy = "System", // Example; adjust based on auth context
                     ModifiedAt = DateTime.Now
                 };

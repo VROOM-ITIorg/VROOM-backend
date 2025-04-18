@@ -11,8 +11,8 @@ using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+
 // using Serilog;
-using API;
 //using VROOM.Services.Mapping;
 
 
@@ -20,9 +20,6 @@ using API;
 // Log.Information("Logger configured.");
 
 
-=========
-using Hangfire;
->>>>>>>>> Temporary merge branch 2
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +76,7 @@ builder.Services.AddSwaggerGen(c =>
 // Configure DbContext with lazy loading
 builder.Services.AddDbContext<VroomDbContext>(options =>
     options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
         .UseLazyLoadingProxies());
 
 // Configure Identity
@@ -95,10 +92,11 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 
 // Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();
+builder.Services.AddHttpClient();
 //builder.Services.AddDbContext<VroomDbContext>
 //    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddIdentity<User, IdentityRole>()
@@ -114,6 +112,12 @@ builder.Services.AddScoped<CustomerServices>();
 
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
+builder.Services.AddScoped<RouteRepository>();
+builder.Services.AddScoped<RouteServices>();
+builder.Services.AddScoped<OrderRouteRepository>();
+builder.Services.AddScoped<OrderRouteServices>();
+builder.Services.AddScoped<ShipmentRepository>();
+builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();

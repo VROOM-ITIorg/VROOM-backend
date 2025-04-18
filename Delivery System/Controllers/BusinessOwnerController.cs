@@ -47,6 +47,12 @@ namespace Delivery_System.Controllers
         public IActionResult GetAllOwners(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
             var Owners = adminServices.ShowAllOwners( Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort : sort);
+
+            ViewData["Name"] = Name;
+            ViewData["status"] = status;
+            ViewData["sort"] = sort;
+            ViewData["pageSize"] = pageSize.ToString();
+
             ViewData["Owners"] = Owners;
             return View();
         }

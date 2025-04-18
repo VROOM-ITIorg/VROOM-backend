@@ -35,7 +35,8 @@ namespace API.Controllers
             if (ModelState.IsValid)
             {
                 await adminServices.CreateNewRider(model);
-                return RedirectToAction("Index");
+
+                return RedirectToAction("GetAllRiders");
             }
             return View(model);
         }
@@ -50,6 +51,11 @@ namespace API.Controllers
 
             ViewData["Riders"] = Riders;
             ViewData["Owners"] = Owners;
+            ViewData["Name"] = Name;
+            ViewData["status"] = status;
+            ViewData["sort"] = sort;
+            ViewData["owner"] = owner;
+            ViewData["pageSize"] = pageSize.ToString();
 
             return View("index");
         }

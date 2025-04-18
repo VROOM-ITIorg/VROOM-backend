@@ -403,8 +403,10 @@ namespace VROOM.Services
                     Id = order.Id,
                     Title = order.Title,
                     State = order.State,
-                    Notes = order.Notes,
-                    Weight = order.Weight,
+                    RiderName = order.Rider.User.Name,
+                    CustomerName = order.Customer.User.Name,
+                    BusinessOwner = order.Rider.BusinessOwner.User.Name,
+                    Priority = order.OrderPriority,
                     OrderPrice = order.OrderPrice,
                     DeliveryPrice = order.DeliveryPrice,
                     Date = order.Date

@@ -2,320 +2,322 @@
 @using VROOM.ViewModels
 @using ViewModels
 @{
-	ViewBag.Title = "Owners List";
-	var owners = ViewData["Owners"] as PaginationViewModel<AdminBusOwnerDetialsVM>;
-	var totalPages = (int)Math.Ceiling((double)owners.Total / owners.PageSize);
-	var currentPage = owners.PageNumber;
-	var start = ((owners.PageNumber - 1) * owners.PageSize) + 1;
-	var end = Math.Min(owners.PageNumber * owners.PageSize, owners.Total);
+    ViewBag.Title = "Owners List";
+    var owners = ViewData["Owners"] as PaginationViewModel<AdminBusOwnerDetialsVM>;
+    var totalPages = (int)Math.Ceiling((double)owners.Total / owners.PageSize);
+    var currentPage = owners.PageNumber;
+    var start = ((owners.PageNumber - 1) * owners.PageSize) + 1;
+    var end = Math.Min(owners.PageNumber * owners.PageSize, owners.Total);
+
+    // Retrieve query parameters
+    var name = ViewData["Name"]?.ToString();
+    var status = ViewData["status"]?.ToString() ?? "-1";
+    var sort = ViewData["sort"]?.ToString() ?? "name_asc";
+    var pageSize = ViewData["pageSize"]?.ToString() ?? "4";
 }
 
 <div class="container-fluid py-4">
-	<!-- Header Section with Title and Add Button -->
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<h3 class="fw-bold">
-			<span class="text-primary">Owners</span>
-			<span class="text-secondary"> Management</span>
-		</h3>
-		<a asp-controller="BusinessOwner" asp-action="Create" class="btn btn-primary px-4 d-flex align-items-center">
-			<i class="bi bi-plus-circle me-2"></i> Add New Business Owner
-		</a>
-	</div>
+    <!-- Header Section with Title and Add Button -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">
+            <span class="text-primary">Owners</span>
+            <span class="text-secondary"> Management</span>
+        </h3>
+        <a asp-controller="BusinessOwner" asp-action="Create" class="btn btn-primary px-4 d-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i> Add New Business Owner
+        </a>
+    </div>
 
-	<!-- Filter Section -->
-	<div class="card mb-4 border-0 shadow-sm">
-		<div class="card-body p-4">
-			<form asp-controller="BusinessOwner" asp-action="GetAllOwners" method="get" class="row align-items-end">
-				<div class="col-md-3 mb-3 mb-md-0">
-					<label class="form-label fw-semibold text-secondary">Search</label>
-					<div class="input-group">
-						<span class="input-group-text bg-white border-end-0">
-							<i class="bi bi-search text-primary"></i>
-						</span>
-						<input type="text" name="Name" class="form-control border-start-0" placeholder="Search by name, email, phone...">
-					</div>
-				</div>
-				<div class="col-md-2 mb-3 mb-md-0">
-					<label class="form-label fw-semibold text-secondary">Status</label>
-					<select class="form-select" id="statusFilter" name="status" asp-items="Html.GetEnumSelectList<RiderStatusEnum>()">
-						<option value="-1" selected>All Status</option>
+    <!-- Filter Section -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form asp-controller="BusinessOwner" asp-action="GetAllOwners" method="get" class="row align-items-end">
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" name="Name" id="searchOwner" class="form-control border-start-0" placeholder="Search by name, email, phone..." value="@name">
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Status</label>
+                    <select class="form-select" id="statusFilter" name="status">
+                        <option value="-1" selected="@(status == "-1")">All Status</option>
+                        @foreach (var item in Html.GetEnumSelectList<RiderStatusEnum>())
+                        {
+                            <option value="@item.Value" selected="@(item.Value == status)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Sort By</label>
+                    <select class="form-select" id="sortBy" name="sort">
+                        <option value="name_asc" selected="@(sort == "name_asc")">Name (A-Z)</option>
+                        <option value="name_desc" selected="@(sort == "name_desc")">Name (Z-A)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">Items Per Page</label>
+                    <select class="form-select" id="perPage" name="pageSize">
+                        <option value="2" selected="@(pageSize == "2")">2 Items</option>
+                        <option value="4" selected="@(pageSize == "4")">4 Items</option>
+                        <option value="8" selected="@(pageSize == "8")">8 Items</option>
+                        <option value="16" selected="@(pageSize == "16")">16 Items</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+                    <button type="submit" class="btn btn-outline-primary me-2" id="applyFilters">
+                        <i class="bi bi-funnel-fill me-1"></i> Apply
+                    </button>
+                    <a href="@Url.Action("GetAllOwners", "BusinessOwner")" class="btn btn-outline-secondary" id="resetFilters">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-					</select>
-				</div>
-				<div class="col-md-3 mb-3 mb-md-0">
-					<label class="form-label fw-semibold text-secondary">Sort By</label>
-					<select class="form-select" id="sortBy" name="sort">
-						<option value="name_asc">Name (A-Z)</option>
-						<option value="name_desc">Name (Z-A)</option>
-					</select>
-				</div>
-				<div class="col-md-2 mb-3 mb-md-0">
-					<label class="form-label fw-semibold text-secondary">Items Per Page</label>
-					<select class="form-select" id="perPage" name="pageSize">
-						<option value="2">2 Items</option>
-						<option value="4" selected>4 Items</option>
-						<option value="8">8 Items</option>
-						<option value="16">16 Items</option>
-					</select>
-				</div>
-				<div class="col-md-2 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
-					<button class="btn btn-outline-primary me-2" id="applyFilters">
-						<i class="bi bi-funnel-fill me-1"></i> Apply
-					</button>
-					<button class="btn btn-outline-secondary" id="resetFilters">
-						<i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
+    <!-- Owners Cards Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        @if (owners.Data.Count != 0)
+        {
+            @foreach (var owner in owners.Data)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 rider-card">
+                        <div class="position-relative">
+                            <div class="rider-image-container">
+                                <img src="@owner.ImagePath" class="rider-image" alt="@owner.ImagePath">
+                            </div>
+                        </div>
+                        <div class="card-body pt-4">
+                            <h5 class="card-title fw-bold mb-3">@owner.OwnerName</h5>
+                            <div class="owner-info mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-telephone-fill text-primary me-3"></i>
+                                    <span>@owner.PhoneNumber</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-fill text-primary me-3"></i>
+                                    <span>@owner.Email</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-workspace text-primary me-3"></i>
+                                    <span>@owner.BusinessName</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="Edit/@owner.UserID" class="btn btn-outline-warning me-1">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="Delete/@owner.UserID" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-light text-center py-5 w-100" role="alert">
+                <h1 class="display-4 fw-bold">😕 No Owners Found</h1>
+                <p class="lead">We couldn't find any owners matching your search.</p>
+            </div>
+        }
+    </div>
 
-	<!-- owners Cards Grid -->
-	<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-		@if (owners.Data.Count != 0)
-		{
+    <!-- Pagination Section -->
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@owners.Total</span> owners</p>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
+                            @{
+                                // Display up to 5 pages, centering the current page when possible
+                                const int maxPagesToShow = 5;
+                                int startPage = Math.Max(1, currentPage - (maxPagesToShow / 2));
+                                int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
 
-
-			@foreach (var owner in owners.Data)
-			{
-				<div class="col">
-					<div class="card h-100 border-0 rider-card">
-						<div class="position-relative">
-							<div class="rider-image-container">
-								<img src="@owner.ImagePath" class="rider-image" alt="@owner.ImagePath">
-							</div>
-
-						</div>
-						<div class="card-body pt-4">
-							<h5 class="card-title fw-bold mb-3">@owner.OwnerName</h5>
-							<div class="owner-info mb-3">
-								<div class="d-flex align-items-center mb-2">
-									<i class="bi bi-telephone-fill text-primary me-3"></i>
-									<span>@owner.PhoneNumber</span>
-								</div>
-								<div class="d-flex align-items-center">
-									<i class="bi bi-envelope-fill text-primary me-3"></i>
-									<span>@owner.Email</span>
-								</div>
-								<div class="d-flex align-items-center">
-									<i class="bi bi-person-workspace text-primary me-3"></i>
-									<span>@owner.BusinessName</span>
-								</div>
-							</div>
-						</div>
-						<div class="card-footer bg-white border-0 pt-0 pb-3">
-							<div class="d-flex justify-content-between">
-
-								<div>
-									<a href="Edit/@owner.UserID" class="btn btn-outline-warning me-1">
-										<i class="bi bi-pencil-square"></i>
-									</a>
-									<a href="Delete/@owner.UserID" class="btn btn-outline-danger">
-										<i class="bi bi-trash"></i>
-									</a>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			}
-		}else {
-			<div class="alert alert-light  text-center py-5 w-100" role="alert">
-				<h1 class="display-4 fw-bold">😕 No Owners Found</h1>
-				<p class="lead">We couldn't find any owners matching your search.</p>
-			</div>
-		}
-	</div>
-
-	<!-- Pagination Section -->
-	<div class="card mt-4 border-0 shadow-sm">
-		<div class="card-body">
-			<div class="row align-items-center">
-				<div class="col-md-6 mb-3 mb-md-0">
-					<p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@owners.Total</span> owners</p>
-				</div>
-				<div class="col-md-6">
-					<nav aria-label="Page navigation">
-						<ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
-							<li class="page-item @(currentPage == 1 ? "disabled" : "")">
-								<a class="page-link" href="?pageNumber=@(currentPage - 1)&pageSize=@owners.PageSize" aria-label="Previous">
-									<i class="bi bi-chevron-left"></i>
-								</a>
-							</li>
-							@if (totalPages > 1)
-							{
-								for (int i = 1; i <= totalPages; i++)
-								{
-									<li class="page-item @(i == owners.PageNumber ? "active" : "")">
-										<a class="page-link" href="?pageNumber=@i&pageSize=@owners.PageSize">@i</a>
-									</li>
-								}
-							}
-							<li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-								<a class="page-link" href="?pageNumber=@(currentPage + 1)&pageSize=@owners.PageSize" aria-label="Next">
-									<i class="bi bi-chevron-right"></i>
-								</a>
-							</li>
-						</ul>
-					</nav>
-				</div>
-			</div>
-		</div>
-	</div>
+                                // Adjust startPage if endPage is at totalPages to ensure 5 pages are shown (if possible)
+                                if (endPage - startPage + 1 < maxPagesToShow && startPage > 1)
+                                {
+                                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                                }
+                            }
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("GetAllOwners", new { pageNumber = currentPage - 1, pageSize, Name = name, status, sort })" aria-label="Previous">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("GetAllOwners", new { pageNumber = i, pageSize, Name = name, status, sort })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" href="@Url.Action("GetAllOwners", new { pageNumber = currentPage + 1, pageSize, Name = name, status, sort })" aria-label="Next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
+    /* Card Styles */
+    .rider-card {
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+    }
 
-	/* Card Styles (from your original) */
-	.rider-card {
-		transition: all 0.3s ease;
-		box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
-		border-radius: 12px;
-		overflow: hidden;
-	}
+        .rider-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
 
-		.rider-card:hover {
-			transform: translateY(-5px);
-			box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-		}
+    .rider-image-container {
+        height: 200px;
+        overflow: hidden;
+    }
 
-	.rider-image-container {
-		height: 200px;
-		overflow: hidden;
-	}
+    .rider-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
 
-	.rider-image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transition: transform 0.5s ease;
-	}
+    .rider-card:hover .rider-image {
+        transform: scale(1.1);
+    }
 
-	.rider-card:hover .rider-image {
-		transform: scale(1.1);
-	}
+    .rider-status {
+        position: absolute;
+        bottom: -15px;
+        right: 20px;
+    }
 
-	.rider-status {
-		position: absolute;
-		bottom: -15px;
-		right: 20px;
-	}
+    .rider-info, .owner-info {
+        color: #6c757d;
+    }
 
-	.rider-info {
-		color: #6c757d;
-	}
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
 
-	.btn {
-		border-radius: 8px;
-		font-weight: 500;
-		transition: all 0.2s;
-	}
+    .btn-outline-primary:hover, .btn-outline-warning:hover, .btn-outline-danger:hover {
+        transform: translateY(-2px);
+    }
 
-	.btn-outline-primary:hover, .btn-outline-warning:hover, .btn-outline-danger:hover {
-		transform: translateY(-2px);
-	}
+    .btn-outline-warning {
+        color: #fd7e14;
+        border-color: #fd7e14;
+    }
 
-	.btn-outline-warning {
-		color: #fd7e14;
-		border-color: #fd7e14;
-	}
+        .btn-outline-warning:hover {
+            background-color: #fd7e14;
+            color: white;
+        }
 
-		.btn-outline-warning:hover {
-			background-color: #fd7e14;
-			color: white;
-		}
+    /* Filter Styles */
+    .form-select, .form-control {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+    }
 
-	/* New Filter Styles */
-	.form-select, .form-control {
-		border-radius: 8px;
-		padding: 0.6rem 1rem;
-	}
+        .form-select:focus, .form-control:focus {
+            border-color: rgba(13, 110, 253, 0.4);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
 
-		.form-select:focus, .form-control:focus {
-			border-color: rgba(13, 110, 253, 0.4);
-			box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-		}
+    .input-group-text {
+        border-radius: 8px 0 0 8px;
+    }
 
-	.input-group-text {
-		border-radius: 8px 0 0 8px;
-	}
+    /* Pagination Styles */
+    .pagination {
+        gap: 5px;
+    }
 
-	/* Pagination Styles */
-	.pagination {
-		gap: 5px;
-	}
+    .page-link {
+        border-radius: 8px;
+        color: #0d6efd;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.85rem;
+    }
 
-	.page-link {
-		border-radius: 8px;
-		color: #0d6efd;
-		border: 1px solid #dee2e6;
-		padding: 0.5rem 0.85rem;
-	}
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
 
-	.page-item.active .page-link {
-		background-color: #0d6efd;
-		border-color: #0d6efd;
-	}
+    .page-link:hover {
+        background-color: #f0f2f5;
+        color: #0d6efd;
+    }
 
-	.page-link:hover {
-		background-color: #f0f2f5;
-		color: #0d6efd;
-	}
-
-	.page-item.disabled .page-link {
-		color: #6c757d;
-		background-color: #f8f9fa;
-	}
+    .page-item.disabled .page-link {
+        color: #6c757d;
+        background-color: #f8f9fa;
+    }
 </style>
 
 <script>
-	// Filter functionality
-	document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply Filters Button (handled by form submission)
 
+        // Reset Filters Button (handled by the link)
 
-		// Reset Filters Button
-		document.getElementById('resetFilters')?.addEventListener('click', function() {
-			document.getElementById('searchRider').value = '';
-			document.getElementById('statusFilter').value = 'active';
-			document.getElementById('sortBy').value = 'name_asc';
-			document.getElementById('perPage').value = '2';
+        // Simple toast notification function
+        function showToast(message) {
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
 
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
 
-		});
-	});
+            toastEl.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
 
-	// Simple toast notification function
-	function showToast(message) {
-		// Check if a toast container already exists
-		let toastContainer = document.querySelector('.toast-container');
-		if (!toastContainer) {
-			toastContainer = document.createElement('div');
-			toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-			document.body.appendChild(toastContainer);
-		}
+            toastContainer.appendChild(toastEl);
 
-		// Create toast element
-		const toastEl = document.createElement('div');
-		toastEl.className = 'toast show';
-		toastEl.setAttribute('role', 'alert');
-		toastEl.setAttribute('aria-live', 'assertive');
-		toastEl.setAttribute('aria-atomic', 'true');
-
-		toastEl.innerHTML = `
-			<div class="toast-header">
-				<i class="bi bi-info-circle text-primary me-2"></i>
-				<strong class="me-auto">Notification</strong>
-				<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-			</div>
-			<div class="toast-body">${message}</div>
-		`;
-
-		// Add to container
-		toastContainer.appendChild(toastEl);
-
-		// Auto-remove after 3 seconds
-		setTimeout(() => {
-			toastEl.remove();
-		}, 3000);
-	}
+            setTimeout(() => {
+                toastEl.remove();
+            }, 3000);
+        }
+    });
 </script>

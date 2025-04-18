@@ -55,7 +55,16 @@ namespace VROOM.Services
 
                 return model.ImagePath = $"/Images/Rider/{fileName}";
             }
-            return null;
+            else if (model.ImagePath != null)
+            {
+                return model.ImagePath = model.ImagePath;
+
+            }
+            else
+            {
+                return model.ImagePath = $"/Images/Rider/default-avatar-profile-icon-of-social-media-user-vector.jpg";
+
+            }
         }
 
         public async Task CreateNewRider(AdminCreateRiderVM model)
@@ -150,10 +159,11 @@ namespace VROOM.Services
                 VehicleType = rider.VehicleType,
                 Location = rider.Area,
                 ExperienceLevel = rider.ExperienceLevel,
-                UserName = rider.User?.UserName,
+                UserName = rider.User?.Name,
                 Email = rider.User?.Email,
                 PhoneNumber = rider.User.PhoneNumber,
                 ImagePath = rider.User.ProfilePicture,
+                
 
             };
             return (Rider: viewModel, BusinessName: await ownerRepository.GetAllAsync());

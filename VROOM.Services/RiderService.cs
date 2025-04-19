@@ -3,25 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ViewModels.Shipment;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
+using VROOM.Repository;
 
 namespace VROOM.Services
 {
     public class RiderService
     {
         private readonly RiderRepository _riderRepository;
+        private readonly OrderRouteRepository _orderRouteRepository;
+        private readonly RouteRepository _routeRepository;
         private readonly VroomDbContext _context;
         private readonly DbSet<Order> _orders;
         private readonly DbSet<OrderRider> _orderRiders;
+        private readonly ShipmentServices _shipmentServices;
 
-        public RiderService(RiderRepository riderRepository, VroomDbContext context)
+        public RiderService(RiderRepository riderRepository, VroomDbContext context, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository)
         {
             _riderRepository = riderRepository ?? throw new ArgumentNullException(nameof(riderRepository));
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _orders = context.Set<Order>();
             _orderRiders = context.Set<OrderRider>();
+            _shipmentServices = shipmentServices;
+            _orderRouteRepository = orderRouteRepository;
+            _routeRepository = routeRepository;
         }
 
         public Rider RegisterRiderAsync(Rider rider)
@@ -98,6 +106,7 @@ namespace VROOM.Services
             order.ModifiedAt = DateTime.UtcNow;
 
             rider.Status = RiderStatusEnum.OnDelivery;
+
 
             await _context.SaveChangesAsync();
             return order;

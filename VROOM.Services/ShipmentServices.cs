@@ -27,7 +27,6 @@ namespace VROOM.Services
             var shipment = new Shipment
             {
                startTime = DateTime.Now,
-               EndTime = DateTime.Now,
                RiderID = addShipmentVM.RiderID,
                BeginningLang = addShipmentVM.BeginningLang,
                BeginningLat = addShipmentVM.BeginningLat,

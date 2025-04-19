@@ -1,9 +1,7 @@
 ﻿using System.Threading.Tasks;
-<<<<<<< HEAD
 using LinqKit;
-=======
+using Microsoft.EntityFrameworkCore;
 using ViewModels;
->>>>>>> b58cbc0196033d2ff79e8709da5c01b3b8a2a398
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -56,14 +54,17 @@ namespace VROOM.Services
         private CustomerServices customerService;
         private OrderRouteServices orderRouteServices;
         private RouteServices routeService;
-
+        private readonly ShipmentRepository shipmentRepository;
+        private readonly RouteRepository routeRepository;
         public OrderService(
-            OrderRepository _orderRepository, 
+            OrderRepository _orderRepository,
             NotificationService _notificationService,
             CustomerServices _customerService,
             RouteServices _routeServices,
             RiderRepository _riderRepository,
-            OrderRouteServices _orderRouteServices
+            OrderRouteServices _orderRouteServices,
+            ShipmentRepository _shipmentRepository,
+            RouteRepository _routeRepository
             )
         {
             orderRepository = _orderRepository;
@@ -72,13 +73,15 @@ namespace VROOM.Services
             routeService = _routeServices;
             riderRepository = _riderRepository;
             orderRouteServices = _orderRouteServices;
+            shipmentRepository = _shipmentRepository;
+            routeRepository = _routeRepository;
         }
 
-        public async Task CreateOrder(OrderCreateViewModel orderVM , string BussinsId)
+        public async Task CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
         {
             // We will check if the customer is exists 
 
-            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
+            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername, Name = orderVM.CustomerUsername, PhoneNumber = orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
 
             var route = await routeService.CreateRoute(orderVM.RouteLocation);
 
@@ -104,10 +107,60 @@ namespace VROOM.Services
 
             await orderRouteServices.CreateOrderRoute(order.Id, route.Id);
 
-            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id,"Success");
+            // shipment 
+
+            var shipment = await shipmentRepository
+                .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries))
+                .Include(s => s.Routes)
+                .FirstOrDefaultAsync();
+
+            if (shipment != null) 
+            {
+                // Update Route => Add Shipment Id
+                route.ShipmentID = shipment.Id;
+                routeRepository.Update(route);
+                routeRepository.CustomSaveChanges();
+
+                // تعديل نهاية الشحنة لو المسار الجديد بعد المسار القديم
+                var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang).ThenByDescending(r=>r.DestinationLat).FirstOrDefault();
+
+                if (lastRoute != null)
+                {
+                    // هنحسب المسافة التقريبية ما بين نقطة النهاية بتاعة آخر Route والنقطة الجديدة
+                    double lastLat = lastRoute.DestinationLat;
+                    double lastLng = lastRoute.DestinationLang;
+
+                    double newLat = route.DestinationLat;
+                    double newLng = route.DestinationLang;
+
+                    // نحسب المسافة (تقريبية باستخدام فيثاغورس لو مش محتاج دقة الخرائط الجغرافية)
+                    double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
+
+                    // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب
+                    double threshold = 0.01;
+
+                    if (distance > threshold)
+                    {
+                        // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
+                        shipment.EndLat = newLat;
+                        shipment.EndLang = newLng;
+                        shipment.EndArea = route.DestinationArea;
+                    }
+
+                    // بترجع تعمل Update للـ shipment بعد التعديل
+                    shipmentRepository.Update(shipment);
+                    shipmentRepository.CustomSaveChanges();
+                }
+            }else
+            {
+                // Create New Shipment With its Details 
+            }
+
+
+            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
             await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
-            
+
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)
@@ -152,7 +205,7 @@ namespace VROOM.Services
         public decimal CalculateTotalRevenue(int orderId) => orderRepository.SumOrderRevenue(orderId);
 
         // update Order Status
-        public async Task<Order> UpdateOrderState(int orderID , OrderStateEnum orderState , string riderId, string businessOwnerId)
+        public async Task<Order> UpdateOrderState(int orderID, OrderStateEnum orderState, string riderId, string businessOwnerId)
         {
             Order order = await orderRepository.GetAsync(orderID);
             if (order == null || order.IsDeleted) return null;
@@ -177,7 +230,7 @@ namespace VROOM.Services
         {
             try
             {
-                var orders =  orderRepository.GetOrdersByStatusAsync(OrderStateEnum.Pending).Result;
+                var orders = orderRepository.GetOrdersByStatusAsync(OrderStateEnum.Pending).Result;
                 foreach (var order in orders)
                 {
                     if (order.ModifiedAt.HasValue && order.ModifiedAt.Value.AddMinutes(30) <= DateTime.UtcNow)
@@ -271,7 +324,7 @@ namespace VROOM.Services
                     Id = o.Id,
                     Title = o.Title,
                     CustomerName = o.Customer?.User.Name ?? o.CustomerID,
-                    RiderName = o.Rider?.User?.Name ,
+                    RiderName = o.Rider?.User?.Name,
                     Priority = o.OrderPriority,
                     State = o.State,
                     IsBreakable = o.IsBreakable,

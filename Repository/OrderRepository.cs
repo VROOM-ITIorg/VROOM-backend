@@ -1,4 +1,5 @@
 ﻿
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
 using VROOM.Models;
@@ -104,5 +105,190 @@ namespace VROOM.Repositories
 
             return orderReports;
         }
+
+
+
+        public async Task<List<Order>> GetActiveOrdersAsync(
+            string priority = null,
+            string state = null,
+            string customer = null,
+            string rider = null,
+            bool? isBreakable = null,
+            DateTime? dateFrom = null,
+            DateTime? dateTo = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string search = null)
+        {
+            IQueryable<Order> query = context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Rider)
+                .Where(o => !o.IsDeleted);
+
+            if (!string.IsNullOrEmpty(priority) && Enum.TryParse<OrderPriorityEnum>(priority, out var priorityEnum))
+                query = query.Where(o => o.OrderPriority == priorityEnum);
+
+            if (!string.IsNullOrEmpty(state) && Enum.TryParse<OrderStateEnum>(state, out var stateEnum))
+                query = query.Where(o => o.State == stateEnum);
+
+            if (!string.IsNullOrEmpty(customer))
+                query = query.Where(o => o.Customer.User.Name.Contains(customer, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(rider))
+                query = query.Where(o => o.Rider.User.Name.Contains(rider, StringComparison.OrdinalIgnoreCase));
+
+            if (isBreakable.HasValue)
+                query = query.Where(o => o.IsBreakable == isBreakable.Value);
+
+            if (dateFrom.HasValue)
+                query = query.Where(o => o.Date >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                query = query.Where(o => o.Date <= dateTo.Value);
+
+            if (minPrice.HasValue)
+                query = query.Where(o => o.OrderPrice >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                query = query.Where(o => o.OrderPrice <= maxPrice.Value);
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(o => o.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || o.Details.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<(decimal MinPrice, decimal MaxPrice)> GetPriceRangeAsync(
+            string priority = null,
+            string state = null,
+            string customer = null,
+            string rider = null,
+            bool? isBreakable = null,
+            DateTime? dateFrom = null,
+            DateTime? dateTo = null,
+            string search = null)
+        {
+            IQueryable<Order> query = context.Orders
+                .Where(o => !o.IsDeleted);
+
+            if (!string.IsNullOrEmpty(priority) && Enum.TryParse<OrderPriorityEnum>(priority, out var priorityEnum))
+                query = query.Where(o => o.OrderPriority == priorityEnum);
+
+            if (!string.IsNullOrEmpty(state) && Enum.TryParse<OrderStateEnum>(state, out var stateEnum))
+                query = query.Where(o => o.State == stateEnum);
+
+            if (!string.IsNullOrEmpty(customer))
+                query = query.Where(o => o.Customer.User.Name.Contains(customer, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(rider))
+                query = query.Where(o => o.Rider.User.Name.Contains(rider, StringComparison.OrdinalIgnoreCase));
+
+            if (isBreakable.HasValue)
+                query = query.Where(o => o.IsBreakable == isBreakable.Value);
+
+            if (dateFrom.HasValue)
+                query = query.Where(o => o.Date >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                query = query.Where(o => o.Date <= dateTo.Value);
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(o => o.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || o.Details.Contains(search, StringComparison.OrdinalIgnoreCase));
+
+            var priceRange = await query
+                .Select(o => new { o.OrderPrice })
+                .AggregateAsync(
+                    new { MinPrice = (decimal?)null, MaxPrice = (decimal?)null },
+                    (acc, curr) => new
+                    {
+                        MinPrice = acc.MinPrice == null || curr.OrderPrice < acc.MinPrice ? curr.OrderPrice : acc.MinPrice,
+                        MaxPrice = acc.MaxPrice == null || curr.OrderPrice > acc.MaxPrice ? curr.OrderPrice : acc.MaxPrice
+                    });
+
+            return (priceRange.MinPrice ?? 0, priceRange.MaxPrice ?? 5000);
+        }
+
+        public async Task<(List<Order> Data, int TotalCount)> GetPaginatedOrdersAsync(
+            Expression<Func<Order, bool>> filter = null,
+            int pageSize = 4,
+            int pageNumber = 1,
+            string sort = "title_asc")
+        {
+            IQueryable<Order> query = context.Orders
+                .Include(o => o.Customer)
+                .Include(o => o.Rider)
+                .Where(o => !o.IsDeleted);
+
+            if (filter != null)
+                query = query.Where(filter);
+
+            int totalCount = await query.CountAsync();
+
+            // Pagination
+            if (pageSize < 0)
+                pageSize = 4;
+
+            if (pageNumber < 0)
+                pageNumber = 1;
+
+            if (totalCount < pageSize)
+            {
+                pageSize = totalCount;
+                pageNumber = 1;
+            }
+
+            int toSkip = (pageNumber - 1) * pageSize;
+
+            // Sorting
+            switch (sort.ToLower())
+            {
+                case "title_desc":
+                    query = query.OrderByDescending(o => o.Title);
+                    break;
+                case "price_asc":
+                    query = query.OrderBy(o => o.OrderPrice);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(o => o.OrderPrice);
+                    break;
+                case "date_asc":
+                    query = query.OrderBy(o => o.Date);
+                    break;
+                case "date_desc":
+                    query = query.OrderByDescending(o => o.Date);
+                    break;
+                default: // title_asc
+                    query = query.OrderBy(o => o.Title);
+                    break;
+            }
+
+            query = query.Skip(toSkip).Take(pageSize);
+
+            var data = await query.ToListAsync();
+
+            return (data, totalCount);
+        }
+
+
+
+    }
+}
+
+
+public static class QueryableExtensions
+{
+    public static async Task<TAccumulate> AggregateAsync<TSource, TAccumulate>(
+        this IQueryable<TSource> source,
+        TAccumulate seed,
+        Expression<Func<TAccumulate, TSource, TAccumulate>> func)
+    {
+        var compiledFunc = func.Compile();
+        var result = seed;
+        var items = await source.ToListAsync();
+        foreach (var item in items)
+        {
+            result = compiledFunc(result, item);
+        }
+        return result;
     }
 }

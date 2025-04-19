@@ -189,7 +189,10 @@ namespace VROOM.Data.Migrations
                 {
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BankAccount = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BusinessType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    BusinessType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SubscriptionType = table.Column<int>(type: "int", nullable: false),
+                    SubscriptionStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SubscriptionEndDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {

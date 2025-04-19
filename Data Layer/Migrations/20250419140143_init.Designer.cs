@@ -12,7 +12,7 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250419132617_init")]
+    [Migration("20250419140143_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -202,6 +202,15 @@ namespace VROOM.Data.Migrations
                     b.Property<string>("BusinessType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SubscriptionEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SubscriptionStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubscriptionType")
+                        .HasColumnType("int");
 
                     b.HasKey("UserID");
 

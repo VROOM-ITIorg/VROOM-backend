@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using LinqKit;
@@ -71,8 +72,7 @@ namespace VROOM.Repositories
 
 
 
-        public PaginationViewModel<AdminBusOwnerDetialsVM> Search(
-         string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public PaginationViewModel<AdminBusOwnerDetialsVM> Search(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
 
             var builder = PredicateBuilder.New<BusinessOwner>();
@@ -95,14 +95,16 @@ namespace VROOM.Repositories
                  filter: builder,
                  pageSize: pageSize,
                  pageNumber: pageNumber)
-                 .Include(r => r.User)
-                 .ToList()
-                 .Select(p => p.ToDetailsVModel())
-                 .ToList();
+                .Include(r => r.User)
+                     .ToList();
+
+            var query = resultAfterPagination.Select(p => p.ToDetailsVModel()).ToList();
+            if (sort == "name_desc")
+                query = resultAfterPagination.OrderByDescending(u => u.User.Name).Select(p => p.ToDetailsVModel()).ToList();
 
             return new PaginationViewModel<AdminBusOwnerDetialsVM>
             {
-                Data = resultAfterPagination,
+                Data = query,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 Total = count
@@ -115,6 +117,10 @@ namespace VROOM.Repositories
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
         }
+
+
+
+      
     }
 }
 

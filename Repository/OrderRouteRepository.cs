@@ -20,7 +20,7 @@ namespace VROOM.Repository
             // EF.Property<string>(e, "Email") this for weak entity because we don't know the property in the compile time 
             Console.WriteLine($"dbSet Type: {dbSet.GetType().Module}");
             //return await dbSet.FindAsync(orderID, orderID);
-            return await dbSet.Where(o => o.OrderID == orderID).FirstOrDefaultAsync();
+            return await dbSet.Where(o => !o.IsDeleted && o.OrderID == orderID).FirstOrDefaultAsync();
         }
     }
 }

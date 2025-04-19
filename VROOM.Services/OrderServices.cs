@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using LinqKit;
+using Microsoft.EntityFrameworkCore;
 using ViewModels;
 using ViewModels.User;
 using VROOM.Models;
@@ -26,7 +28,7 @@ namespace VROOM.Services
                 BusinessOwner = o.Rider.BusinessOwner.User.Name,
                 RiderName = o.Rider.User?.Name,
                 CustomerName = o.Customer.User.Name,
-                Priority = o.OrderPriority.ToString(),
+                Priority = o.OrderPriority,
                 Details = o.Details,
                 State = o.State,
                 OrderPrice = o.OrderPrice,
@@ -52,14 +54,17 @@ namespace VROOM.Services
         private CustomerServices customerService;
         private OrderRouteServices orderRouteServices;
         private RouteServices routeService;
-
+        private readonly ShipmentRepository shipmentRepository;
+        private readonly RouteRepository routeRepository;
         public OrderService(
-            OrderRepository _orderRepository, 
+            OrderRepository _orderRepository,
             NotificationService _notificationService,
             CustomerServices _customerService,
             RouteServices _routeServices,
             RiderRepository _riderRepository,
-            OrderRouteServices _orderRouteServices
+            OrderRouteServices _orderRouteServices,
+            ShipmentRepository _shipmentRepository,
+            RouteRepository _routeRepository
             )
         {
             orderRepository = _orderRepository;
@@ -68,13 +73,15 @@ namespace VROOM.Services
             routeService = _routeServices;
             riderRepository = _riderRepository;
             orderRouteServices = _orderRouteServices;
+            shipmentRepository = _shipmentRepository;
+            routeRepository = _routeRepository;
         }
 
-        public async Task CreateOrder(OrderCreateViewModel orderVM , string BussinsId)
+        public async Task CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
         {
             // We will check if the customer is exists 
 
-            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername,Name= orderVM.CustomerUsername,PhoneNumber= orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
+            var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername, Name = orderVM.CustomerUsername, PhoneNumber = orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
 
             var route = await routeService.CreateRoute(orderVM.RouteLocation);
 
@@ -100,10 +107,12 @@ namespace VROOM.Services
 
             await orderRouteServices.CreateOrderRoute(order.Id, route.Id);
 
-            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id,"Success");
+          
+
+            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
             await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
-            
+
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)
@@ -119,7 +128,7 @@ namespace VROOM.Services
                 BusinessOwner = order.Rider.BusinessOwner.User.Name,
                 RiderName = order.Rider.User.Name,
                 CustomerName = order.Customer.User.Name,
-                Priority = order.OrderPriority.ToString(),
+                Priority = order.OrderPriority,
                 Details = order.Details,
                 OrderPrice = order.OrderPrice,
                 DeliveryPrice = order.DeliveryPrice,
@@ -148,7 +157,7 @@ namespace VROOM.Services
         public decimal CalculateTotalRevenue(int orderId) => orderRepository.SumOrderRevenue(orderId);
 
         // update Order Status
-        public async Task<Order> UpdateOrderState(int orderID , OrderStateEnum orderState , string riderId, string businessOwnerId)
+        public async Task<Order> UpdateOrderState(int orderID, OrderStateEnum orderState, string riderId, string businessOwnerId)
         {
             Order order = await orderRepository.GetAsync(orderID);
             if (order == null || order.IsDeleted) return null;
@@ -173,7 +182,7 @@ namespace VROOM.Services
         {
             try
             {
-                var orders =  orderRepository.GetOrdersByStatusAsync(OrderStateEnum.Pending).Result;
+                var orders = orderRepository.GetOrdersByStatusAsync(OrderStateEnum.Pending).Result;
                 foreach (var order in orders)
                 {
                     if (order.ModifiedAt.HasValue && order.ModifiedAt.Value.AddMinutes(30) <= DateTime.UtcNow)
@@ -193,5 +202,97 @@ namespace VROOM.Services
         // filter by order status
 
 
+        public async Task<ActiveOrdersViewModel> GetActiveOrdersAsync(
+            string priority = null,
+            string state = null,
+            string customer = null,
+            string rider = null,
+            bool? isBreakable = null,
+            DateTime? dateFrom = null,
+            DateTime? dateTo = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            string search = null,
+            int pageNumber = 1,
+            int pageSize = 4,
+            string sort = "title_asc")
+        {
+            // Validate filter inputs
+            if (dateFrom.HasValue && dateTo.HasValue && dateFrom > dateTo)
+                throw new ArgumentException("Date From cannot be later than Date To.");
+
+            if (minPrice.HasValue && maxPrice.HasValue && minPrice >= maxPrice)
+                throw new ArgumentException("Minimum price must be less than maximum price.");
+
+            // Build filter predicate
+            var builder = PredicateBuilder.New<Order>();
+            builder = builder.And(o => !o.IsDeleted);
+
+            if (!string.IsNullOrEmpty(priority) && Enum.TryParse<OrderPriorityEnum>(priority, out var priorityEnum))
+                builder = builder.And(o => o.OrderPriority == priorityEnum);
+
+            if (!string.IsNullOrEmpty(state) && Enum.TryParse<OrderStateEnum>(state, out var stateEnum))
+                builder = builder.And(o => o.State == stateEnum);
+
+            if (!string.IsNullOrEmpty(customer))
+                builder = builder.And(o => o.Customer.User.Name.ToLower().Contains(customer.ToLower()));
+
+            if (!string.IsNullOrEmpty(rider))
+                builder = builder.And(o => o.Rider.User.Name.ToLower().Contains(rider.ToLower()));
+
+            if (isBreakable.HasValue)
+                builder = builder.And(o => o.IsBreakable == isBreakable.Value);
+
+            if (dateFrom.HasValue)
+                builder = builder.And(o => o.Date >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                builder = builder.And(o => o.Date <= dateTo.Value);
+
+            if (minPrice.HasValue)
+                builder = builder.And(o => o.OrderPrice >= minPrice.Value);
+
+            if (maxPrice.HasValue)
+                builder = builder.And(o => o.OrderPrice <= maxPrice.Value);
+
+            //if (!string.IsNullOrEmpty(search))
+            //    builder = builder.And(o => o.Title.ToLower().Contains(search.ToLower()) || o.Details.ToLower().Contains(search.ToLower()));
+
+            // Get paginated orders
+            var (orders, totalCount) = await orderRepository.GetPaginatedOrdersAsync(
+                filter: builder,
+                pageSize: pageSize,
+                pageNumber: pageNumber,
+                sort: sort);
+
+            // Get price range
+            var (minPriceRange, maxPriceRange) = await orderRepository.GetPriceRangeAsync(
+                priority, state, customer, rider, isBreakable, dateFrom, dateTo, search);
+
+            var viewModel = new ActiveOrdersViewModel
+            {
+                Orders = orders.Select(o => new OrderDetailsViewModel
+                {
+                    Id = o.Id,
+                    Title = o.Title,
+                    CustomerName = o.Customer?.User.Name ?? o.CustomerID,
+                    RiderName = o.Rider?.User?.Name,
+                    Priority = o.OrderPriority,
+                    State = o.State,
+                    IsBreakable = o.IsBreakable,
+                    Details = o.Details,
+                    OrderPrice = o.OrderPrice,
+                    DeliveryPrice = o.DeliveryPrice,
+                    Date = o.Date
+                }).ToList(),
+                MinPrice = minPriceRange,
+                MaxPrice = maxPriceRange,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                Total = totalCount
+            };
+
+            return viewModel;
+        }
     }
 }

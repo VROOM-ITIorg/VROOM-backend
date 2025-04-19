@@ -47,7 +47,6 @@ builder.Services.AddScoped(typeof(AdminServices));
 builder.Services.AddScoped(typeof(UserRepository));
 builder.Services.AddScoped(typeof(UserManager<User>));
 builder.Services.AddScoped(typeof(SignInManager<User>));
-builder.Services.AddScoped(typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(TransactionWork<>));
 builder.Services.AddScoped(typeof(BusinessOwnerRepository));
 builder.Services.AddScoped(typeof(BusinessOwnerService));
@@ -57,6 +56,8 @@ builder.Services.AddScoped(typeof(CustomerServices));
 builder.Services.AddScoped(typeof(CustomerRepository));
 builder.Services.AddScoped(typeof(UserService));
 builder.Services.AddScoped(typeof(OrderRiderRepository));
+builder.Services.AddScoped(typeof(OrderRouteRepository));
+builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<MapService>();
 
 

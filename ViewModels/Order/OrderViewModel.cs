@@ -66,7 +66,7 @@ namespace VROOM.ViewModels
         public string BusinessOwner { get; set; }
         public string CustomerName { get; set; }
         public string RiderName { get; set; }
-        public string Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
+        public OrderPriorityEnum Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
         public OrderStateEnum State { get; set; }
         public bool IsBreakable { get; set; }
         public string Details { get; set; }
@@ -76,6 +76,14 @@ namespace VROOM.ViewModels
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
     }
-
+    public class ActiveOrdersViewModel
+    {
+        public List<OrderDetailsViewModel> Orders { get; set; }
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int Total { get; set; }
+    }
 }
 

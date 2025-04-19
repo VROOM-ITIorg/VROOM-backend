@@ -200,6 +200,15 @@ namespace VROOM.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("SubscriptionEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SubscriptionStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubscriptionType")
+                        .HasColumnType("int");
+
                     b.HasKey("UserID");
 
                     b.ToTable("BusinessOwners");

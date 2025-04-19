@@ -8,6 +8,14 @@
     var currentPage = riders.PageNumber;
     var start = ((riders.PageNumber - 1) * riders.PageSize) + 1;
     var end = Math.Min(riders.PageNumber * riders.PageSize, riders.Total);
+    var owners = ViewData["Owners"] as List<BusinessOwner>;
+
+    // Retrieve query parameters
+    var name = ViewData["Name"]?.ToString();
+    var status = ViewData["status"]?.ToString() ?? "-1";
+    var sort = ViewData["sort"]?.ToString() ?? "name_asc";
+    var owner = ViewData["owner"]?.ToString() ?? "All";
+    var pageSize = ViewData["pageSize"]?.ToString() ?? "4";
 }
 
 <div class="container-fluid py-4">
@@ -25,48 +33,59 @@
     <!-- Filter Section -->
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body p-4">
-            <form asp-controller="Rider" asp-action="Index" method="post" class="row align-items-end">
-                <div class="col-md-3 mb-3 mb-md-0">
+            <form asp-controller="Rider" asp-action="Index" method="get" class="row align-items-end">
+                <div class="col-md-12 mb-5 mb-md-3">
                     <label class="form-label fw-semibold text-secondary">Search</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-search text-primary"></i>
                         </span>
-                        <input type="text" name="Name" class="form-control border-start-0" placeholder="Search by name, email, phone...">
+                        <input type="text" name="Name" id="searchRider" class="form-control border-start-0" placeholder="Search by name, email, phone..." value="@name">
                     </div>
                 </div>
                 <div class="col-md-2 mb-3 mb-md-0">
                     <label class="form-label fw-semibold text-secondary">Status</label>
-                    <select class="form-select" id="statusFilter" name="status" asp-items="Html.GetEnumSelectList<RiderStatusEnum>()">
-                        <option value="-1" selected>All Status</option>
-
+                    <select class="form-select" id="statusFilter" name="status">
+                        <option value="-1" selected="@(status == "-1")">All Status</option>
+                        @foreach (var item in Html.GetEnumSelectList<RiderStatusEnum>())
+                        {
+                            <option value="@item.Value" selected="@(item.Value == status)">@item.Text</option>
+                        }
                     </select>
                 </div>
                 <div class="col-md-3 mb-3 mb-md-0">
                     <label class="form-label fw-semibold text-secondary">Sort By</label>
-                    <select class="form-select" id="sortBy">
-                        <option value="name_asc">Name (A-Z)</option>
-                        <option value="name_desc">Name (Z-A)</option>
-                        <option value="date_new">Date Added (Newest)</option>
-                        <option value="date_old">Date Added (Oldest)</option>
+                    <select class="form-select" id="sortBy" name="sort">
+                        <option value="name_asc" selected="@(sort == "name_asc")">Name (A-Z)</option>
+                        <option value="name_desc" selected="@(sort == "name_desc")">Name (Z-A)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <label class="form-label fw-semibold text-secondary">By Owner</label>
+                    <select class="form-select" id="ownerFilter" name="owner">
+                        <option value="All" selected="@(owner == "All")">All Owner</option>
+                        @foreach (var ownerItem in owners)
+                        {
+                            <option value="@ownerItem.User?.Name" selected="@(owner == ownerItem.User?.Name)">@ownerItem.User?.Name</option>
+                        }
                     </select>
                 </div>
                 <div class="col-md-2 mb-3 mb-md-0">
                     <label class="form-label fw-semibold text-secondary">Items Per Page</label>
                     <select class="form-select" id="perPage" name="pageSize">
-                        <option value="2">2 Items</option>
-                        <option value="4" selected >4 Items</option>
-                        <option value="8">8 Items</option>
-                        <option value="16">16 Items</option>
+                        <option value="2" selected="@(pageSize == "2")">2 Items</option>
+                        <option value="4" selected="@(pageSize == "4")">4 Items</option>
+                        <option value="8" selected="@(pageSize == "8")">8 Items</option>
+                        <option value="16" selected="@(pageSize == "16")">16 Items</option>
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
-                    <button class="btn btn-outline-primary me-2" id="applyFilters">
+                    <button type="submit" class="btn btn-outline-primary me-2" id="applyFilters">
                         <i class="bi bi-funnel-fill me-1"></i> Apply
                     </button>
-                    <button class="btn btn-outline-secondary" id="resetFilters">
+                    <a href="@Url.Action("Index", "Rider")" class="btn btn-outline-secondary" id="resetFilters">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </button>
+                    </a>
                 </div>
             </form>
         </div>
@@ -74,49 +93,58 @@
 
     <!-- Riders Cards Grid -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-        @foreach (var rider in  riders.Data)
+        @if (riders.Data.Count != 0)
         {
-            <div class="col">
-                <div class="card h-100 border-0 rider-card">
-                    <div class="position-relative">
-                        <div class="rider-image-container">
-                            <img src="@rider.ImagePath" class="rider-image" alt="@rider.ImagePath">
+            @foreach (var rider in riders.Data)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 rider-card">
+                        <div class="position-relative">
+                            <div class="rider-image-container">
+                                <img src="@rider.ImagePath" class="rider-image" alt="@rider.ImagePath">
+                            </div>
+                            <div class="rider-status">
+                                <span class="badge @(rider.Status == RiderStatusEnum.Unavailable ? "bg-danger" : rider.Status == RiderStatusEnum.OnDelivery ? "bg-warning" : rider.Status == RiderStatusEnum.Available ? "bg-success" : "")">@rider.Status</span>
+                            </div>
                         </div>
-                        <div class="rider-status">
-                            <span class="badge @(rider.Status == RiderStatusEnum.Unavailable ? "bg-danger" : rider.Status == RiderStatusEnum.OnDelivery ? "bg-warning" : rider.Status == RiderStatusEnum.Available ? "bg-success" : "")">@rider.Status</span>
+                        <div class="card-body pt-4">
+                            <h5 class="card-title fw-bold mb-3">@rider.UserName</h5>
+                            <div class="rider-info mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-telephone-fill text-primary me-3"></i>
+                                    <span>@rider.PhoneNumber</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-fill text-primary me-3"></i>
+                                    <span>@rider.Email</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-workspace text-primary me-3"></i>
+                                    <span>@rider.BusinessName</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0 pb-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="Edit/@rider.UserID" class="btn btn-outline-warning me-1">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="Delete/@rider.UserID" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body pt-4">
-                        <h5 class="card-title fw-bold mb-3">@rider.UserName</h5>
-                        <div class="rider-info mb-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-telephone-fill text-primary me-3"></i>
-                                <span>@rider.PhoneNumber</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-envelope-fill text-primary me-3"></i>
-                                <span>@rider.Email</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-person-workspace text-primary me-3"></i>
-                                <span>@rider.BusinessName</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-white border-0 pt-0 pb-3"> 
-                        <div class="d-flex justify-content-between">
-
-                            <div>
-                                <a href="Edit/@rider.UserID" class="btn btn-outline-warning me-1">
-                                    <i class="bi bi-pencil-square"></i> 
-                                </a>
-                                <a href="Delete/@rider.UserID" class="btn btn-outline-danger">
-                                    <i class="bi bi-trash"></i> 
-                                </a> 
-                            </div> 
-                        </div> 
-                    </div> 
                 </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-light text-center py-5 w-100" role="alert">
+                <h1 class="display-4 fw-bold">😕 No Riders Found</h1>
+                <p class="lead">We couldn't find any riders matching your search.</p>
             </div>
         }
     </div>
@@ -131,22 +159,31 @@
                 <div class="col-md-6">
                     <nav aria-label="Page navigation">
                         <ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
+                            @{
+                                // Display up to 5 pages, centering the current page when possible
+                                const int maxPagesToShow = 5;
+                                int startPage = Math.Max(1, currentPage - (maxPagesToShow / 2));
+                                int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+                                // Adjust startPage if endPage is at totalPages to ensure 5 pages are shown (if possible)
+                                if (endPage - startPage + 1 < maxPagesToShow && startPage > 1)
+                                {
+                                    startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                                }
+                            }
                             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                                <a class="page-link" href="?pageNumber=@(currentPage - 1)&pageSize=@riders.PageSize" aria-label="Previous">
+                                <a class="page-link" href="@Url.Action("Index", new { pageNumber = currentPage - 1, pageSize, Name = name, status, sort, owner })" aria-label="Previous">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
                             </li>
-                            @if (totalPages > 1)
+                            @for (int i = startPage; i <= endPage; i++)
                             {
-                                for (int i = 1; i <= totalPages; i++)
-                                {
-                                    <li class="page-item @(i == riders.PageNumber ? "active" : "")">
-                                        <a class="page-link" href="?pageNumber=@i&pageSize=@riders.PageSize">@i</a>
-                                    </li>
-                                }
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { pageNumber = i, pageSize, Name = name, status, sort, owner })">@i</a>
+                                </li>
                             }
                             <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
-                                <a class="page-link" href="?pageNumber=@(currentPage + 1)&pageSize=@riders.PageSize" aria-label="Next">
+                                <a class="page-link" href="@Url.Action("Index", new { pageNumber = currentPage + 1, pageSize, Name = name, status, sort, owner })" aria-label="Next">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
                             </li>
@@ -159,8 +196,7 @@
 </div>
 
 <style>
-
-    /* Card Styles (from your original) */
+    /* Card Styles */
     .rider-card {
         transition: all 0.3s ease;
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
@@ -219,7 +255,7 @@
             color: white;
         }
 
-    /* New Filter Styles */
+    /* Filter Styles */
     .form-select, .form-control {
         border-radius: 8px;
         padding: 0.6rem 1rem;
@@ -263,53 +299,40 @@
 </style>
 
 <script>
-    // Filter functionality
-    document.addEventListener('DOMContentLoaded', function() {
-       
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply Filters Button (handled by form submission)
 
-        // Reset Filters Button
-        document.getElementById('resetFilters')?.addEventListener('click', function() {
-            document.getElementById('searchRider').value = '';
-            document.getElementById('statusFilter').value = 'active';
-            document.getElementById('sortBy').value = 'name_asc';
-            document.getElementById('perPage').value = '2';
+        // Reset Filters Button (handled by the link)
 
+        // Simple toast notification function
+        function showToast(message) {
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
 
-        });
-    });
+            const toastEl = document.createElement('div');
+            toastEl.className = 'toast show';
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
 
-    // Simple toast notification function
-    function showToast(message) {
-        // Check if a toast container already exists
-        let toastContainer = document.querySelector('.toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            document.body.appendChild(toastContainer);
+            toastEl.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
+
+            toastContainer.appendChild(toastEl);
+
+            setTimeout(() => {
+                toastEl.remove();
+            }, 3000);
         }
-
-        // Create toast element
-        const toastEl = document.createElement('div');
-        toastEl.className = 'toast show';
-        toastEl.setAttribute('role', 'alert');
-        toastEl.setAttribute('aria-live', 'assertive');
-        toastEl.setAttribute('aria-atomic', 'true');
-
-        toastEl.innerHTML = `
-            <div class="toast-header">
-                <i class="bi bi-info-circle text-primary me-2"></i>
-                <strong class="me-auto">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">${message}</div>
-        `;
-
-        // Add to container
-        toastContainer.appendChild(toastEl);
-
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-            toastEl.remove();
-        }, 3000);
-    }
+    });
 </script>

@@ -10,7 +10,11 @@ namespace VROOM.Models
 
         public string UserID { get; set; }
         public string BankAccount { get; set; } = "df";
-        public string BusinessType { get; set; } 
+        public string BusinessType { get; set; }
+
+        public SubscriptionTypeEnum SubscriptionType { get; set; } = SubscriptionTypeEnum.None;
+        public DateTime? SubscriptionStartDate { get; set; }
+        public DateTime? SubscriptionEndDate { get; set; }
 
         public virtual User User { get; set; }
         public virtual ICollection<Rider> Riders { get; set; }

@@ -23,8 +23,8 @@ namespace VROOM.Services
         private readonly RiderRepository riderRepository;
         private readonly TransactionWork<Rider> transactionWork;
         private readonly TransactionWork<BusinessOwner> transactionWorkBO;
-
-        public AdminServices(AccountManager _accountManager, BusinessOwnerRepository _ownerRepository, TransactionWork<Rider> _transactionWork, UserManager<User> _userManager, TransactionWork<BusinessOwner> _transactionWorkBO, RiderRepository _riderRepository)
+        private readonly BusinessOwnerService ownerService;
+        public AdminServices(AccountManager _accountManager, BusinessOwnerRepository _ownerRepository, TransactionWork<Rider> _transactionWork, UserManager<User> _userManager, TransactionWork<BusinessOwner> _transactionWorkBO, RiderRepository _riderRepository, BusinessOwnerService _ownerService)
         {
             accountManager = _accountManager;
             ownerRepository = _ownerRepository;
@@ -32,6 +32,7 @@ namespace VROOM.Services
             userManager = _userManager;
             transactionWorkBO = _transactionWorkBO;
             riderRepository = _riderRepository;
+            ownerService = _ownerService;
         }
         public async Task<SignInResult> Login(LoginViewModel user)
         {
@@ -55,7 +56,16 @@ namespace VROOM.Services
 
                 return model.ImagePath = $"/Images/Rider/{fileName}";
             }
-            return null;
+            else if (model.ImagePath != null)
+            {
+                return model.ImagePath = model.ImagePath;
+
+            }
+            else
+            {
+                return model.ImagePath = $"/Images/Rider/default-avatar-profile-icon-of-social-media-user-vector.jpg";
+
+            }
         }
 
         public async Task CreateNewRider(AdminCreateRiderVM model)
@@ -82,7 +92,9 @@ namespace VROOM.Services
                 };
                 newUser.ProfilePicture = UploadImageProfile<AdminCreateRiderVM>(model);
 
+                
                 var res = await userManager.CreateAsync(newUser);
+
 
                 var newRider = new Rider();
                 newRider = model.ToModel();
@@ -100,6 +112,7 @@ namespace VROOM.Services
         }
         public async Task CreateNewOwner(AdminCreateBusOnwerVM model)
         {
+            
 
             await transactionWorkBO.BeginTransactionAsync();
             try
@@ -130,6 +143,16 @@ namespace VROOM.Services
                 transactionWorkBO.User.Add(newOwner);
                 transactionWorkBO.User.CustomSaveChanges();
                 await transactionWorkBO.CommitAsync();
+
+                if (model.SubscriptionType == SubscriptionTypeEnum.Trial)
+                {
+                    await ownerService.StartTrial(newOwner.UserID);
+                }
+                else
+                {
+                    await ownerService.ActivatePaidAsync(newOwner.UserID);
+                }
+
             }
             catch (Exception ex)
             {
@@ -148,14 +171,18 @@ namespace VROOM.Services
                 VehicleType = rider.VehicleType,
                 Location = rider.Area,
                 ExperienceLevel = rider.ExperienceLevel,
-                UserName = rider.User?.UserName,
+                UserName = rider.User?.Name,
                 Email = rider.User?.Email,
                 PhoneNumber = rider.User.PhoneNumber,
                 ImagePath = rider.User.ProfilePicture,
+                
 
             };
             return (Rider: viewModel, BusinessName: await ownerRepository.GetAllAsync());
         }
+
+
+
         public async Task EditRider(AdminEditRiderVM Rider)
         {
             var rider = await riderRepository.GetAsync(Rider.UserID);
@@ -175,13 +202,13 @@ namespace VROOM.Services
         {
             return await ownerRepository.GetAllAsync();
         }
-        public PaginationViewModel<AdminRiderDetialsVM> ShowAllRiders(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public async Task<(PaginationViewModel<AdminRiderDetialsVM> Riders, IEnumerable<BusinessOwner> owners)> ShowAllRiders(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc", string owner = "All")
         {
-            return riderRepository.Search(status: status, Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
+            return (riderRepository.Search(status: status, Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort : sort, owner : owner), await ownerRepository.GetAllAsync());
         }
-        public PaginationViewModel<AdminBusOwnerDetialsVM> ShowAllOwners(string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        public PaginationViewModel<AdminBusOwnerDetialsVM> ShowAllOwners(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
-            return ownerRepository.Search(Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
+            return ownerRepository.Search(Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize, sort :sort);
         }
         public async Task EditOwner(AdminEditBusOwnerVM OwnerVM)
         {

@@ -8,11 +8,8 @@ namespace VROOM.Models
 {
     public class OrderRoute
     {
-        public int Id { get; set; }
         public int OrderID { get; set; }
         public int RouteID { get; set; }
-
-        //public string Status { get; set; }
 
         public virtual Order Order { get; set; }
         public virtual Route Route { get; set; }

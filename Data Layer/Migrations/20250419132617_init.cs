@@ -403,8 +403,10 @@ namespace VROOM.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     startTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RealEndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExpectedEndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RiderID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ShipmentState = table.Column<int>(type: "int", nullable: false),
                     BeginningLang = table.Column<double>(type: "float", nullable: false),
                     BeginningLat = table.Column<double>(type: "float", nullable: false),
                     BeginningArea = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -518,12 +520,33 @@ namespace VROOM.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Waypoint",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Lang = table.Column<double>(type: "float", nullable: false),
+                    Lat = table.Column<double>(type: "float", nullable: false),
+                    Area = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShipmentID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Waypoint", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Waypoint_Shipments_ShipmentID",
+                        column: x => x.ShipmentID,
+                        principalTable: "Shipments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderRoutes",
                 columns: table => new
                 {
                     OrderID = table.Column<int>(type: "int", nullable: false),
                     RouteID = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -715,6 +738,11 @@ namespace VROOM.Data.Migrations
                 name: "IX_Shipments_RiderID",
                 table: "Shipments",
                 column: "RiderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Waypoint_ShipmentID",
+                table: "Waypoint",
+                column: "ShipmentID");
         }
 
         /// <inheritdoc />
@@ -758,6 +786,9 @@ namespace VROOM.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "RiderRouteIssues");
+
+            migrationBuilder.DropTable(
+                name: "Waypoint");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

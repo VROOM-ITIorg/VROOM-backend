@@ -369,7 +369,6 @@ namespace VROOM.Services
                 await shipmentServices.CreateShipment(new AddShipmentVM
                 {
                     startTime = route.Start,
-                    EndTime = DateTime.Now,
                     RiderID = riderId,
                     BeginningLang = route.OriginLang,
                     BeginningLat = route.OriginLat,

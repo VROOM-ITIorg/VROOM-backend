@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -30,6 +30,7 @@ namespace VROOM.Services
         private readonly OrderRepository orderRepository;
         private readonly RiderRepository riderRepository;
         private readonly RouteRepository routeRepository;
+        private readonly ShipmentRepository shipmentRepository;
         private readonly ShipmentServices shipmentServices;
         private readonly OrderRiderRepository orderRiderRepository;
         private readonly OrderRouteRepository orderRouteRepository;
@@ -56,8 +57,8 @@ namespace VROOM.Services
             OrderRouteRepository _orderRouteRepository,
             OrderService _orderService,
             RouteRepository _routeRepository,
-            ShipmentServices _shipmentServices
-
+            ShipmentServices _shipmentServices,
+            ShipmentRepository _shipmentRepository
             )
         {
             userManager = _userManager;
@@ -74,7 +75,7 @@ namespace VROOM.Services
             _httpContextAccessor = httpContextAccessor;
             _userRepository = userRepository;
             shipmentServices = _shipmentServices;
-
+            shipmentRepository = _shipmentRepository;
         }
 
 
@@ -350,10 +351,6 @@ namespace VROOM.Services
                     return false;
                 }
 
-                //order.RiderID = riderId;
-                //order.State = OrderStateEnum.Pending;
-                //order.ModifiedBy = businessOwnerId;
-                //order.ModifiedAt = DateTime.Now;
 
                 await orderService.UpdateOrderState(order.Id, OrderStateEnum.Pending, riderId, businessOwnerId);
 
@@ -365,20 +362,73 @@ namespace VROOM.Services
                 var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
 
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
+                // shipment 
 
+                var shipment = await shipmentRepository
+                    .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)&& (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.InTransit))
+                    .Include(s => s.Routes)
+                    .FirstOrDefaultAsync();
 
-                await shipmentServices.CreateShipment(new AddShipmentVM
+                if (shipment != null)
                 {
-                    startTime = route.Start,
-                    RiderID = riderId,
-                    BeginningLang = route.OriginLang,
-                    BeginningLat = route.OriginLat,
-                    BeginningArea = route.OriginArea,
-                    EndLang = route.DestinationLang,
-                    EndLat = route.DestinationLat,
-                    EndArea = route.DestinationArea,
-                    MaxConsecutiveDeliveries = 1
-                },route);
+                    // Update Route => Add Shipment Id
+                    route.ShipmentID = shipment.Id;
+                    routeRepository.Update(route);
+                    routeRepository.CustomSaveChanges();
+
+                    // تعديل نهاية الشحنة لو المسار الجديد بعد المسار القديم
+                    var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang).ThenByDescending(r => r.DestinationLat).FirstOrDefault();
+
+                    if (lastRoute != null)
+                    {
+                        // هنحسب المسافة التقريبية ما بين نقطة النهاية بتاعة آخر Route والنقطة الجديدة
+                        double lastLat = lastRoute.DestinationLat;
+                        double lastLng = lastRoute.DestinationLang;
+
+                        double newLat = route.DestinationLat;
+                        double newLng = route.DestinationLang;
+
+                        // نحسب المسافة (تقريبية باستخدام فيثاغورس لو مش محتاج دقة الخرائط الجغرافية)
+                        double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
+
+                        // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب
+                        double threshold = 0.01;
+
+                        if (distance > threshold)
+                        {
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id,Lang = shipment.EndLang,Lat=shipment.EndLat,Area=shipment.EndArea};
+
+                            shipment.waypoints.Add(waypoint); 
+                            // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
+                            shipment.EndLat = newLat;
+                            shipment.EndLang = newLng;
+                            shipment.EndArea = route.DestinationArea;
+                        }
+
+                        // بترجع تعمل Update للـ shipment بعد التعديل
+                        shipmentRepository.Update(shipment);
+                        shipmentRepository.CustomSaveChanges();
+                    }
+                }
+                else
+                {
+                    // Create New Shipment With its Details 
+                    await shipmentServices.CreateShipment(new AddShipmentVM
+                    {
+                        startTime = route.Start,
+                        RiderID = riderId,
+                        BeginningLang = route.OriginLang,
+                        BeginningLat = route.OriginLat,
+                        BeginningArea = route.OriginArea,
+                        EndLang = route.DestinationLang,
+                        EndLat = route.DestinationLat,
+                        EndArea = route.DestinationArea,
+                        MaxConsecutiveDeliveries = 1
+                    },route);
+
+                }
+
+
 
                 _logger.LogInformation($"Order {orderId} successfully assigned to Rider {riderId} by BusinessOwner {businessOwnerId}.");
                 return true;

@@ -107,55 +107,7 @@ namespace VROOM.Services
 
             await orderRouteServices.CreateOrderRoute(order.Id, route.Id);
 
-            // shipment 
-
-            var shipment = await shipmentRepository
-                .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries))
-                .Include(s => s.Routes)
-                .FirstOrDefaultAsync();
-
-            if (shipment != null) 
-            {
-                // Update Route => Add Shipment Id
-                route.ShipmentID = shipment.Id;
-                routeRepository.Update(route);
-                routeRepository.CustomSaveChanges();
-
-                // تعديل نهاية الشحنة لو المسار الجديد بعد المسار القديم
-                var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang).ThenByDescending(r=>r.DestinationLat).FirstOrDefault();
-
-                if (lastRoute != null)
-                {
-                    // هنحسب المسافة التقريبية ما بين نقطة النهاية بتاعة آخر Route والنقطة الجديدة
-                    double lastLat = lastRoute.DestinationLat;
-                    double lastLng = lastRoute.DestinationLang;
-
-                    double newLat = route.DestinationLat;
-                    double newLng = route.DestinationLang;
-
-                    // نحسب المسافة (تقريبية باستخدام فيثاغورس لو مش محتاج دقة الخرائط الجغرافية)
-                    double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
-
-                    // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب
-                    double threshold = 0.01;
-
-                    if (distance > threshold)
-                    {
-                        // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
-                        shipment.EndLat = newLat;
-                        shipment.EndLang = newLng;
-                        shipment.EndArea = route.DestinationArea;
-                    }
-
-                    // بترجع تعمل Update للـ shipment بعد التعديل
-                    shipmentRepository.Update(shipment);
-                    shipmentRepository.CustomSaveChanges();
-                }
-            }else
-            {
-                // Create New Shipment With its Details 
-            }
-
+          
 
             await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
             await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");

@@ -16,6 +16,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <!-- Polyline decoding script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mapbox-polyline/1.1.1/polyline.min.js"></script>
+    <!-- Axios for AJAX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
 
     <style>
         #map {
@@ -39,6 +41,10 @@
             position: relative;
             margin-top: 20px;
         }
+
+        .error-container {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -52,7 +58,7 @@
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="search-container">
-                    <form asp-action="Route" method="post">
+                    <form id="routeForm">
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <div class="input-group">
@@ -78,138 +84,27 @@
                                 </button>
                             </div>
                         </div>
-
-                        @if (!ViewData.ModelState.IsValid)
-                        {
-                            <div class="alert alert-danger mt-3">
-                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                                {
-                                    <p class="mb-0"><i class="fas fa-exclamation-circle me-2"></i> @error.ErrorMessage</p>
-                                }
-                            </div>
-                        }
                     </form>
+                    <div id="errorContainer" class="alert alert-danger mt-3 error-container">
+                        <!-- Errors will be displayed here -->
+                    </div>
                 </div>
 
-                @if (Model is VROOM.Models.Route routeModel && routeModel.Id != 0) // Check if a Route is passed
-                {
-                    <div class="results mt-4">
-                        <h2 class="border-bottom pb-2 mb-3">Optimized Route Found</h2>
-
-                        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Route ID</h5>
-                                        <p class="card-text"><i class="fas fa-id-badge me-2"></i> @routeModel.Id</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Origin</h5>
-                                        <p class="card-text"><i class="fas fa-map-pin me-2"></i> @routeModel.OriginArea</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Destination</h5>
-                                        <p class="card-text"><i class="fas fa-map-pin me-2"></i> @routeModel.DestinationArea</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Start</h5>
-                                        <p class="card-text"><i class="fas fa-clock me-2"></i> @routeModel.Start.ToString("g")</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">End</h5>
-                                        <p class="card-text"><i class="fas fa-clock me-2"></i> @routeModel.End.ToString("g")</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Duration</h5>
-                                        <p class="card-text"><i class="fas fa-hourglass-half me-2"></i> @(routeModel.End - routeModel.Start).TotalMinutes.ToString("F2") minutes</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="card h-100 bg-light">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-primary">Shipment ID</h5>
-                                        <p class="card-text"><i class="fas fa-truck me-2"></i> @routeModel.ShipmentID</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="map-container">
-                            <div id="map" class="shadow"></div>
-                            <div class="map-overlay shadow-sm">
-                                <i class="fas fa-info-circle me-1"></i> Drag to move, scroll to zoom
-                            </div>
-                        </div>
+                <!-- Map container (always visible) -->
+                <div class="map-container">
+                    <div id="map" class="shadow"></div>
+                    <div class="map-overlay shadow-sm">
+                        <i class="fas fa-info-circle me-1"></i> Drag to move, scroll to zoom
                     </div>
+                </div>
 
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Decode the polyline from Radar API using the global 'polyline' object
-                            var encodedPolyline = '@Html.Raw(routeModel.Waypoints)';
-                            var coordinates = polyline.decode(encodedPolyline);
-
-                            // Create the map, centered on the first coordinate
-                            var map = L.map('map').setView(coordinates[0], 13);
-
-                            // Add OpenStreetMap tile layer
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            }).addTo(map);
-
-                            // Add the polyline to the map
-                            var polylineLayer = L.polyline(coordinates, { color: '#0d6efd', weight: 5, opacity: 0.7 }).addTo(map);
-
-                            // Add markers for origin and destination
-                            var originIcon = L.divIcon({
-                                html: '<i class="fas fa-play-circle text-success" style="font-size: 24px;"></i>',
-                                className: 'custom-div-icon',
-                                iconSize: [30, 30],
-                                iconAnchor: [15, 15]
-                            });
-
-                            var destIcon = L.divIcon({
-                                html: '<i class="fas fa-flag-checkered text-danger" style="font-size: 24px;"></i>',
-                                className: 'custom-div-icon',
-                                iconSize: [30, 30],
-                                iconAnchor: [15, 15]
-                            });
-
-                            var originMarker = L.marker(coordinates[0], {icon: originIcon}).addTo(map)
-                                .bindPopup('<strong>Origin: @routeModel.OriginArea</strong>');
-                            var destMarker = L.marker(coordinates[coordinates.length - 1], {icon: destIcon}).addTo(map)
-                                .bindPopup('<strong>Destination: @routeModel.DestinationArea</strong>').openPopup();
-
-                            // Fit the map to the polyline bounds
-                            map.fitBounds(polylineLayer.getBounds());
-
-                            // Ensure map renders correctly
-                            setTimeout(function() {
-                                map.invalidateSize();
-                            }, 100);
-                        });
-                    </script>
-                }
+                <!-- Route details (updated dynamically) -->
+                <div id="routeDetails" class="results mt-4" style="display: none;">
+                    <h2 class="border-bottom pb-2 mb-3">Optimized Route Found</h2>
+                    <div id="routeCards" class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+                        <!-- Route cards will be injected here -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -217,5 +112,178 @@
             <p>Maps powered by <a href="https://leafletjs.com/" class="text-decoration-none">Leaflet</a> | © OpenStreetMap contributors</p>
         </footer>
     </div>
+
+    <script>
+        let map;
+        let polylineLayer;
+        let originMarker;
+        let destMarker;
+
+        // Initialize default map
+        document.addEventListener('DOMContentLoaded', function() {
+            map = L.map('map').setView([51.505, -0.09], 13); // Default center (e.g., London)
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+
+            // Handle form submission
+            document.getElementById('routeForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent page reload
+
+                const origin = document.getElementById('origin').value;
+                const destination = document.getElementById('destination').value;
+                const shipmentId = document.getElementById('shipmentId').value;
+
+                // Clear previous errors
+                const errorContainer = document.getElementById('errorContainer');
+                errorContainer.style.display = 'none';
+                errorContainer.innerHTML = '';
+
+                // Submit form data via AJAX
+        axios.post('/Map/Route', { origin, destination, shipmentId })
+            .then(response => {
+                const route = response.data;
+                if (!route || route.id === 0) {
+                    showError('Unable to find a route for the provided inputs.');
+                    return;
+                }
+                updateRouteDetails(route);
+                updateMap(route);
+            })
+            .catch(error => {
+                const errors = error.response?.data?.errors || ['An unknown error occurred while fetching the route.'];
+                showError(errors.join('<br>'));
+            });
+            });
+        });
+
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `<p class="mb-0"><i class="fas fa-exclamation-circle me-2"></i> ${message}</p>`;
+            errorContainer.style.display = 'block';
+        }
+
+        function updateRouteDetails(route) {
+            const routeDetails = document.getElementById('routeDetails');
+            const routeCards = document.getElementById('routeCards');
+
+            // Generate route cards
+            routeCards.innerHTML = `
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Route ID</h5>
+                            <p class="card-text"><i class="fas fa-id-badge me-2"></i> ${route.id}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Origin</h5>
+                            <p class="card-text"><i class="fas fa-map-pin me-2"></i> ${route.originArea}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Destination</h5>
+                            <p class="card-text"><i class="fas fa-map-pin me-2"></i> ${route.destinationArea}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Start</h5>
+                            <p class="card-text"><i class="fas fa-clock me-2"></i> ${new Date(route.start).toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">End</h5>
+                            <p class="card-text"><i class="fas fa-clock me-2"></i> ${new Date(route.end).toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Duration</h5>
+                            <p class="card-text"><i class="fas fa-hourglass-half me-2"></i> ${((new Date(route.end) - new Date(route.start)) / 60000).toFixed(2)} minutes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">Shipment ID</h5>
+                            <p class="card-text"><i class="fas fa-truck me-2"></i> ${route.shipmentID}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            routeDetails.style.display = 'block';
+        }
+
+        function updateMap(route) {
+            // Clear existing polyline and markers
+            if (polylineLayer) map.removeLayer(polylineLayer);
+            if (originMarker) map.removeLayer(originMarker);
+            if (destMarker) map.removeLayer(destMarker);
+
+            // Parse waypoints (JSON array of [lat, lng] pairs)
+            const coordinates = JSON.parse(route.waypoints);
+
+            // Validate coordinates
+            if (!coordinates || coordinates.length === 0) {
+                showError('No valid waypoints found for the route.');
+                return;
+            }
+
+            // Update map view to the first coordinate
+            map.setView(coordinates[0], 13);
+
+            // Add polyline
+            polylineLayer = L.polyline(coordinates, { color: '#0d6efd', weight: 5, opacity: 0.7 }).addTo(map);
+
+            // Add markers
+            const originIcon = L.divIcon({
+                html: '<i class="fas fa-play-circle text-success" style="font-size: 24px;"></i>',
+                className: 'custom-div-icon',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const destIcon = L.divIcon({
+                html: '<i class="fas fa-flag-checkered text-danger" style="font-size: 24px;"></i>',
+                className: 'custom-div-icon',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            originMarker = L.marker(coordinates[0], { icon: originIcon }).addTo(map)
+                .bindPopup(`<strong>Origin: ${route.originArea}</strong>`);
+            destMarker = L.marker(coordinates[coordinates.length - 1], { icon: destIcon }).addTo(map)
+                .bindPopup(`<strong>Destination: ${route.destinationArea}</strong>`).openPopup();
+
+            // Fit map to polyline bounds
+            map.fitBounds(polylineLayer.getBounds());
+
+            // Ensure map renders correctly
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+        }
+    </script>
 </body>
 </html>

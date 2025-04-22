@@ -217,8 +217,8 @@ namespace VROOM.Repositories
 
         private string EncodePolyline(Point[] points)
         {
-            var coords = points.Select(p => $"{p.Latitude},{p.Longitude}");
-            return string.Join(";", coords); // Placeholder
+            var coords = points.Select(p => new[] { p.Latitude, p.Longitude }).ToArray();
+            return JsonConvert.SerializeObject(coords);
         }
 
         internal class TomTomGeocodeResponse

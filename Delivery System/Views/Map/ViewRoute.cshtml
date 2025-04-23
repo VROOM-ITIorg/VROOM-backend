@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Route</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.25rem;
+        }
+
+        .map-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+
+        .map-container {
+            position: relative;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="fas fa-map-marked-alt me-2"></i> View Route
+            </h1>
+        </header>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="border-bottom pb-2 mb-3">Route Details</h2>
+                <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Route ID</h5>
+                                <p class="card-text"><i class="fas fa-id-badge me-2"></i> @Model.Id</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Origin</h5>
+                                <p class="card-text"><i class="fas fa-map-pin me-2"></i> @Model.OriginArea</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Destination</h5>
+                                <p class="card-text"><i class="fas fa-map-pin me-2"></i> @Model.DestinationArea</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Start</h5>
+                                <p class="card-text"><i class="fas fa-clock me-2"></i> @Model.Start.ToString("g")</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">End</h5>
+                                <p class="card-text"><i class="fas fa-clock me-2"></i> @Model.End.ToString("g")</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Duration</h5>
+                                <p class="card-text"><i class="fas fa-hourglass-half me-2"></i> @((Model.End - Model.Start).TotalMinutes.ToString("F2")) minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Shipment ID</h5>
+                                <p class="card-text"><i class="fas fa-truck me-2"></i> @Model.ShipmentID</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map container -->
+                <div class="map-container">
+                    <div id="map" class="shadow"></div>
+                    <div class="map-overlay shadow-sm">
+                        <i class="fas fa-info-circle me-1"></i> Drag to move, scroll to zoom
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <a asp-controller="Map" asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i> Back to Route Explorer
+            </a>
+        </div>
+
+        <footer class="text-center text-muted">
+            <p>Maps powered by <a href="https://leafletjs.com/" class="text-decoration-none">Leaflet</a> | © OpenStreetMap contributors</p>
+        </footer>
+    </div>
+
+    <script>
+        let map;
+        let polylineLayer;
+        let originMarker;
+        let destMarker;
+
+        // Initialize map
+        document.addEventListener('DOMContentLoaded', function() {
+            map = L.map('map').setView([51.505, -0.09], 13); // Default center
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Parse waypoints from Model
+            const waypoints = @Html.Raw(Model.Waypoints);
+
+            if (waypoints && waypoints.length > 0) {
+                // Update map view to the first coordinate
+                map.setView(waypoints[0], 13);
+
+                // Add polyline
+                polylineLayer = L.polyline(waypoints, { color: '#0d6efd', weight: 5, opacity: 0.7 }).addTo(map);
+
+                // Add markers
+                const originIcon = L.divIcon({
+                    html: '<i class="fas fa-play-circle text-success" style="font-size: 24px;"></i>',
+                    className: 'custom-div-icon',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                const destIcon = L.divIcon({
+                    html: '<i class="fas fa-flag-checkered text-danger" style="font-size: 24px;"></i>',
+                    className: 'custom-div-icon',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                originMarker = L.marker(waypoints[0], { icon: originIcon }).addTo(map)
+                    .bindPopup(`<strong>Origin: @Model.OriginArea</strong>`);
+                destMarker = L.marker(waypoints[waypoints.length - 1], { icon: destIcon }).addTo(map)
+                    .bindPopup(`<strong>Destination: @Model.DestinationArea</strong>`).openPopup();
+
+                // Fit map to polyline bounds
+                map.fitBounds(polylineLayer.getBounds());
+            }
+
+            // Ensure map renders correctly
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

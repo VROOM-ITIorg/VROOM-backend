@@ -12,7 +12,7 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250419140143_init")]
+    [Migration("20250419143613_init")]
     partial class init
     {
         /// <inheritdoc />

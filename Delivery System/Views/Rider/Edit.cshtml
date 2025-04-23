@@ -18,8 +18,9 @@
                     <form asp-action="Edit" asp-controller="Rider" enctype="multipart/form-data" method="post">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                        <!-- Hidden ID field -->
+                        <!-- Hidden fields -->
                         <input type="hidden" asp-for="UserID" />
+                        <input type="hidden" asp-for="ImagePath" id="currentImagePath" />
 
                         <!-- BusinessID & UserID -->
                         <div class="row">
@@ -28,7 +29,7 @@
                                     <select asp-for="BusinessName" class="form-select">
                                         @foreach (var item in owners)
                                         {
-                                            <option value="@item.User.Name">@item.User.Name</option>
+                                            <option value="@item.User?.Name">@item.User?.Name</option>
                                         }
                                     </select>
                                     <label asp-for="BusinessName"></label>
@@ -102,33 +103,54 @@
                             </div>
                         </div>
 
-                        <!-- Current Profile Picture & Upload New -->
+                        <!-- Enhanced Profile Picture Section -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Current Profile Image</label>
-                            <div class="mb-3">
-                                @if (!string.IsNullOrEmpty(Model.ImagePath))
-                                {
-                                    <img src="@Model.ImagePath" class="img-thumbnail" style="max-height: 200px;" />
-                                }
-                                else
-                                {
-                                    <div class="alert alert-secondary">No profile image available</div>
-                                }
-                            </div>
+                            <label class="form-label fw-bold">Profile Image</label>
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <!-- Hidden file input -->
+                                    <input asp-for="ProfilePicture" type="file" accept="image/*" id="profileImageInput" class="d-none" />
 
-                            <label asp-for="ProfilePicture" class="form-label fw-bold">Upload New Profile Image</label>
-                            <div class="input-group">
-                                <input asp-for="ProfilePicture" type="file" class="form-control" accept="image/*" />
-                                <label class="input-group-text" for="ProfilePicture">
-                                    <i class="bi bi-upload"></i>
-                                </label>
+                                    <!-- Clickable image preview in a nicer container -->
+                                    <div class="profile-image-wrapper mx-auto" id="imagePreviewContainer">
+                                        <div class="profile-image-inner">
+                                            <img id="imagePreview"
+                                                 src="@(string.IsNullOrEmpty(Model.ImagePath) ? "/images/default-profile.png" : Model.ImagePath)" />
+
+                                            <!-- Camera overlay icon (shows on hover) -->
+                                            <div class="image-overlay">
+                                                <i class="bi bi-camera"></i>
+                                            </div>
+
+                                            <!-- Success checkmark (hidden by default) -->
+                                            <div id="successCheckmark">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="image-info-panel">
+                                        <h6 class="text-muted mb-3">Image Options</h6>
+                                        <div class="d-grid gap-2">
+                                            <button type="button" class="btn btn-outline-primary" id="changeImageBtn">
+                                                <i class="bi bi-image"></i> Change Image
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary" id="clearImageBtn">
+                                                <i class="bi bi-x-lg"></i> Remove Image
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-3">
+                                            Click directly on the image to change it. For best results, use a square image.
+                                        </small>
+                                        <span asp-validation-for="ProfilePicture" class="text-danger d-block mt-2"></span>
+                                    </div>
+                                </div>
                             </div>
-                            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
-                            <img id="imagePreview" class="img-thumbnail mt-2" style="max-height: 200px; display: none;" />
-                            <small class="text-muted">Leave empty to keep the current image</small>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
+                        <div class="d-flex justify-content-between mt-5">
                             <a asp-action="Index" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Back to List
                             </a>
@@ -145,15 +167,205 @@
 
 @section Scripts {
     <script>
-        document.querySelector('#ProfilePicture').addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.querySelector('#imagePreview').src = e.target.result;
-                    document.querySelector('#imagePreview').style.display = 'block';
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileInput = document.querySelector('#profileImageInput');
+            const imagePreview = document.querySelector('#imagePreview');
+            const imagePreviewContainer = document.querySelector('#imagePreviewContainer');
+            const changeImageBtn = document.querySelector('#changeImageBtn');
+            const clearImageBtn = document.querySelector('#clearImageBtn');
+            const successCheckmark = document.querySelector('#successCheckmark');
+
+            // Make the image preview clickable
+            imagePreviewContainer.addEventListener('click', function() {
+                profileInput.click();
+            });
+
+            // Change image button
+            changeImageBtn.addEventListener('click', function() {
+                profileInput.click();
+            });
+
+            // Handle file selection for preview
+            profileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+
+                        // Show success checkmark with animation
+                        successCheckmark.classList.add('show-checkmark');
+
+                        // Hide checkmark after animation completes
+                        setTimeout(function() {
+                            successCheckmark.classList.remove('show-checkmark');
+                        }, 3000);
+                    }
+                    reader.readAsDataURL(this.files[0]);
                 }
-                reader.readAsDataURL(this.files[0]);
-            }
+            });
+
+            // Handle clear button click
+            clearImageBtn.addEventListener('click', function() {
+                profileInput.value = '';
+
+                // If there was a previous image, show default image
+                imagePreview.src = '/images/default-profile.png';
+
+                // Hide success checkmark if visible
+                successCheckmark.classList.remove('show-checkmark');
+            });
         });
     </script>
+
+    <style>
+        /* Add custom styles for the form */
+        .card {
+            transition: all 0.3s;
+            border: none;
+        }
+
+            .card:hover {
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-select:focus ~ label {
+            color: #0d6efd;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Profile image styling */
+        .profile-image-wrapper {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-image-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .profile-image-wrapper:hover .profile-image-inner {
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+            border-color: #0d6efd;
+        }
+
+        #imagePreview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50%;
+        }
+
+            .image-overlay i {
+                color: white;
+                font-size: 2rem;
+            }
+
+        .profile-image-wrapper:hover .image-overlay {
+            opacity: 1;
+        }
+
+        #successCheckmark {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            background-color: #198754;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+            #successCheckmark i {
+                color: white;
+                font-size: 1rem;
+            }
+
+            #successCheckmark.show-checkmark {
+                opacity: 1;
+                transform: scale(1);
+                animation: pulseCheckmark 3s ease forwards;
+            }
+
+        .image-info-panel {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            height: 100%;
+        }
+
+        /* Animation for checkmark */
+        @@keyframes pulseCheckmark {
+            0%
+
+        {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        20% {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        30% {
+            transform: scale(1);
+        }
+
+        80% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .profile-image-wrapper
+
+        {
+            margin-bottom: 20px;
+        }
+
+        }
+    </style>
 }

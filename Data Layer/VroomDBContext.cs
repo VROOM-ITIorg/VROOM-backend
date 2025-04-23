@@ -32,6 +32,12 @@ namespace VROOM.Data
         public DbSet<Shipment> Shipments { get; set; }
         public DbSet<RiderRouteIssue> RiderRouteIssues { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data source = .; Initial catalog = VROOM; Integrated security= true; trustservercertificate = true;MultipleActiveResultSets=True");
+
+            base.OnConfiguring(optionsBuilder);
+        }
     
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

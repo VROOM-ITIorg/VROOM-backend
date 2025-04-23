@@ -1,66 +1,489 @@
-﻿@* @using VROOM.ViewModels *@
-@* @model List<OrderDetailsViewModel> *@
-@* @{ *@
-@*     ViewData["Title"] = "Active Orders"; *@
-@* } *@
+﻿@using System.Web.Mvc
+@using VROOM.Models
+@using VROOM.ViewModels
 
-@* <div class="container-fluid"> *@
-@*     <h2 class="mb-3 text-primary">Active Orders</h2> *@
-@*     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> *@
+@model ActiveOrdersViewModel
+@{
+	ViewData["Title"] = "Active Orders";
+}
+<div class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-3">
+		<h2 class="text-primary mb-0">Active Orders</h2>
+		<button class="btn btn-primary px-4 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+			<i class="fas fa-filter"></i> Filters
+		</button>
 
-@*     <div class="table-responsive"> *@
-@*         <table class="table table-striped table-bordered align-middle text-center shadow-sm rounded overflow-hidden"> *@
-@*             <thead class="bg-dark text-white"> *@
-@*                 <tr> *@
-@*                     <th>Title</th> *@
-@*                     <th>Business Owner</th> *@
-@*                     <th>Customer</th> *@
-@*                     <th>Rider</th> *@
-@*                     <th>Priority</th> *@
-@*                     <th>State</th> *@
-@*                     <th>Is Breakable</th> *@
-@*                     <th>Details</th> *@
-@*                     <th>Order Price</th> *@
-@*                     <th>Delivery Price</th> *@
-@*                     <th>Order Date</th> *@
-@*                     <th>Order Time</th> *@
-@*                     <th>Actions</th> *@
-@*                 </tr> *@
-@*             </thead> *@
-@*             <tbody> *@
-@*                 @foreach (var order in Model) *@
-@*                 { *@
-@*                     <tr class="table-light"> *@
-@*                         <td class="fw-bold">@order.Title</td> *@
-@*                         <td>@order.BusinessOwner</td> *@
-@*                         <td>@order.CustomerName</td> *@
-@*                         <td>@order.RiderName</td> *@
-@*                         <td> *@
-@*                             <span class="badge bg-warning text-dark">@order.Priority</span> *@
-@*                         </td> *@
-@*                         <td> *@
-@*                             <span class="badge bg-success">@order.State</span> *@
-@*                         </td> *@
-@*                         <td> *@
-@*                             <span class="badge @(order.IsBreakable ? "bg-danger" : "bg-secondary")"> *@
-@*                                 @(order.IsBreakable ? "Yes" : "No") *@
-@*                             </span> *@
-@*                         </td> *@
-@*                         <td>@order.Details</td> *@
-@*                         <td class="fw-bold text-primary">@order.OrderPrice EGP</td> *@
-@*                         <td class="fw-bold text-danger">@order.DeliveryPrice EGP</td> *@
-@*                         <td>@order.Date.ToString("dd/MM/yyyy")</td> *@
-@*                         <td>@order.Date.ToString("hh:mm tt")</td> *@
-@*                         <td> *@
-@*                             <a href="@Url.Action("OrderPerformance", "Order", new { id = order.Id })" *@
-@*                                class="btn btn-outline-info btn-sm"> *@
-@*                                 <i class="fas fa-chart-line"></i> View Report *@
-@*                             </a> *@
-@*                         </td> *@
-@*                     </tr> *@
-@*                 } *@
-@*             </tbody> *@
-@*         </table> *@
-@*     </div> *@
-@*     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> *@
-@* </div> *@
+
+	</div>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css">
+
+	@* <!-- Filter Summary --> *@
+	@* <div class="mb-3" id="filterSummary" style="display: none;"> *@
+	@*     <strong>Applied Filters:</strong> <span id="filterSummaryText"></span> *@
+	@*     <button class="btn btn-link btn-sm text-danger" onclick="document.querySelector('button[type=reset]').click()">Clear All</button> *@
+	@* </div> *@
+
+
+	<!-- Compact Filter Section -->
+	<div class="collapse mb-3" id="filterCollapse">
+		<div class="card shadow-sm border-0">
+			<div class="card-body p-3">
+				<form id="orderFilterForm" method="get" action="@Url.Action("ActiveOrders", "Order")">
+					<!-- Main filters section -->
+					<div class="row g-2 mb-3">
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="stateFilter">Order Status</label>
+							<select class="form-select" id="stateFilter" name="state">
+								<option value="">All Statuses</option>
+								<option value="Created">Created</option>
+								<option value="Pending">Pending</option>
+								<option value="InProgress">In Progress</option>
+								<option value="Delivered">Delivered</option>
+							</select>
+						</div>
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="priorityFilter">Priority</label>
+							<select class="form-select" id="priorityFilter" name="priority">
+								<option value="">All Priorities</option>
+								<option value="High">High</option>
+								<option value="Medium">Medium</option>
+								<option value="Low">Low</option>
+								<option value="Standard">Standard</option>
+							</select>
+						</div>
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="customerFilter">Customer</label>
+							<input type="text" class="form-control" id="customerFilter" name="customer" placeholder="Filter by customer">
+						</div>
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="riderFilter">Rider</label>
+							<input type="text" class="form-control" id="riderFilter" name="rider" placeholder="Filter by rider">
+						</div>
+					</div>
+
+					<!-- Secondary filters row -->
+					<div class="row g-2 mb-3">
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="isBreakableFilter">Breakable Items</label>
+							<select class="form-select" id="isBreakableFilter" name="isBreakable">
+								<option value="">All Items</option>
+								<option value="true">Breakable Only</option>
+								<option value="false">Non-breakable Only</option>
+							</select>
+						</div>
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<label class="form-label small mb-1" for="sortFilter">Sort Results By</label>
+							<select class="form-select" id="sortFilter" name="sort">
+								<option value="date_desc">Date (Newest first)</option>
+								<option value="date_asc">Date (Oldest first)</option>
+								<option value="title_asc">Title (A to Z)</option>
+								<option value="title_desc">Title (Z to A)</option>
+								<option value="price_asc">Price (Low to High)</option>
+								<option value="price_desc">Price (High to Low)</option>
+							</select>
+						</div>
+						<div class="col-lg-6 col-md-4 col-sm-12">
+							<label class="form-label small mb-1">Date Range</label>
+							<div class="input-group">
+								<input type="date" class="form-control" id="dateFromFilter" name="dateFrom" placeholder="From">
+								<span class="input-group-text bg-light">to</span>
+								<input type="date" class="form-control" id="dateToFilter" name="dateTo" placeholder="To">
+							</div>
+						</div>
+					</div>
+
+					<!-- Price range row -->
+					<div class="row mb-4">
+						<div class="col-12">
+							<label class="form-label small mb-1">Price Range (EGP)</label>
+							<div class="px-2 mt-4">
+								<div id="priceRangeSlider" aria-label="Price range slider" role="slider"></div>
+								<div class="d-flex justify-content-between mt-1">
+									<small id="priceRangeMin">@Model.MinPrice EGP</small>
+									<small id="priceRangeMax">@Model.MaxPrice EGP</small>
+								</div>
+								<input type="hidden" id="minPriceFilter" name="minPrice" value="@Model.MinPrice">
+								<input type="hidden" id="maxPriceFilter" name="maxPrice" value="@Model.MaxPrice">
+							</div>
+						</div>
+					</div>
+
+					<!-- Action buttons -->
+					<div class="row">
+						<div class="col-12">
+							<div class="d-flex justify-content-end">
+								<button type="reset" class="btn btn-outline-secondary me-2">
+									<i class="fas fa-undo"></i> Reset Filters
+								</button>
+								<button type="submit" class="btn btn-primary">
+									<i class="fas fa-filter"></i> Apply Filters
+								</button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			// Toggle advanced filters visibility
+			const advancedFilters = document.getElementById('advancedFilters');
+			const advancedFilterToggle = document.getElementById('advancedFilterToggle');
+
+			// Hide advanced filters by default
+			advancedFilters.style.display = 'none';
+
+			advancedFilterToggle.addEventListener('click', function() {
+				if (advancedFilters.style.display === 'none') {
+					advancedFilters.style.display = 'block';
+					advancedFilterToggle.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Advanced Filters';
+				} else {
+					advancedFilters.style.display = 'none';
+					advancedFilterToggle.innerHTML = '<i class="fas fa-sliders-h"></i> Advanced Filters';
+				}
+			});
+
+			// Form submission loading state
+			const orderFilterForm = document.getElementById('orderFilterForm');
+			const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+			const spinner = applyFiltersBtn.querySelector('.spinner-border');
+
+			orderFilterForm.addEventListener('submit', function() {
+				spinner.classList.remove('d-none');
+				applyFiltersBtn.setAttribute('disabled', true);
+			});
+		});
+	</script>
+	<!-- Order Summary Stats -->
+	<div class="row g-3 mb-3">
+		<div class="col-xl-3 col-md-6">
+			<div class="card border-0 shadow-sm bg-primary bg-gradient text-white">
+				<div class="card-body d-flex align-items-center py-2">
+					<div class="display-6 me-3"><i class="fas fa-clipboard-list"></i></div>
+					<div>
+						<h5 class="mb-0">@Model.Orders.Count()</h5>
+						<div class="small">Total Orders</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xl-3 col-md-6">
+			<div class="card border-0 shadow-sm bg-warning bg-gradient text-dark">
+				<div class="card-body d-flex align-items-center py-2">
+					<div class="display-6 me-3"><i class="fas fa-exclamation-circle"></i></div>
+					<div>
+						<h5 class="mb-0">@Model.Orders.Count(o => o.Priority == OrderPriorityEnum.Standard)</h5>
+						<div class="small">High Priority</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xl-3 col-md-6">
+			<div class="card border-0 shadow-sm bg-success bg-gradient text-white">
+				<div class="card-body d-flex align-items-center py-2">
+					<div class="display-6 me-3"><i class="fas fa-check-circle"></i></div>
+					<div>
+						<h5 class="mb-0">@Model.Orders.Count(o => o.State == OrderStateEnum.Delivered)</h5>
+						<div class="small">Delivered</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xl-3 col-md-6">
+			<div class="card border-0 shadow-sm bg-info bg-gradient text-white">
+				<div class="card-body d-flex align-items-center py-2">
+					<div class="display-6 me-3"><i class="fas fa-truck"></i></div>
+					<div>
+						<h5 class="mb-0">@Model.Orders.Count(o => o.State == OrderStateEnum.Pending)</h5>
+						<div class="small">In Progress</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="table-responsive">
+		@if (Model.Orders.Count != 0)
+		{
+			<table class="table table-striped table-bordered align-middle text-center shadow-sm rounded overflow-hidden">
+				<thead class="bg-dark text-white">
+					<tr>
+						<th>Title</th>
+						<th>Customer</th>
+						<th>Rider</th>
+						<th>Priority</th>
+						<th>State</th>
+						<th>Is Breakable</th>
+						<th>Details</th>
+						<th>Order Price</th>
+						<th>Delivery Price</th>
+						<th>Order Date</th>
+						<th>Order Time</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+
+
+					@foreach (var order in Model.Orders)
+					{
+						<tr class="table-light">
+							<td class="fw-bold">@order.Title</td>
+							<td>@order.CustomerName</td>
+							<td>@order.RiderName</td>
+							<td>
+								<span class="badge bg-warning text-dark">@order.Priority</span>
+							</td>
+							<td>
+								<span class="badge bg-success">@order.State</span>
+							</td>
+							<td>
+								<span class="badge @(order.IsBreakable ? "bg-danger" : "bg-secondary")">
+									@(order.IsBreakable ? "Yes" : "No")
+								</span>
+							</td>
+							<td>@order.Details</td>
+							<td class="fw-bold text-primary">@order.OrderPrice EGP</td>
+							<td class="fw-bold text-danger">@order.DeliveryPrice EGP</td>
+							<td>@order.Date.ToString("dd/MM/yyyy")</td>
+							<td>@order.Date.ToString("hh:mm tt")</td>
+							<td>
+								<a href="@Url.Action("OrderPerformance", "Order", new { id = order.Id })"
+								   class="btn btn-outline-info btn-sm">
+									<i class="fas fa-chart-line"></i> View Report
+								</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+		else
+		{
+			<div class="alert alert-light text-center py-5 w-100" role="alert">
+				<h1 class="display-4 fw-bold">😕 No Orders Found</h1>
+			</div>
+		}
+	</div>
+
+	<div class="position-relative" style="min-height: 40vh;">
+		<div class="card mt-4 border-0 shadow-sm position-absolute bottom-0 start-0 end-0">
+			<div class="card-body">
+				<div class="row align-items-center">
+					<div class="col-md-6 mb-3 mb-md-0">
+						@{
+							int start = (Model.PageNumber - 1) * Model.PageSize + 1;
+							int end = Math.Min(start + Model.PageSize - 1, Model.Total);
+						}
+						<p class="text-secondary mb-0">Showing <span class="fw-bold">@start-@end</span> of <span class="fw-bold">@Model.Total</span> items</p>
+					</div>
+					<div class="col-md-6">
+						<nav aria-label="Page navigation">
+							<ul class="pagination pagination-md justify-content-md-end justify-content-center mb-0">
+								@{
+									int totalPages = (int)Math.Ceiling((double)Model.Total / Model.PageSize);
+									int currentPage = Model.PageNumber;
+									int startPage = Math.Max(1, currentPage - 2);
+									int endPage = Math.Min(totalPages, currentPage + 2);
+								}
+								<li class="page-item @(currentPage == 1 ? "disabled" : "")">
+									<a class="page-link" href="@Url.Action("ActiveOrders", new { pageNumber = currentPage - 1, pageSize = Model.PageSize, sort = ViewData["sort"], priority = ViewData["priority"], state = ViewData["state"], customer = ViewData["customer"], rider = ViewData["rider"], isBreakable = ViewData["isBreakable"], dateFrom = ViewData["dateFrom"], dateTo = ViewData["dateTo"], minPrice = ViewData["minPrice"], maxPrice = ViewData["maxPrice"], search = ViewData["search"] })" aria-label="Previous">
+										<i class="bi bi-chevron-left"></i>
+									</a>
+								</li>
+								@for (int i = startPage; i <= endPage; i++)
+								{
+									<li class="page-item @(i == currentPage ? "active" : "")">
+										<a class="page-link" href="@Url.Action("ActiveOrders", new { pageNumber = i, pageSize = Model.PageSize, sort = ViewData["sort"], priority = ViewData["priority"], state = ViewData["state"], customer = ViewData["customer"], rider = ViewData["rider"], isBreakable = ViewData["isBreakable"], dateFrom = ViewData["dateFrom"], dateTo = ViewData["dateTo"], minPrice = ViewData["minPrice"], maxPrice = ViewData["maxPrice"], search = ViewData["search"] })">@i</a>
+									</li>
+								}
+								<li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+									<a class="page-link" href="@Url.Action("ActiveOrders", new { pageNumber = currentPage + 1, pageSize = Model.PageSize, sort = ViewData["sort"], priority = ViewData["priority"], state = ViewData["state"], customer = ViewData["customer"], rider = ViewData["rider"], isBreakable = ViewData["isBreakable"], dateFrom = ViewData["dateFrom"], dateTo = ViewData["dateTo"], minPrice = ViewData["minPrice"], maxPrice = ViewData["maxPrice"], search = ViewData["search"] })" aria-label="Next">
+										<i class="bi bi-chevron-right"></i>
+									</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- Custom CSS for noUiSlider -->
+	<style>
+		.noUi-target {
+			background: #e9ecef;
+			border: none;
+			box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+			height: 8px;
+			border-radius: 4px;
+		}
+
+		.noUi-connect {
+			background: #007bff;
+		}
+
+		.noUi-handle {
+			background: #fff;
+			border: 2px solid #007bff;
+			border-radius: 50%;
+			width: 20px !important;
+			height: 20px !important;
+			top: -6px !important;
+			cursor: pointer;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+
+			.noUi-handle::after, .noUi-handle::before {
+				display: none;
+			}
+
+		.noUi-tooltip {
+			background: #007bff;
+			color: #fff;
+			padding: 2px 6px;
+			font-size: 12px;
+			border-radius: 3px;
+		}
+	</style>
+
+	<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Initialize price range slider
+			const priceSlider = document.getElementById('priceRangeSlider');
+			const minPriceInput = document.getElementById('minPriceFilter');
+			const maxPriceInput = document.getElementById('maxPriceFilter');
+			const priceRangeMin = document.getElementById('priceRangeMin');
+			const priceRangeMax = document.getElementById('priceRangeMax');
+
+			const minPrice = @Model.MinPrice;
+			const maxPrice = @Model.MaxPrice;
+
+			noUiSlider.create(priceSlider, {
+				start: [minPrice, maxPrice],
+				connect: true,
+				step: 10,
+				range: {
+					'min': minPrice,
+					'max': maxPrice
+				},
+				tooltips: [true, true],
+				format: {
+					to: function (value) {
+						return Math.round(value);
+					},
+					from: function (value) {
+						return Math.round(value);
+					}
+				}
+			});
+
+			priceSlider.noUiSlider.on('update', function (values, handle) {
+				const value = values[handle];
+				if (handle === 0) {
+					minPriceInput.value = value;
+					priceRangeMin.textContent = value + ' EGP';
+				} else {
+					maxPriceInput.value = value;
+					priceRangeMax.textContent = value + ' EGP';
+				}
+			});
+
+			priceSlider.noUiSlider.on('change', function (values) {
+				const [min, max] = values;
+				if (min >= max) {
+					priceSlider.noUiSlider.set([min, min + 10]);
+					alert('Maximum price must be greater than minimum price.');
+				}
+			});
+
+			// Initialize filter values from URL parameters
+			const urlParams = new URLSearchParams(window.location.search);
+			urlParams.forEach((value, key) => {
+				const element = document.getElementById(key + 'Filter');
+				if (element) {
+					element.value = value;
+				}
+			});
+
+			if (urlParams.has('minPrice') && urlParams.has('maxPrice')) {
+				const min = parseFloat(urlParams.get('minPrice'));
+				const max = parseFloat(urlParams.get('maxPrice'));
+				if (min >= minPrice && max <= maxPrice && min < max) {
+					priceSlider.noUiSlider.set([min, max]);
+				}
+			}
+
+			// Debounced search
+			const searchInput = document.getElementById('searchFilter');
+			searchInput.addEventListener('input', debounce(function () {
+				document.getElementById('orderFilterForm').submit();
+			}, 500));
+
+			// Loading spinner
+			document.getElementById('orderFilterForm').addEventListener('submit', function () {
+				const applyBtn = document.getElementById('applyFiltersBtn');
+				applyBtn.querySelector('.spinner-border').classList.remove('d-none');
+				applyBtn.disabled = true;
+			});
+
+			// Reset button functionality
+			document.querySelector('button[type="reset"]').addEventListener('click', function () {
+				priceSlider.noUiSlider.set([minPrice, maxPrice]);
+				document.getElementById('orderFilterForm').reset();
+				setTimeout(() => {
+					document.getElementById('orderFilterForm').submit();
+				}, 100);
+			});
+
+			// Filter summary
+			function updateFilterSummary() {
+				const urlParams = new URLSearchParams(window.location.search);
+				const summary = [];
+				if (urlParams.get('priority')) summary.push(`Priority: ${urlParams.get('priority')}`);
+				if (urlParams.get('state')) summary.push(`State: ${urlParams.get('state')}`);
+				if (urlParams.get('customer')) summary.push(`Customer: ${urlParams.get('customer')}`);
+				if (urlParams.get('rider')) summary.push(`Rider: ${urlParams.get('rider')}`);
+				if (urlParams.get('isBreakable')) summary.push(`Is Breakable: ${urlParams.get('isBreakable') === 'true' ? 'Yes' : 'No'}`);
+				if (urlParams.get('dateFrom')) summary.push(`Date From: ${urlParams.get('dateFrom')}`);
+				if (urlParams.get('dateTo')) summary.push(`Date To: ${urlParams.get('dateTo')}`);
+				if (urlParams.get('minPrice') && urlParams.get('maxPrice')) {
+					summary.push(`Price: ${urlParams.get('minPrice')} - ${urlParams.get('maxPrice')} EGP`);
+				}
+				if (urlParams.get('search')) summary.push(`Search: ${urlParams.get('search')}`);
+
+				const summaryText = document.getElementById('filterSummaryText');
+				const summaryContainer = document.getElementById('filterSummary');
+				if (summary.length > 0) {
+					summaryText.textContent = summary.join(', ');
+					summaryContainer.style.display = 'block';
+				} else {
+					summaryContainer.style.display = 'none';
+				}
+			}
+
+			updateFilterSummary();
+
+			// Debounce function
+			function debounce(func, wait) {
+				let timeout;
+				return function executedFunction(...args) {
+					const later = () => {
+						clearTimeout(timeout);
+						func(...args);
+					};
+					clearTimeout(timeout);
+					timeout = setTimeout(later, wait);
+				};
+			}
+		});
+	</script>
+</div>

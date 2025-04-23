@@ -8,13 +8,17 @@ using VROOM.Models;
 
 namespace VROOM.Models
 {
+
     public class Shipment
     {
         public int Id { get; set; }
-        public int StartId{ get; set; }
-        public int EndId{ get; set; }
+        public DateTime startTime { get; set; }
+        public DateTime? RealEndTime { get; set; }
+        public DateTime? ExpectedEndTime { get; set; }
+
         public string  RiderID { get; set; }
 
+        public ShipmentStateEnum ShipmentState {  get; set; } = ShipmentStateEnum.Created;
         public double BeginningLang { get; set; }
         public double BeginningLat { get; set; }
         public string BeginningArea { get; set; }
@@ -23,6 +27,7 @@ namespace VROOM.Models
         public double EndLat { get; set; }
         public string EndArea { get; set; }
 
+        public virtual ICollection<Waypoint>? waypoints { get; set; }
         public int MaxConsecutiveDeliveries { get; set; }
         public virtual Rider Rider { get; set; }
         public virtual ICollection<Route> Routes { get; set; }

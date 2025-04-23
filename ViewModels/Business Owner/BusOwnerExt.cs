@@ -25,11 +25,14 @@ namespace ViewModels
                 UserID = owner.UserID,
                 OwnerName = owner.User?.Name ?? "Unknown",
                 Email = owner.User?.Email ?? "No Email",
-                ImagePath = owner.User.ProfilePicture,
+                ImagePath = owner.User?.ProfilePicture ?? "/images/default.png",
                 PhoneNumber = owner.User?.PhoneNumber ?? "No Phone Number",
-                BusinessName = owner.BusinessType,
-                Address = owner.User.Address?.Area,
+                BusinessName = owner.BusinessType ?? "No Business",
+                Address = owner.User?.Address?.Area ?? "No Address",
+                SubscriptionName = owner.SubscriptionType.ToString() ?? "No Subscription", 
+                SubscriptionExpiryDate = owner.SubscriptionEndDate ?? DateTime.MinValue 
             };
+
         }
 
     }

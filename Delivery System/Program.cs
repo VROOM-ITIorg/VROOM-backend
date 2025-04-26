@@ -16,6 +16,7 @@ builder.Services.AddControllersWithViews()
         options.HtmlHelperOptions.ClientValidationEnabled = true;
     });
 
+builder.Services.AddHttpClient();
 
 builder.Services.AddDbContext<VroomDbContext>(i =>
     i.UseLazyLoadingProxies()
@@ -62,12 +63,18 @@ builder.Services.AddScoped<MapService>();
 
 
 
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/vroom-admin/account/login"; 
     options.ExpireTimeSpan = TimeSpan.FromDays(30); 
     options.SlidingExpiration = true;
 });
+
+
+
+
+
 
 
 var app = builder.Build();

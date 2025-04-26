@@ -96,8 +96,8 @@ namespace VROOM.Repositories
                     var testShipment = new Shipment
                     {
                         Id = shipmentId,
-                        StartId = 1,
-                        EndId = 2,
+                        //StartId = 1,
+                        //EndId = 2,
                         RiderID = "e5e945d2-c0a3-414d-9879-9e5e2b16b81c",
                         BeginningLang = originMap.Longitude,
                         BeginningLat = originMap.Latitude,
@@ -182,7 +182,7 @@ namespace VROOM.Repositories
                     Start = DateTime.Now,
                     End = DateTime.Now.AddSeconds(optimizedRoute.Summary.TravelTimeInSeconds),
                     SafetyIndex = 0.0f,
-                    DateTime = DateTime.Now,
+                    dateTime = DateTime.Now,
                     ModifiedBy = "System",
                     ModifiedAt = DateTime.Now
                 };

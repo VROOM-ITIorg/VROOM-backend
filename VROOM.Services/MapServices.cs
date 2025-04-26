@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Map;
 using VROOM.Repositories;
@@ -9,10 +10,11 @@ namespace VROOM.Services
     public class MapService
     {
         private readonly IMapRepository _mapRepository;
-
-        public MapService(IMapRepository mapRepository)
+        private readonly VroomDbContext dbContext;
+        public MapService(IMapRepository mapRepository, VroomDbContext _dbContext)
         {
             _mapRepository = mapRepository ?? throw new ArgumentNullException(nameof(mapRepository));
+            dbContext = _dbContext;
         }
 
         public async Task<MapModel> FetchCoordinatesAsync(string locationName)
@@ -32,8 +34,11 @@ namespace VROOM.Services
             }
         }
 
-        public async Task<Route> FetchOptimizedRouteAsync(string origin, string destination, int shipmentId)
+        public async Task<Route> FetchOptimizedRouteAsync( int shipmentId)
         {
+            var shipment = dbContext.Shipments.FirstOrDefault(sh => sh.Id == shipmentId);
+            var origin = shipment.BeginningArea;
+            var destination = shipment.EndArea;
             if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
             {
                 throw new ArgumentException("Origin and destination cannot be empty.");
@@ -41,7 +46,7 @@ namespace VROOM.Services
 
             try
             {
-                return await _mapRepository.GetOptimizedRouteAsync(origin, destination, shipmentId);
+                return await _mapRepository.GetOptimizedRouteAsync( shipmentId);
             }
             catch (Exception ex)
             {

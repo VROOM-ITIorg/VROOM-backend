@@ -75,6 +75,8 @@ namespace VROOM.ViewModels
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
+
+        public int? shipmentId { get; set; }
     }
     public class ActiveOrdersViewModel
     {

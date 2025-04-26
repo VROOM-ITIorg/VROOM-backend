@@ -10,7 +10,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "BusinessOwner")]
+    //[Authorize(Roles = "BusinessOwner")]
     public class BusinessOwnerController : Controller
     {
         private readonly BusinessOwnerService _businessOwnerService;

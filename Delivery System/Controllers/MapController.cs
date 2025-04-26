@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using VROOM.Data;
@@ -11,21 +12,23 @@ namespace VROOM.Controllers
     public class MapController : Controller
     {
         private readonly MapService _mapService;
-        private readonly VroomDbContext _dbContext;
+        private readonly VroomDbContext _dbContext ;
 
-        public MapController(MapService mapService)
+        public MapController(MapService mapService, VroomDbContext dbContext )
         {
             _mapService = mapService ?? throw new ArgumentNullException(nameof(mapService));
+            _dbContext = dbContext;
         }
 
         // GET: /Map
-        public IActionResult Index()
+        public IActionResult Index(int id)
         {
-            return View(new MapModel());
+            var shipment = _dbContext.Shipments.FirstOrDefault(x => x.Id == id);
+
+            return View(shipment);
         }
 
         // POST: /Map/Route
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Route([FromBody] RouteRequest request)
         {
@@ -36,8 +39,7 @@ namespace VROOM.Controllers
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray();
                     return BadRequest(new { errors });
                 }
-
-                var route = await _mapService.FetchOptimizedRouteAsync(request.Origin, request.Destination, request.ShipmentId);
+                var route = await _mapService.FetchOptimizedRouteAsync( request.ShipmentId );
                 return Json(route);
             }
             catch (Exception ex)

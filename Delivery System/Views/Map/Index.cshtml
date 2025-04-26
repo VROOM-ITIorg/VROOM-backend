@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using VROOM.Models;
+@model Shipment;
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -63,19 +65,19 @@
                             <div class="col-md-4">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control" id="origin" name="origin" placeholder="Enter origin...">
+                                    <input type="hidden" class="form-control" id="origin" name="origin" value="@Model.BeginningArea">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control" id="destination" name="destination" placeholder="Enter destination...">
+                                    <input type="hidden" class="form-control" id="destination" name="destination" value="@Model.EndArea">
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-truck"></i></span>
-                                    <input type="number" class="form-control" id="shipmentId" name="shipmentId" placeholder="Shipment ID...">
+                                    <input type="hidden" class="form-control" id="shipmentId" name="shipmentId" value="@Model.Id">
                                 </div>
                             </div>
                             <div class="col-md-2">

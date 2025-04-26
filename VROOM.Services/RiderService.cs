@@ -15,6 +15,9 @@ namespace VROOM.Services
     {
         private readonly RiderRepository _riderRepository;
         private readonly OrderRouteRepository _orderRouteRepository;
+        private readonly OrderRepository _orderRepository;
+        private readonly ShipmentRepository _shipmentRepository;
+
         private readonly RouteRepository _routeRepository;
         private readonly VroomDbContext _context;
         private readonly DbSet<Order> _orders;
@@ -22,7 +25,7 @@ namespace VROOM.Services
         private readonly ShipmentServices _shipmentServices;
         private readonly OrderService _orderService;
 
-        public RiderService(RiderRepository riderRepository, VroomDbContext context, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository, OrderService orderService)
+        public RiderService(RiderRepository riderRepository, VroomDbContext context,OrderRepository orderRepository, ShipmentRepository shipmentRepository, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository, OrderService orderService)
         {
             _riderRepository = riderRepository ?? throw new ArgumentNullException(nameof(riderRepository));
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -32,6 +35,8 @@ namespace VROOM.Services
             _orderRouteRepository = orderRouteRepository;
             _routeRepository = routeRepository;
             _orderService = orderService;
+            _orderRepository = orderRepository;
+            _shipmentRepository = shipmentRepository;
         }
 
         public Rider RegisterRiderAsync(Rider rider)
@@ -157,8 +162,8 @@ namespace VROOM.Services
             if (rider == null)
                 throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
 
-            var orderRider = await _orderRiders
-                .FirstOrDefaultAsync(or => or.OrderID == orderId && or.RiderID == riderId && !or.IsDeleted);
+            var orderRider = await _orders
+                .FirstOrDefaultAsync(or => or.Id == orderId && or.RiderID == riderId && !or.IsDeleted);
             if (orderRider == null)
                 throw new KeyNotFoundException($"Order with ID {orderId} not found or not assigned to this rider.");
 
@@ -179,14 +184,92 @@ namespace VROOM.Services
                 orderRider.IsDeleted = true;
                 orderRider.ModifiedBy = rider.UserID;
                 orderRider.ModifiedAt = DateTime.UtcNow;
-                order.RiderID = "";
-                rider.Status = RiderStatusEnum.Available;
+
+                bool hasOtherActiveOrders = await _orders
+                    .AnyAsync(or =>
+                        or.RiderID == riderId &&
+                        !or.IsDeleted &&
+                        or.Id != orderId);
+
+                if (!hasOtherActiveOrders)
+                {
+                    rider.Status = RiderStatusEnum.Available; //change shipment to delivered??
+                }
             }
 
-            await _context.SaveChangesAsync();
+            _orderRepository.CustomSaveChanges();
+            _riderRepository.CustomSaveChanges();
             return order;
         }
+        public async Task<List<Order>> StartDeliveriesAsync(string riderId, List<int> orderIds)
+        {
+            if (_riderRepository == null || _orderRepository == null || _orderRiders == null)
+                throw new NullReferenceException("One or more repositories are not initialized in RiderService.");
 
+            if (orderIds == null || orderIds.Count == 0)
+                throw new ArgumentException("No order IDs provided");
+
+            var rider = await _riderRepository.GetAsync(riderId);
+            if (rider == null)
+                throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
+
+            if (rider.Status != RiderStatusEnum.Available)
+                throw new InvalidOperationException($"Rider with ID {riderId} cannot start delivery. Current status: {rider.Status}.");
+
+            var successfulOrders = new List<Order>();
+
+            foreach (var orderId in orderIds.Distinct())
+            {
+                try
+                {
+                    var orderRider = await _orders
+                        .FirstOrDefaultAsync(or => or.Id == orderId && or.RiderID == riderId && !or.IsDeleted);
+                    if (orderRider == null)
+                        throw new KeyNotFoundException($"Order with ID {orderId} not found or not assigned to this rider.");
+
+                    var order = await _orderRepository.GetAsync(orderId);
+                    if (order == null)
+                        throw new KeyNotFoundException($"Order with ID {orderId} not found.");
+
+                    if (order.State != OrderStateEnum.Confirmed)
+                        throw new InvalidOperationException($"Order with ID {orderId} cannot be marked as shipped. Current state: {order.State}.");
+
+                    order.State = OrderStateEnum.Shipped;
+                    order.ModifiedBy = rider.UserID;
+                    order.ModifiedAt = DateTime.UtcNow;
+
+                    successfulOrders.Add(order);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to process order {orderId}: {ex.Message}");
+                }
+            }
+
+            if (successfulOrders.Count > 0)
+            {
+
+                var shipment = new Shipment
+                {
+                    RiderID = riderId,
+                    Rider = rider,
+                    startTime = DateTime.UtcNow,
+                    ShipmentState = ShipmentStateEnum.Created,
+                    ModifiedBy = rider.UserID,
+                    ModifiedAt = DateTime.UtcNow,
+                };
+
+                _shipmentRepository.Add(shipment);
+
+                rider.Status = RiderStatusEnum.OnDelivery;
+
+                _orderRepository.CustomSaveChanges();
+                _riderRepository.CustomSaveChanges();
+                _shipmentRepository.CustomSaveChanges();
+            }
+
+            return successfulOrders;
+        }
         private bool IsValidStateTransition(OrderStateEnum currentState, OrderStateEnum newState)
         {
             return (currentState, newState) switch

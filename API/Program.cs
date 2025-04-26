@@ -92,7 +92,7 @@ builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 
 // Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();
@@ -132,7 +132,7 @@ builder.Services.AddScoped<IssueService>();
 
 
 // Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"];
+var jwtSecret = "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
 {
     throw new InvalidOperationException("JWT Secret is missing or too short in configuration. It must be at least 16 characters long.");

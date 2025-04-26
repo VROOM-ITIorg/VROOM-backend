@@ -1,0 +1,13 @@
+{
+  "ConnectionStrings": {
+    "DB": "Data Source=.;Initial Catalog=Vroom_DB;Integrated Security=True;TrustServerCertificate=True;MultipleActiveResultSets=True"
+  },
+  "exclude": [
+    "**/bin",
+    "**/bower_components",
+    "**/jspm_packages",
+    "**/node_modules",
+    "**/obj",
+    "**/platforms"
+  ]
+}

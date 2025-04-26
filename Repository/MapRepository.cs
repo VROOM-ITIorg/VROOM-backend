@@ -110,7 +110,6 @@ namespace VROOM.Repositories
                         EndLat = destMap.Latitude,
                         EndArea = destination,
                         MaxConsecutiveDeliveries = 5,
-                        CreatedAt = DateTime.Now,
                         ModifiedAt = DateTime.Now,
                         ModifiedBy = "System",
                         IsDeleted = false

@@ -12,8 +12,13 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
+<<<<<<<< HEAD:Data Layer/Migrations/20250419143613_init.Designer.cs
     [Migration("20250419143613_init")]
     partial class init
+========
+    [Migration("20250426134247_pordios")]
+    partial class pordios
+>>>>>>>> fff24d8eb32fb8196b6764a080705cfb0463ff99:Data Layer/Migrations/20250426134247_pordios.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

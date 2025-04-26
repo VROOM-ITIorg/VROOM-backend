@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using VROOM.Models;
 
@@ -25,6 +26,7 @@ namespace VROOM.Models
         public float SafetyIndex { get; set; }
         public DateTime dateTime { get; set; }
 
+        [JsonIgnore]
         public virtual Shipment Shipment { get; set; }
         public virtual ICollection<OrderRoute> OrderRoutes { get; set; }
         public virtual ICollection<RiderRouteIssue> RiderRouteIssues { get; set; }

@@ -716,9 +716,6 @@ namespace VROOM.Data.Migrations
                     b.Property<double>("BeginningLat")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("EndArea")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

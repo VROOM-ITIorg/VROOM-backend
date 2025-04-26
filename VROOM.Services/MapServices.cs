@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using VROOM.Data;
 using VROOM.Models;
+using VROOM.Models.Dtos;
 using VROOM.Models.Map;
 using VROOM.Repositories;
 
@@ -34,9 +35,13 @@ namespace VROOM.Services
             }
         }
 
-        public async Task<Route> FetchOptimizedRouteAsync( int shipmentId)
+        public async Task<RouteDto> FetchOptimizedRouteAsync(int shipmentId)
         {
             var shipment = dbContext.Shipments.FirstOrDefault(sh => sh.Id == shipmentId);
+            if (shipment == null)
+            {
+                throw new ArgumentException("Shipment not found.");
+            }
             var origin = shipment.BeginningArea;
             var destination = shipment.EndArea;
             if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
@@ -44,14 +49,17 @@ namespace VROOM.Services
                 throw new ArgumentException("Origin and destination cannot be empty.");
             }
 
-            try
+            var route = await _mapRepository.GetOptimizedRouteAsync(shipmentId);
+            return new RouteDto
             {
-                return await _mapRepository.GetOptimizedRouteAsync( shipmentId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error fetching optimized route in MapService: {ex.Message}", ex);
-            }
+                Id = route.Id,
+                ShipmentID = route.Id,
+                OriginArea = route.OriginArea,
+                DestinationArea = route.DestinationArea,
+                Waypoints = route.Waypoints,
+                Start = route.Start,
+                End = route.End
+            };
         }
     }
 }

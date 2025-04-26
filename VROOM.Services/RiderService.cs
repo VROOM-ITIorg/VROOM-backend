@@ -20,8 +20,9 @@ namespace VROOM.Services
         private readonly DbSet<Order> _orders;
         private readonly DbSet<OrderRider> _orderRiders;
         private readonly ShipmentServices _shipmentServices;
+        private readonly OrderService _orderService;
 
-        public RiderService(RiderRepository riderRepository, VroomDbContext context, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository)
+        public RiderService(RiderRepository riderRepository, VroomDbContext context, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository, OrderService orderService)
         {
             _riderRepository = riderRepository ?? throw new ArgumentNullException(nameof(riderRepository));
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -30,6 +31,7 @@ namespace VROOM.Services
             _shipmentServices = shipmentServices;
             _orderRouteRepository = orderRouteRepository;
             _routeRepository = routeRepository;
+            _orderService = orderService;
         }
 
         public Rider RegisterRiderAsync(Rider rider)
@@ -101,9 +103,11 @@ namespace VROOM.Services
             if (order.State != OrderStateEnum.Pending)
                 throw new InvalidOperationException($"Order with ID {orderId} cannot be accepted. Current state: {order.State}.");
 
-            order.State = OrderStateEnum.Confirmed;
-            order.ModifiedBy = rider.UserID;
-            order.ModifiedAt = DateTime.UtcNow;
+            //order.State = OrderStateEnum.Confirmed;
+            //order.ModifiedBy = rider.UserID;
+            //order.ModifiedAt = DateTime.UtcNow;
+
+            await _orderService.UpdateOrderState(orderId, OrderStateEnum.Confirmed, riderId, rider.UserID);
 
             rider.Status = RiderStatusEnum.OnDelivery;
 

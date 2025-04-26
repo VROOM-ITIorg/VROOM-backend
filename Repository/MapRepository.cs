@@ -90,7 +90,54 @@ namespace VROOM.Repositories
                 throw new ArgumentException("Invalid coordinates for origin or destination.");
             }
 
-
+            // Step 3: Validate or create Shipment
+            try
+            {
+                var shipmentExists = await _dbContext.Shipments.AnyAsync(s => s.Id == shipmentId);
+                if (!shipmentExists)
+                {
+                    // Create test Shipment
+                    var testShipment = new Shipment
+                    {
+                        Id = shipmentId,
+                        //StartId = 1,
+                        //EndId = 2,
+                        RiderID = "e5e945d2-c0a3-414d-9879-9e5e2b16b81c",
+                        BeginningLang = originMap.Longitude,
+                        BeginningLat = originMap.Latitude,
+                        BeginningArea = origin,
+                        EndLang = destMap.Longitude,
+                        EndLat = destMap.Latitude,
+                        EndArea = destination,
+                        MaxConsecutiveDeliveries = 5,
+                        CreatedAt = DateTime.Now,
+                        ModifiedAt = DateTime.Now,
+                        ModifiedBy = "System",
+                        IsDeleted = false
+                    };
+                    Console.WriteLine($"Attempting to create shipment: ID={shipmentId}, StartId=1, EndId=2, RiderID=e5e945d2-c0a3-414d-9879-9e5e2b16b81c, BeginningArea={origin}, BeginningLat={originMap.Latitude}, BeginningLang={originMap.Longitude}, EndArea={destination}, EndLat={destMap.Latitude}, EndLang={destMap.Longitude}, MaxConsecutiveDeliveries=5");
+                    _dbContext.Shipments.Add(testShipment);
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        Console.WriteLine($"Successfully created test shipment with ID: {shipmentId}");
+                    }
+                    catch (Exception saveEx)
+                    {
+                        Console.WriteLine($"Shipment creation failed: {saveEx.Message}");
+                        throw new Exception($"Failed to save shipment with ID {shipmentId}: {saveEx.Message}", saveEx);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Shipment with ID: {shipmentId} already exists.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Shipment validation failed: {ex.Message}");
+                throw new Exception($"Failed to create or validate shipment with ID {shipmentId}: {ex.Message}", ex);
+            }
 
             // Step 4: Prepare routing request
             string coordinates = $"{originMap.Latitude},{originMap.Longitude}:{destMap.Latitude},{destMap.Longitude}";
@@ -139,7 +186,7 @@ namespace VROOM.Repositories
                     Start = DateTime.Now,
                     End = DateTime.Now.AddSeconds(optimizedRoute.Summary.TravelTimeInSeconds),
                     SafetyIndex = 0.0f,
-                    //DateTime = DateTime.Now,
+                    dateTime = DateTime.Now,
                     ModifiedBy = "System",
                     ModifiedAt = DateTime.Now
                 };

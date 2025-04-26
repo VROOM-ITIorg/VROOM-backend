@@ -362,7 +362,7 @@ namespace VROOM.Services
                 var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
 
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
-                // shipment 
+                // shipment WE WILL REUSE IN GETRIDER
 
                 var shipment = await shipmentRepository
                     .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)&& (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.InTransit))
@@ -404,6 +404,10 @@ namespace VROOM.Services
                             shipment.EndLang = newLng;
                             shipment.EndArea = route.DestinationArea;
                         }
+                        else
+                        {
+                            // Here would be the oppsite 
+                        }
 
                         // بترجع تعمل Update للـ shipment بعد التعديل
                         shipmentRepository.Update(shipment);
@@ -423,7 +427,7 @@ namespace VROOM.Services
                         EndLang = route.DestinationLang,
                         EndLat = route.DestinationLat,
                         EndArea = route.DestinationArea,
-                        MaxConsecutiveDeliveries = 1
+                        MaxConsecutiveDeliveries = 10
                     },route);
 
                 }

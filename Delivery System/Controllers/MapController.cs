@@ -39,7 +39,7 @@ namespace VROOM.Controllers
                     var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray();
                     return BadRequest(new { errors });
                 }
-                var route = await _mapService.FetchOptimizedRouteAsync( request.ShipmentId );
+                var route = await _mapService.FetchOptimizedRouteAsync(request.ShipmentId);
                 return Json(route);
             }
             catch (Exception ex)

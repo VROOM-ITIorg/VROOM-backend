@@ -7,6 +7,7 @@ using VROOM.Models;
 using VROOM.Models.Map;
 using VROOM.Data;
 using Microsoft.EntityFrameworkCore;
+//using Microsoft.AspNetCore.Routing;
 
 namespace VROOM.Repositories
 {
@@ -69,8 +70,11 @@ namespace VROOM.Repositories
             }
         }
 
-        public async Task<Route> GetOptimizedRouteAsync(string origin, string destination, int shipmentId)
+        public async Task<Route> GetOptimizedRouteAsync( int shipmentId)
         {
+            var shipment = _dbContext.Shipments.FirstOrDefault(sh => sh.Id == shipmentId);
+            var origin = shipment.BeginningArea;
+            var destination = shipment.EndArea;
             if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
             {
                 throw new ArgumentException("Origin and destination cannot be empty.");

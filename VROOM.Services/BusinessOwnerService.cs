@@ -388,7 +388,7 @@ namespace VROOM.Services
                         double newLat = route.DestinationLat;
                         double newLng = route.DestinationLang;
 
-                        // نحسب المسافة (تقريبية باستخدام فيثاغورس لو مش محتاج دقة الخرائط الجغرافية)
+                        // Calculate Distance Between Two Points
                         double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
 
                         // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب

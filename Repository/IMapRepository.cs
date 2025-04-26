@@ -7,6 +7,6 @@ namespace VROOM.Repositories
     public interface IMapRepository
     {
         Task<MapModel> GetCoordinatesAsync(string locationName);
-        Task<Route> GetOptimizedRouteAsync(string origin, string destination, int shipmentId);
+        Task<Route> GetOptimizedRouteAsync(int shipmentId);
     }
 }

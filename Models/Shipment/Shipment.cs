@@ -32,7 +32,7 @@ namespace VROOM.Models
         public virtual Rider Rider { get; set; }
         public virtual ICollection<Route> Routes { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        //public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; } = false;
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedAt { get; set; } = DateTime.Now;

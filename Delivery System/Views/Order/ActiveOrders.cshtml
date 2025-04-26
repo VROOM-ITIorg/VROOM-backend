@@ -251,7 +251,7 @@
 							<td>@order.Date.ToString("dd/MM/yyyy")</td>
 							<td>@order.Date.ToString("hh:mm tt")</td>
 							<td>
-								<a href="@Url.Action("OrderPerformance", "Order", new { id = order.Id })"
+								<a href="@Url.Action("OrderPerformance", "Order", new { id = order.shipmentId })"
 								   class="btn btn-outline-info btn-sm">
 									<i class="fas fa-chart-line"></i> View Report
 								</a>

@@ -283,7 +283,8 @@ namespace VROOM.Services
                     Details = o.Details,
                     OrderPrice = o.OrderPrice,
                     DeliveryPrice = o.DeliveryPrice,
-                    Date = o.Date
+                    Date = o.Date,
+                    //shipmentId = o.OrderRoute.Route.ShipmentID
                 }).ToList(),
                 MinPrice = minPriceRange,
                 MaxPrice = maxPriceRange,

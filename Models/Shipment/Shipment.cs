@@ -27,6 +27,7 @@ namespace VROOM.Models
         public double EndLat { get; set; }
         public string EndArea { get; set; }
 
+        public ZoneEnum zone { get; set; }
         public virtual ICollection<Waypoint>? waypoints { get; set; }
         public int MaxConsecutiveDeliveries { get; set; }
         public virtual Rider Rider { get; set; }

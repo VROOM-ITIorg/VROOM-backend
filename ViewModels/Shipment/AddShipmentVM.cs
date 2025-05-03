@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VROOM.Models;
 
 namespace ViewModels.Shipment
 {
@@ -19,6 +20,8 @@ namespace ViewModels.Shipment
         public double EndLang { get; set; }
         public double EndLat { get; set; }
         public string EndArea { get; set; }
+
+        public ZoneEnum zone { get; set; }
 
         public int MaxConsecutiveDeliveries { get; set; }
     }

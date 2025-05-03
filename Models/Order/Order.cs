@@ -29,6 +29,9 @@ namespace VROOM.Models
 
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
+
+        public ZoneEnum zone { get; set; }
+
         public DateTime Date { get; set; } = DateTime.Now;
 
         public virtual Customer Customer { get; set; }

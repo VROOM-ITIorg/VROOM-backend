@@ -14,4 +14,14 @@ namespace VROOM.Models
         Cancelled
     }
 
+    public enum ZoneEnum 
+    { 
+        Elsal,
+        Kima,
+        Eltameen,
+        Ma7ta,
+        Akaleem
+    }
+
+
 }

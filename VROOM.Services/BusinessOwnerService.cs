@@ -365,7 +365,7 @@ namespace VROOM.Services
                 // shipment WE WILL REUSE IN GETRIDER
 
                 var shipment = await shipmentRepository
-                    .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)&& (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.InTransit))
+                    .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)&& (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.InTransit) && sh.zone == order.zone)
                     .Include(s => s.Routes)
                     .FirstOrDefaultAsync();
 
@@ -427,6 +427,7 @@ namespace VROOM.Services
                         EndLang = route.DestinationLang,
                         EndLat = route.DestinationLat,
                         EndArea = route.DestinationArea,
+                        zone = order.zone,
                         MaxConsecutiveDeliveries = 10
                     },route);
 

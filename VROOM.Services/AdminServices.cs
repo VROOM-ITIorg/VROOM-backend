@@ -75,13 +75,13 @@ namespace VROOM.Services
             await transactionWork.BeginTransactionAsync();
             try
             {
-                var baseUserName = Regex.Replace(model.Name, @"[^a-zA-Z0-9]", "");
+                var baseUserName = Regex.Replace(model.BusinessName, @"[^a-zA-Z0-9]", "");
                 var randomSuffix = Guid.NewGuid().ToString("N").Substring(0, 6);
                 var uniqueUserName = $"{baseUserName}_{randomSuffix}".ToUpper();
                 var newUser = new User
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Name = model.Name,
+                    Name = model.BusinessName,
                     Email = model.Email,
                     NormalizedEmail = model.Email.ToUpper(),
                     UserName = uniqueUserName,
@@ -144,14 +144,14 @@ namespace VROOM.Services
                 transactionWorkBO.User.CustomSaveChanges();
                 await transactionWorkBO.CommitAsync();
 
-                if (model.SubscriptionType == SubscriptionTypeEnum.Trial)
-                {
-                    await ownerService.StartTrial(newOwner.UserID);
-                }
-                else
-                {
-                    await ownerService.ActivatePaidAsync(newOwner.UserID);
-                }
+                //if (model.SubscriptionType == SubscriptionTypeEnum.Trial)
+                //{
+                //    await ownerService.StartTrial(newOwner.UserID);
+                //}
+                //else
+                //{
+                //    await ownerService.ActivatePaidAsync(newOwner.UserID);
+                //}
 
             }
             catch (Exception ex)

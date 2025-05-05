@@ -109,7 +109,7 @@ builder.Services.AddScoped(typeof(IssuesRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<CustomerServices>();
-
+builder.Services.AddScoped<RiderService>();
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
 builder.Services.AddScoped<RouteRepository>();

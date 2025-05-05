@@ -841,49 +841,139 @@ namespace VROOM.Services
             }
         }
 
+        public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, int orderId)
+        {
+            // Retrieve the business owner
+            var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+            if (businessOwner == null)
+                return Result.Failure("Business owner not found.");
+
+            // Retrieve the order
+            var order = await orderRepository.GetAsync(orderId);
+            // Get available riders for the business owner
+            var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
 
 
-        //public async Task StartTrial(string userId)
-        //{
-        //    var owner = await businessOwnerRepo.GetAsync(userId);
-        //    if (owner == null) throw new Exception("Owner not found");
+            // Filter riders based on vehicle status and weight capacity
+            var filteredRiders = riders
+                .Where(r => r.VehicleStatus == "Good")
+                .ToList();
 
-        //    owner.SubscriptionType = SubscriptionTypeEnum.Trial;
-        //    owner.SubscriptionStartDate = DateTime.Now;
-        //    owner.SubscriptionEndDate = DateTime.Now.AddDays(7);
+            if (!filteredRiders.Any())
+                return Result.Failure("No available riders who can handle this order.");
 
-        //    businessOwnerRepo.Update(owner);
-        //    businessOwnerRepo.CustomSaveChanges();
-        //}
+            // Calculate distances and scores
+            var distances = filteredRiders
+                .Select(r => Haversine(35.5, 28.9, r.Lat, r.Lang))
+                .ToList();
 
-        //public async Task ActivatePaidAsync(string userId)
-        //{
-        //    var owner = await businessOwnerRepo.GetAsync(userId);
-        //    if (owner == null) throw new Exception("Owner not found");
+            var dMin = distances.Min();
+            var dMax = distances.Max();
 
-        //    owner.SubscriptionType = SubscriptionTypeEnum.Paid;
-        //    owner.SubscriptionStartDate = DateTime.Now;
-        //    owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+            var scoredRiders = filteredRiders
+                .Select(r =>
+                {
+                    var distance = Haversine(35.5, 25.9, r.Lat, r.Lang);
+                    var scoreDistance = dMax == dMin ? 100 : 100 * (dMax - distance) / (dMax - dMin);
+                    var scoreExperience = GetExperienceScore(r.ExperienceLevel);
+                    var scoreRating = r.Rating * 20;
+                    var totalScore = scoreDistance + scoreExperience + scoreRating;
+                    return new { Rider = r, TotalScore = totalScore };
+                })
+                .ToList();
 
-        //    businessOwnerRepo.Update(owner);
-        //    businessOwnerRepo.CustomSaveChanges();
-        //}
+            // Select the best rider
+            var bestRider = scoredRiders.OrderByDescending(x => x.TotalScore).FirstOrDefault();
+            if (bestRider == null)
+                return Result.Failure("No suitable rider found.");
 
-        //public async Task RenewSubscriptionAsync(string userId)
-        //{
-        //    var owner = await businessOwnerRepo.GetAsync(userId);
-        //    if (owner == null) throw new Exception("Owner not found");
+            // Assign the order to the best rider
+            order.RiderID = bestRider.Rider.UserID;
+            order.State = OrderStateEnum.Confirmed;
+            orderRepository.Update(order);
+            orderRepository.CustomSaveChanges();
 
-        //    if (owner.SubscriptionEndDate.HasValue && owner.SubscriptionEndDate > DateTime.Now)
-        //        owner.SubscriptionEndDate = owner.SubscriptionEndDate.Value.AddMonths(1);
-        //    else
-        //        owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+            return Result.Success("Order assigned successfully.");
+        }
 
-        //    owner.SubscriptionType = SubscriptionTypeEnum.Paid;
+        private int GetMaxWeight(VehicleTypeEnum type)
+        {
+            switch (type)
+            {
+                case VehicleTypeEnum.Motorcycle: return 50;
+                case VehicleTypeEnum.Car: return 100;
+                case VehicleTypeEnum.Van: return 200;
+                default: return 0;
+            }
+        }
 
-        //    businessOwnerRepo.Update(owner);
-        //    businessOwnerRepo.CustomSaveChanges();
-        //}
+        private double GetExperienceScore(float experienceLevel)
+        {
+            if (experienceLevel < 10) return 25; // Rookie
+            if (experienceLevel < 20) return 50; // Experienced
+            if (experienceLevel < 30) return 75; // Delivery Master
+            return 100; // Leader
+        }
+
+        private double Haversine(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371;
+            var dLat = ToRadians(lat2 - lat1);
+            var dLon = ToRadians(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            var d = R * c;
+            return d;
+        }
+
+        private double ToRadians(double angle)
+        {
+            return Math.PI * angle / 180.0;
+        }
+
+        public async Task StartTrial(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Trial;
+            owner.SubscriptionStartDate = DateTime.Now;
+            owner.SubscriptionEndDate = DateTime.Now.AddDays(7);
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
+
+        public async Task ActivatePaidAsync(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Paid;
+            owner.SubscriptionStartDate = DateTime.Now;
+            owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
+
+        public async Task RenewSubscriptionAsync(string userId)
+        {
+            var owner = await businessOwnerRepo.GetAsync(userId);
+            if (owner == null) throw new Exception("Owner not found");
+
+            if (owner.SubscriptionEndDate.HasValue && owner.SubscriptionEndDate > DateTime.Now)
+                owner.SubscriptionEndDate = owner.SubscriptionEndDate.Value.AddMonths(1);
+            else
+                owner.SubscriptionEndDate = DateTime.Now.AddMonths(1);
+
+            owner.SubscriptionType = SubscriptionTypeEnum.Paid;
+
+            businessOwnerRepo.Update(owner);
+            businessOwnerRepo.CustomSaveChanges();
+        }
 
     }
 }

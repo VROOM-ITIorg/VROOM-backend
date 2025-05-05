@@ -85,7 +85,7 @@ namespace API.Controllers
                 return BadRequest(new { message = "Invalid order or business owner details." });
             }
 
-            var result = await _businessOwnerRepository.AssignOrderAutomaticallyAsync(request.BusinessOwnerId, request.OrderId);
+            var result = await _businessOwnerService.AssignOrderAutomaticallyAsync(request.BusinessOwnerId, request.OrderId);
             if (!result.IsSuccess)
             {
                 return BadRequest(new { message = result.Message });

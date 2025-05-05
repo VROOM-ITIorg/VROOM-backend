@@ -70,6 +70,11 @@ namespace VROOM.Repositories
         }
 
 
+        public async Task<List<Rider>> GetAvaliableRiders(string businessOwnerId)
+        {
+            return await context.Riders.Where(r => r.BusinessID == businessOwnerId && r.Status == RiderStatusEnum.Available).ToListAsync();
+        }
+
         public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)
         {
             return await context.Riders

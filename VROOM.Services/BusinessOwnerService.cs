@@ -707,7 +707,8 @@ namespace VROOM.Services
 
                     if(order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
-                        shipment.ShipmentState = ShipmentStateEnum.Assigned;
+                        // ADD YOUR MAGNIFICENT FUNCTION HERE !!!!!!
+                        //shipment.ShipmentState = ShipmentStateEnum.Assigned; NIGGA DON"T FORGET TO ADD THIS SHIPMENT UPDATE IN YOUR FUNCTION
                         // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
                         //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
                     }
@@ -877,7 +878,8 @@ namespace VROOM.Services
                     var scoreDistance = dMax == dMin ? 100 : 100 * (dMax - distance) / (dMax - dMin);
                     var scoreExperience = GetExperienceScore(r.ExperienceLevel);
                     var scoreRating = r.Rating * 20;
-                    var totalScore = scoreDistance + scoreExperience + scoreRating;
+                    var weightScore = GetMaxWeight(r.VehicleType);
+                    var totalScore = scoreDistance + scoreExperience + scoreRating + weightScore;
                     return new { Rider = r, TotalScore = totalScore };
                 })
                 .ToList();

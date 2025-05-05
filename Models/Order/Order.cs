@@ -16,6 +16,7 @@ namespace VROOM.Models
         //public string BusinessID { get; set; }
         public string CustomerID { get; set; }
         public string? RiderID { get; set; }
+        public TimeSpan? PrepareTime { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public OrderStateEnum State { get; set; } = OrderStateEnum.Created;
@@ -24,7 +25,7 @@ namespace VROOM.Models
         public string Notes { get; set; }
         public string Details { get; set; }
         public float Weight { get; set; }
-        public OrderPriorityEnum OrderPriority { get; set; } = OrderPriorityEnum.Standard;
+        public OrderPriorityEnum OrderPriority { get; set; } = OrderPriorityEnum.Normal;
         public CustomerPriorityEnum CustomerPriority { get; set; } = CustomerPriorityEnum.FirstTime;
 
         public decimal OrderPrice { get; set; }

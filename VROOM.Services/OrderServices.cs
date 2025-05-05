@@ -159,6 +159,8 @@ namespace VROOM.Services
         // update Order Status
         public async Task<Order> UpdateOrderState(int orderID, OrderStateEnum orderState, string riderId, string businessOwnerId)
         {
+
+            Rider rider = await riderRepository.GetAsync(riderId);
             Order order = await orderRepository.GetAsync(orderID);
             if (order == null || order.IsDeleted) return null;
 
@@ -169,7 +171,6 @@ namespace VROOM.Services
             order.ModifiedBy = businessOwnerId;
             order.ModifiedAt = DateTime.Now;
             order.State = orderState;
-
             orderRepository.Update(order);
             orderRepository.CustomSaveChanges();
 

@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routes List</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .routes-table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <header class="pb-3 mb-4 border-bottom">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="fas fa-map-marked-alt me-2"></i> All Routes
+            </h1>
+        </header>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="border-bottom pb-2 mb-3">Routes Overview</h2>
+                @if (Model != null && Model.Any())
+                {
+                    <table class="table table-striped routes-table">
+                        <thead>
+                            <tr>
+                                <th>Route ID</th>
+                                <th>Origin</th>
+                                <th>Destination</th>
+                                <th>Shipment ID</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Duration (min)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var route in Model)
+                            {
+                                <tr>
+                                    <td>@route.Id</td>
+                                    <td>@route.OriginArea</td>
+                                    <td>@route.DestinationArea</td>
+                                    <td>@route.ShipmentID</td>
+                                    <td>@route.Start.ToString("g")</td>
+                                    <td>@route.End.ToString("g")</td>
+                                    <td>@((route.End - route.Start).TotalMinutes.ToString("F2"))</td>
+                                    <td>
+                                        <a asp-controller="Map" asp-action="ViewRoute" asp-route-id="@route.Id" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> No routes found.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <footer class="text-center text-muted">
+            <p>Powered by <a href="https://leafletjs.com/" class="text-decoration-none">Leaflet</a> | © OpenStreetMap contributors</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

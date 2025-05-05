@@ -1,6 +1,7 @@
 ﻿@{
-	Layout = null;
-	ViewData["Title"] = "Admin Dashboard";
+    Layout = null;
+    ViewData["Title"] = "Admin Dashboard";
+    var Admin = User.Identity.Name;
 }
 
 <!DOCTYPE html>
@@ -433,7 +434,7 @@
 				<i class="bi bi-people-fill"></i>
 				<span>Riders</span>
 			</a>
-			<a asp-controller="Business" asp-action="GetAll" class="menu-item">
+            <a asp-controller="BusinessOwner" asp-action="GetAllOwners" class="menu-item">
 				<i class="bi bi-building"></i>
 				<span>Businesses</span>
 			</a>
@@ -475,7 +476,7 @@
 				<i class="bi bi-person-circle"></i>
 				<span>Profile</span>
 			</a>
-			<a asp-controller="Account" asp-action="Logout" class="menu-item">
+            <a asp-controller="Account" asp-action="SignOutUser" class="menu-item">
 				<i class="bi bi-box-arrow-right"></i>
 				<span>Logout</span>
 			</a>
@@ -489,7 +490,7 @@
 				<i class="bi bi-list fs-4"></i>
 			</button>
 			<div class="d-none d-md-block">
-				<h5 class="mb-0">Welcome Back, Admin</h5>
+				<h5 class="mb-0">Welcome Back, @Admin</h5>
 			</div>
 		</div>
 

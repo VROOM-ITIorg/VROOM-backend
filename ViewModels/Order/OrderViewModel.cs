@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ViewModels.Route;
 using VROOM.Models;
 
 
@@ -39,8 +40,14 @@ namespace VROOM.ViewModels
     }
     public class OrderCreateViewModel
     {
-        public string CustomerID { get; set; }
-        public string RiderID { get; set; }
+        // Edit the customerID to CustomerInfo like the username of the customer as it is uniqe then in the orderController 
+        public string? CustomerID { get; set; }
+        //public string? BusinessID { get; set; } // this will be a token 
+        public string? RiderID { get; set; }
+        public string? CustomerUsername { get; set; } // search for dropdown list
+        public string? CustomerPhoneNumber { get; set; }
+        public TimeSpan? PrepareTime { get; set; }
+        public RouteLocation RouteLocation { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public bool IsBreakable { get; set; }
@@ -57,12 +64,29 @@ namespace VROOM.ViewModels
     {
         public int Id { get; set; }
         public string Title { get; set; }
+        public string BusinessOwner { get; set; }
+        public string CustomerName { get; set; }
+        public string RiderName { get; set; }
+        public OrderPriorityEnum Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
         public OrderStateEnum State { get; set; }
+        public bool IsBreakable { get; set; }
+        public string Details { get; set; }
         public string Notes { get; set; }
         public float Weight { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
         public DateTime Date { get; set; }
+
+        public int? shipmentId { get; set; }
+    }
+    public class ActiveOrdersViewModel
+    {
+        public List<OrderDetailsViewModel> Orders { get; set; }
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int Total { get; set; }
     }
 }
 

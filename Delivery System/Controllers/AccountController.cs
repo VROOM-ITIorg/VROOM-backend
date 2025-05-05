@@ -6,9 +6,11 @@ using VROOM.Repositories;
 using VROOM.Services;
 using ViewModels.Account;
 using VROOM.Models;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Delivery_System.Controllers
 {
+
     public class AccountController : Controller
     {
         private AdminServices adminService;
@@ -17,7 +19,6 @@ namespace Delivery_System.Controllers
             adminService = _adminService;
         }
 
-        //[Route("login")]
         [HttpGet]
         public IActionResult login()
         {
@@ -36,7 +37,7 @@ namespace Delivery_System.Controllers
                 {
                     var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role).Value;
                     if (role == "Admin")
-                    return RedirectToAction(controllerName:"order", actionName: "ActiveOrder");
+                    return RedirectToAction(controllerName:"rider", actionName: "index");
 
                 }
                 else if (res.IsLockedOut || res.IsNotAllowed)
@@ -52,6 +53,12 @@ namespace Delivery_System.Controllers
 
         }
 
+        [HttpGet("signout")]
+        public async Task<IActionResult> SignOutUser()
+        {
+            await adminService.SignOut();
+            return RedirectToAction("login","account");
+        }
 
     }
 }

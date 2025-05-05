@@ -1,9 +1,11 @@
-﻿using LinqKit;
+﻿using System.Linq;
+using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ViewModels;
 using VROOM.Data;
 using VROOM.Models;
+using VROOM.Repository;
 using VROOM.ViewModels;
 
 namespace VROOM.Repositories
@@ -14,13 +16,13 @@ namespace VROOM.Repositories
         public RiderRepository(VroomDbContext options) : base(options) { }
 
 
-        public PaginationViewModel<AdminCreateRiderVM> Search( int status ,
-            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4 )
+        public PaginationViewModel<AdminRiderDetialsVM>Search( int status,
+            string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc", string owner = "All")
         {
 
             var builder = PredicateBuilder.New<Rider>();
 
-            var old = builder;
+            builder = builder.And(i => i.User.IsDeleted == false);
 
             if (!Name.IsNullOrEmpty())
                 builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
@@ -29,27 +31,31 @@ namespace VROOM.Repositories
                 builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
             if (status >= 0)
                 builder = builder.And(i => i.Status == (RiderStatusEnum) status);
-
-
-            if (old == builder)
-                builder = null;
+            if (owner != "All")
+                builder = builder.And(i => i.BusinessOwner.User.Name == owner);
+            bool Ascending = true ;
+  
 
 
 
             var count = base.GetList(builder).Count();
 
             var resultAfterPagination = base.Get(
-                 filter: builder,
-                 pageSize: pageSize,
-                 pageNumber: pageNumber)
-                 .Include(r => r.User)
-                 .ToList()
-                 .Select(p => p.ToDetailsVModel())
-                 .ToList();
+                     filter: builder,
+                     pageSize: pageSize,
+                     pageNumber: pageNumber)
+                     .Include(r => r.User)
+                     .ToList();
+                    
+            var query = resultAfterPagination.Select(p => p.ToShowVModel()).ToList();
+            if (sort == "name_desc")
+                 query = resultAfterPagination.OrderByDescending(u => u.User.Name).Select(p => p.ToShowVModel()).ToList();
 
-            return new PaginationViewModel<AdminCreateRiderVM>
+
+           
+            return new PaginationViewModel<AdminRiderDetialsVM>
             {
-                Data = resultAfterPagination,
+                Data = query,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 Total = count
@@ -61,6 +67,20 @@ namespace VROOM.Repositories
         {
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 
+        }
+
+
+        public async Task<List<Rider>> GetAvaliableRiders(string businessOwnerId)
+        {
+            return await context.Riders.Where(r => r.BusinessID == businessOwnerId && r.Status == RiderStatusEnum.Available).ToListAsync();
+        }
+
+        public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)
+        {
+            return await context.Riders
+                .Include(r => r.User)
+                .Where(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted)
+                .ToListAsync();
         }
     }
 }

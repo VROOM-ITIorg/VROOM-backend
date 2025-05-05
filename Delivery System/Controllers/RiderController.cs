@@ -1,10 +1,7 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ViewModels;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -14,167 +11,100 @@ using VROOM.ViewModels;
 namespace API.Controllers
 {
     [Authorize(Roles = "Admin")]
-    [Route("vroom-admin/{controller}")]
+    [Route("{controller}")]
     public class RiderController : Controller
     {
-        private readonly VroomDbContext context;
-        private readonly RiderRepository riderManager;
-        private readonly BusinessOwnerRepository ownerRepository;
-        public RiderController(VroomDbContext _context, RiderRepository _riderManager, BusinessOwnerRepository _ownerRepository)
+        private readonly AdminServices adminServices;
+        private readonly UserManager<User> userManager;
+        public RiderController(AdminServices _adminServices, UserManager<User> _userManager)
         {
-            context = _context;
-            riderManager = _riderManager;
-            ownerRepository = _ownerRepository;
+            adminServices = _adminServices;
+            userManager = _userManager;
         }
-
 
         [HttpGet]
         [Route("Create")]
         public async Task<IActionResult> Create()
         {
-            ViewData["AllOwners"] = await ownerRepository.GetAllAsync();
+            var owners = await adminServices.GetAllOwners();
+            ViewData["AllOwners"] = owners;
             return View();
         }
 
         [HttpPost]
-        [Route("create")]
-        public IActionResult Create(AdminCreateRiderVM model)
+        [Route("Create")]
+        public async Task<IActionResult> Create(AdminCreateRiderVM model)
         {
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already Exist");
+                return View(model);
+            }
             if (ModelState.IsValid)
             {
-                var businessOwnerId = context.BusinessOwners.Where(i => i.User.Name == model.BusinessName).FirstOrDefault().UserID;
+                await adminServices.CreateNewRider(model);
 
-                var newUser = new User
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = model.UserName,
-                    Email = model.Email,
-                    UserName = model.UserName,
-                    NormalizedEmail = model.Email.ToUpper(),
-                    NormalizedUserName = model.Email.ToUpper(),
-                    EmailConfirmed = true,
-                    PasswordHash = new PasswordHasher<User>().HashPassword(null, "Default@123"),
-                    PhoneNumber = model.PhoneNumber
-                };
-
-                context.Users.Add(newUser);
-                context.SaveChanges();
-
-                string imagePath = null;
-                if (model.ProfilePicture != null)
-                {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images", "Rider");
-                    Directory.CreateDirectory(uploadsFolder);
-
-                    var fileExt = Path.GetExtension(model.ProfilePicture.FileName);
-                    var fileName = $"{DateTime.Now:yyyyMMddHHmmssfff}{fileExt}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        model.ProfilePicture.CopyTo(fileStream);
-                    }
-
-                    model.ImagePath = $"/Images/Rider/{fileName}";
-                }
-
-                var newRider = new Rider();
-                newRider = model.ToModel();
-                newRider.UserID = newUser.Id;
-                newRider.BusinessID = businessOwnerId;
-                newUser.ProfilePicture = model.ImagePath;
-                context.Riders.Add(newRider);
-                context.SaveChanges();
-
-                return RedirectToAction("Index");
+                return RedirectToAction("GetAllRiders");
             }
-
-            ViewBag.UserId = new SelectList(context.Users.ToList(), "Id", "Email");
             return View(model);
         }
 
-
-        [Route("Index")]
-        public IActionResult Index(int status = -1 ,string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4)
+        [HttpGet]
+        [Route("GetAllRiders")]
+        public IActionResult Index(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc", string owner= "All")
         {
-            var Riders = riderManager.Search( status : status ,Name: Name, PhoneNumber: PhoneNumber, pageNumber: pageNumber, pageSize: pageSize);
-            
+            var res = adminServices.ShowAllRiders(status, Name, PhoneNumber, pageNumber, pageSize, sort, owner);
+            var Riders = res.Result.Riders;
+            var Owners = res.Result.owners;
 
             ViewData["Riders"] = Riders;
+            ViewData["Owners"] = Owners;
+            ViewData["Name"] = Name;
+            ViewData["status"] = status;
+            ViewData["sort"] = sort;
+            ViewData["owner"] = owner;
+            ViewData["pageSize"] = pageSize.ToString();
 
             return View("index");
         }
 
-
-
-
-        public IActionResult Edit(string id)
+        [HttpGet]
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(string id)
         {
-            var rider = context.Riders
-                .Include(r => r.User)
-                .FirstOrDefault(r => r.UserID == id);
-
-            if (rider == null)
-            {
-                return NotFound();
-            }
-
-            var viewModel = new AdminCreateRiderVM
-            {
-                Status = rider.Status,
-                VehicleType = rider.VehicleType,
-                Location = rider.Area,
-                ExperienceLevel = rider.ExperienceLevel,
-                UserName = rider.User?.UserName,
-                Email = rider.User?.Email
-            };
-
-            return View(viewModel);
+            var res = await adminServices.EditRider(id);
+            var Rider = res.Rider;
+            var owners = res.BusinessName;
+            ViewData["AllOwners"] = owners;
+            return View(Rider);
         }
 
-
-
         [HttpPost]
-        //public IActionResult Edit(AdminCreateRiderVM model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(model);
-        //    }
-
-        //    var rider = context.Riders.FirstOrDefault(r => r.UserID == model.UserID);
-        //    if (rider == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    rider.BusinessID = model.BusinessID;
-        //    rider.UserID = model.UserID;
-        //    rider.Status = model.Status;
-        //    rider.VehicleType = model.VehicleType;
-        //    rider.Area = model.Location;
-        //    rider.ExperienceLevel = model.ExperienceLevel;
-        //    rider.Rating = 0;
-
-        //    context.SaveChanges();
-        //    return RedirectToAction("Index");
-        //}
-
-
-
-
-        public IActionResult Delete(string id)
+        [Route("Edit/{id}")]
+        public async Task<IActionResult> Edit(AdminEditRiderVM model) 
         {
-            var Rider = context.Riders.Where(i => i.UserID == id).FirstOrDefault().User;
+            var existingUser = await userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email is already Exist");
+                return View(model);
+            }
 
-            context.Users.Remove(Rider);
-            context.Riders.Remove(context.Riders.Where(i => i.UserID == id).FirstOrDefault());
-
-            context.SaveChanges();
+            if (!ModelState.IsValid)
+            {
+                  return View(model);
+            }
+            await adminServices.EditRider(model);
             return RedirectToAction("Index");
         }
 
-
-
+        [HttpGet]
+        [Route("Delete/{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            await adminServices.Delete(id);
+            return RedirectToAction("Index");
+        }
     }
 }

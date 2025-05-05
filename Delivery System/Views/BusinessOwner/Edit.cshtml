@@ -1,0 +1,181 @@
+﻿@using VROOM.ViewModels
+@model AdminEditBusOwnerVM
+
+@{
+    ViewData["Title"] = "Edit Business Owner";
+    Layout = "_Layout";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center font-weight-bold my-2">Edit Business Owner</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" asp-controller="BusinessOwner" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Hidden ID field -->
+                        <input type="hidden" asp-for="UserID" />
+
+                        <!-- Basic Information -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Basic Information</h5>
+                            </div>
+                        </div>
+
+                        <!-- Owner Name & Business Name -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="OwnerName" class="form-control" placeholder="Owner Name" required />
+                                    <label asp-for="OwnerName">Owner Name</label>
+                                    <span asp-validation-for="OwnerName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="BusinessName" class="form-control" placeholder="Business Name" required />
+                                    <label asp-for="BusinessName">Business Name</label>
+                                    <span asp-validation-for="BusinessName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="Email" class="form-control" placeholder="Email Address" required />
+                                    <label asp-for="Email">Email Address</label>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" required />
+                                    <label asp-for="PhoneNumber">Phone Number</label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Information -->
+                        <div class="row mb-3 mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Business Information</h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="Address" class="form-control" placeholder="Address" />
+                                    <label asp-for="Address">Address</label>
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subscription Information -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2">Subscription Information</h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <select asp-for="SubscriptionType" class="form-select" required>
+                                        <option value="Basic">Basic</option>
+                                        <option value="Premium">Premium</option>
+                                        <option value="Enterprise">Enterprise</option>
+                                    </select>
+                                    <label asp-for="SubscriptionType">Subscription Type</label>
+                                    <span asp-validation-for="SubscriptionType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="SubscriptionStartDate" class="form-control" placeholder="Subscription Start Date" type="date" required />
+                                    <label asp-for="SubscriptionStartDate">Subscription Start Date</label>
+                                    <span asp-validation-for="SubscriptionStartDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input asp-for="SubscriptionEndDate" class="form-control" placeholder="Subscription End Date" type="date" required />
+                                    <label asp-for="SubscriptionEndDate">Subscription End Date</label>
+                                    <span asp-validation-for="SubscriptionEndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsSubscriptionActive" class="form-check-input" type="checkbox" />
+                                    <label class="form-check-label" for="IsSubscriptionActive">Active Subscription</label>
+                                    <span asp-validation-for="IsSubscriptionActive" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Picture & Upload New -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Current Profile Image</label>
+                            <div class="mb-3">
+                                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                                {
+                                    <img src="@Model.ImagePath" class="img-thumbnail" style="max-height: 200px;" />
+                                }
+                                else
+                                {
+                                    <div class="alert alert-secondary">No profile image available</div>
+                                }
+                            </div>
+
+                            <label asp-for="ProfilePicture" class="form-label fw-bold">Upload New Profile Image</label>
+                            <div class="input-group">
+                                <input asp-for="ProfilePicture" type="file" class="form-control" accept="image/*" />
+                                <label class="input-group-text" for="ProfilePicture">
+                                    <i class="bi bi-upload"></i>
+                                </label>
+                            </div>
+                            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                            <img id="imagePreview" class="img-thumbnail mt-2" style="max-height: 200px; display: none;" />
+                            <small class="text-muted">Leave empty to keep the current image</small>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-plus-circle"></i> Edit Owner
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector('#BusinessLogo').addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('#logoPreview').src = e.target.result;
+                    document.querySelector('#logoPreview').style.display = 'block';
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    </script>
+}

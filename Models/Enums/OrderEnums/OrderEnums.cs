@@ -19,9 +19,9 @@ namespace VROOM.Models
 
     public enum OrderPriorityEnum
     {
-        Standard,
-        Express,
-        Urgent
+        HighUrgent,
+        Urgent,
+        Normal
     }
 
 

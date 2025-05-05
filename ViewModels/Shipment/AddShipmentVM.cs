@@ -11,6 +11,7 @@ namespace ViewModels.Shipment
     {
         public DateTime startTime { get; set; }
         public DateTime? EndTime { get; set; }
+        public DateTime? InTransiteBeginTime { get; set; }
         public string RiderID { get; set; }
 
         public double BeginningLang { get; set; }

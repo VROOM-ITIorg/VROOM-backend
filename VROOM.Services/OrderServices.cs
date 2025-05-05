@@ -77,7 +77,7 @@ namespace VROOM.Services
             routeRepository = _routeRepository;
         }
 
-        public async Task CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
+        public async Task<Order> CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
         {
             // We will check if the customer is exists 
 
@@ -112,7 +112,7 @@ namespace VROOM.Services
             await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
             await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
-
+            return order;
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)

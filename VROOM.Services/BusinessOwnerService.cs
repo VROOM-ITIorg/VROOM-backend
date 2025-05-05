@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hangfire.Server;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
@@ -102,13 +104,6 @@ namespace VROOM.Services
         }
 
 
-        public async void CreateOrder(Order order)
-        {
-            orderRepository.Add(order);
-            orderRepository.CustomSaveChanges();
-        }
-
-
         public BusinessOwnerViewModel GetBusinessDetails(string businessOwnerId)
         {
             var businessOwner = businessOwnerRepo.GetAsync(businessOwnerId).Result;
@@ -121,19 +116,16 @@ namespace VROOM.Services
             };
         }
 
-        
-
-
 
 
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
         {
             _logger.LogInformation("Creating rider with email: {Email}", request.Email);
 
-          
+
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-            
+
                 var existingUser = await userManager.FindByEmailAsync(request.Email);
                 if (existingUser != null)
                 {
@@ -160,7 +152,7 @@ namespace VROOM.Services
 
                 _logger.LogInformation("User created successfully: {Email}", request.Email);
 
-              
+
                 var role = RoleConstants.Rider;
                 if (!await _roleManager.RoleExistsAsync(role))
                 {
@@ -168,7 +160,7 @@ namespace VROOM.Services
                     await _roleManager.CreateAsync(new IdentityRole(role));
                 }
 
-              
+
                 _logger.LogInformation("Assigning role {Role} to user: {Email}", role, request.Email);
                 await userManager.AddToRoleAsync(user, role);
 
@@ -190,7 +182,7 @@ namespace VROOM.Services
                 riderRepository.Add(rider);
                 riderRepository.CustomSaveChanges();
 
-           
+
                 var result = new RiderVM
                 {
                     UserID = user.Id,
@@ -308,9 +300,6 @@ namespace VROOM.Services
 
 
 
-
-
-
         public async Task<bool> AssignOrderToRiderAsync(int orderId, string riderId)
         {
             try
@@ -365,7 +354,7 @@ namespace VROOM.Services
                 // shipment WE WILL REUSE IN GETRIDER
 
                 var shipment = await shipmentRepository
-                    .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)&& (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.InTransit) && sh.zone == order.zone)
+                    .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries) && (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.Assigned) && sh.zone == order.zone)
                     .Include(s => s.Routes)
                     .FirstOrDefaultAsync();
 
@@ -396,9 +385,9 @@ namespace VROOM.Services
 
                         if (distance > threshold)
                         {
-                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id,Lang = shipment.EndLang,Lat=shipment.EndLat,Area=shipment.EndArea};
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea };
 
-                            shipment.waypoints.Add(waypoint); 
+                            shipment.waypoints.Add(waypoint);
                             // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
                             shipment.EndLat = newLat;
                             shipment.EndLang = newLng;
@@ -406,7 +395,8 @@ namespace VROOM.Services
                         }
                         else
                         {
-                            // Here would be the oppsite 
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = route.DestinationLang, Lat = route.DestinationLat, Area = route.DestinationArea };
+                            shipment.waypoints.Add(waypoint);
                         }
 
                         // بترجع تعمل Update للـ shipment بعد التعديل
@@ -429,7 +419,7 @@ namespace VROOM.Services
                         EndArea = route.DestinationArea,
                         zone = order.zone,
                         MaxConsecutiveDeliveries = 10
-                    },route);
+                    }, route);
 
                 }
 
@@ -444,14 +434,6 @@ namespace VROOM.Services
                 return false;
             }
         }
-
-
-
-
-
-
-
-
 
 
         public async Task<OrderDetailsViewModel?> ViewAssignedOrderAsync(int orderId)
@@ -509,8 +491,8 @@ namespace VROOM.Services
                 return null;
             }
         }
-        
-          public async Task<Result<List<RiderVM>>> GetRiders()
+
+        public async Task<Result<List<RiderVM>>> GetRiders()
         {
             try
             {
@@ -567,12 +549,12 @@ namespace VROOM.Services
             }
             catch (Exception ex)
             {
-              //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
+                //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
                 return Result<List<RiderVM>>.Failure("An error occurred while retrieving riders.");
             }
         }
 
-          public async Task<Result<List<CustomerVM>>> GetCustomers()
+        public async Task<Result<List<CustomerVM>>> GetCustomers()
         {
             try
             {
@@ -637,18 +619,144 @@ namespace VROOM.Services
             }
         }
 
+         
+        public async Task PrepareOrder(OrderCreateViewModel _orderCreateVM)
+        {
+            try
+            {
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+               .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    _logger.LogWarning("Assign failed: BusinessOwner ID not found in context.");
+                    //return false;
+                }
+
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning($"Assign failed: No BusinessOwner found with ID {businessOwnerId}");
+                    //return false;
+                }
+                // Create order / order => high urgent / expected time = 0
+                var order = await orderService.CreateOrder(_orderCreateVM, businessOwnerId); // should be await
+
+           
+
+                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(order.Id);
+
+                var route = await routeRepository.GetAsync(orderRoute.RouteID);
+                // order->zone / search for all shipments with the same zone and be created
+                var shipment = await shipmentRepository
+                 .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries) &&
+                 (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.Assigned) &&
+                 sh.zone == order.zone && 
+                 sh.InTransiteBeginTime > DateTime.Now.Add(order.PrepareTime.Value)&&
+                 // in this condition we check if the order is HighUrgent and if it is , get the shipments that their InTransiteBeginTime are only 5 min more than the prepare time 
+                 (order.OrderPriority == OrderPriorityEnum.HighUrgent && sh.InTransiteBeginTime >= DateTime.Now.Add(order.PrepareTime.Value + TimeSpan.FromMinutes(5)))
+                 )
+                 .Include(s => s.Routes)
+                 .FirstOrDefaultAsync();
+                // 
+
+                if(shipment != null)
+                {
+                    // Update Route => Add Shipment Id
+                    route.ShipmentID = shipment.Id;
+                    routeRepository.Update(route);
+                    routeRepository.CustomSaveChanges();
 
 
+                    // تعديل نهاية الشحنة لو المسار الجديد بعد المسار القديم
+                    var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang).ThenByDescending(r => r.DestinationLat).FirstOrDefault();
 
+                    if (lastRoute != null)
+                    {
+                        // هنحسب المسافة التقريبية ما بين نقطة النهاية بتاعة آخر Route والنقطة الجديدة
+                        double lastLat = lastRoute.DestinationLat;
+                        double lastLng = lastRoute.DestinationLang;
 
+                        double newLat = route.DestinationLat;
+                        double newLng = route.DestinationLang;
 
+                        // Calculate Distance Between Two Points
+                        double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
 
+                        // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب
+                        double threshold = 0.01;
 
+                        if (distance > threshold)
+                        {
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea };
+                            shipment.waypoints.Add(waypoint);
 
+                            // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
+                            shipment.EndLat = newLat;
+                            shipment.EndLang = newLng;
+                            shipment.EndArea = route.DestinationArea;
+                        }
+                        else
+                        {
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = route.DestinationLang, Lat = route.DestinationLat, Area = route.DestinationArea };
+                            shipment.waypoints.Add(waypoint);
+                        }
 
+                        // بترجع تعمل Update للـ shipment بعد التعديل
+                    }
 
+                    if(order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                    {
+                        shipment.ShipmentState = ShipmentStateEnum.Assigned;
+                        // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
+                        //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
+                    }
+                    shipmentRepository.Update(shipment);
+                   shipmentRepository.CustomSaveChanges();
 
+                }
+                else
+                {
+                    TimeSpan? setWaitingTime;
+                    // check order priorty
+                    if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                    {
+                        setWaitingTime = order.PrepareTime;
 
+                    }
+                    else if (order.OrderPriority == OrderPriorityEnum.Urgent)
+                    {
+                        setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(5);
+                    }
+                    else
+                    {
+
+                        setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
+                    }
+
+                    await shipmentServices.CreateShipment(new AddShipmentVM
+                    {
+                        startTime = route.Start,
+                        InTransiteBeginTime = DateTime.Now.Add(setWaitingTime.Value),
+                        BeginningLang = route.OriginLang,
+                        BeginningLat = route.OriginLat,
+                        BeginningArea = route.OriginArea,
+                        EndLang = route.DestinationLang,
+                        EndLat = route.DestinationLat,
+                        EndArea = route.DestinationArea,
+                        zone = order.zone,
+                        // The MaxConsecutiveDeliveries would be based on the total order waight
+                        MaxConsecutiveDeliveries = 10
+                    }, route);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception occurred while assigning Order to Rider.");
+                //return false;
+            }
+
+        }
 
 
         public async Task<bool> ViewOrder(int orderId, string riderId, bool isAccepted)
@@ -733,10 +841,6 @@ namespace VROOM.Services
             }
         }
 
-
-
-
-        // Subscription
 
 
         public async Task StartTrial(string userId)

@@ -38,6 +38,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();

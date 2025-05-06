@@ -620,7 +620,7 @@ namespace VROOM.Services
         }
 
          
-        public async Task PrepareOrder(OrderCreateViewModel _orderCreateVM)
+        public async Task<bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
         {
             try
             {
@@ -630,14 +630,14 @@ namespace VROOM.Services
                 if (string.IsNullOrEmpty(businessOwnerId))
                 {
                     _logger.LogWarning("Assign failed: BusinessOwner ID not found in context.");
-                    //return false;
+                    return false;
                 }
 
                 var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
                 if (businessOwner == null)
                 {
                     _logger.LogWarning($"Assign failed: No BusinessOwner found with ID {businessOwnerId}");
-                    //return false;
+                    return false;
                 }
                 // Create order / order => high urgent / expected time = 0
                 var order = await orderService.CreateOrder(_orderCreateVM, businessOwnerId); // should be await
@@ -648,19 +648,106 @@ namespace VROOM.Services
 
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
                 // order->zone / search for all shipments with the same zone and be created
-                var shipment = await shipmentRepository
-                 .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries) &&
-                 (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.Assigned) &&
-                 sh.zone == order.zone && 
-                 sh.InTransiteBeginTime > DateTime.Now.Add(order.PrepareTime.Value)&&
-                 // in this condition we check if the order is HighUrgent and if it is , get the shipments that their InTransiteBeginTime are only 5 min more than the prepare time 
-                 (order.OrderPriority == OrderPriorityEnum.HighUrgent && sh.InTransiteBeginTime >= DateTime.Now.Add(order.PrepareTime.Value + TimeSpan.FromMinutes(5)))
-                 )
-                 .Include(s => s.Routes)
-                 .FirstOrDefaultAsync();
+
+                // Fetch all shipments with Routes included
+                var shipments = await shipmentRepository.GetAllAsync();
+
+
+                Shipment shipment = null;
+                foreach (var sh in shipments)
+                {
+                    // Condition 1: Check if shipment is not deleted
+                    if (!sh.IsDeleted)
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is not deleted and is eligible for further checks.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is deleted and will be skipped.");
+                        continue;
+                    }
+
+                    // Condition 2: Check if shipment has no routes or routes count is less than max consecutive deliveries
+                    if (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries)
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} has no routes or fewer than {sh.MaxConsecutiveDeliveries} routes, making it eligible.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} has reached or exceeded its maximum consecutive deliveries ({sh.MaxConsecutiveDeliveries}).");
+                        continue;
+                    }
+
+                    // Condition 3: Check if shipment state is Created or Assigned
+                    if (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.Assigned)
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is in {sh.ShipmentState} state, which is valid for assignment.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is in {sh.ShipmentState} state, which is not valid for assignment.");
+                        continue;
+                    }
+
+                    // Condition 4: Check if shipment zone matches order zone
+                    if (sh.zone == order.zone)
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is in the same zone as the order ({sh.zone}).");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} is in a different zone ({sh.zone}) than the order ({order.zone}).");
+                        continue;
+                    }
+
+                    // Condition 5: Check if shipment's InTransiteBeginTime is after order's prepare time
+                    if (sh.InTransiteBeginTime > DateTime.Now.Add(order.PrepareTime.Value))
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} has an InTransiteBeginTime ({sh.InTransiteBeginTime}) after the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} has an InTransiteBeginTime ({sh.InTransiteBeginTime}) that is too early for the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
+                        continue;
+                    }
+
+                    // Condition 6: Check if order is HighUrgent and shipment's InTransiteBeginTime is at least 5 minutes after prepare time
+                    if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                    {
+                        if (sh.InTransiteBeginTime >= DateTime.Now.Add(order.PrepareTime.Value + TimeSpan.FromMinutes(5)))
+        {
+                            Console.WriteLine($"Shipment {sh.Id} meets the HighUrgent requirement with InTransiteBeginTime ({sh.InTransiteBeginTime}) at least 5 minutes after the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
+                        }
+        else
+                        {
+                            Console.WriteLine($"Shipment {sh.Id} does not meet the HighUrgent requirement as its InTransiteBeginTime ({sh.InTransiteBeginTime}) is less than 5 minutes after the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Shipment {sh.Id} does not require HighUrgent timing check as the order priority is {order.OrderPriority}.");
+                    }
+
+                    // If all conditions pass, select this shipment and break
+                    shipment = sh;
+                    Console.WriteLine($"Shipment {sh.Id} meets all conditions and is selected.");
+                    break;
+                }
+
+                //var shipment = await shipmentRepository
+                // .GetList(sh => !sh.IsDeleted && (sh.Routes == null || sh.Routes.Count < sh.MaxConsecutiveDeliveries) &&
+                // (sh.ShipmentState == ShipmentStateEnum.Created || sh.ShipmentState == ShipmentStateEnum.Assigned) &&
+                // sh.zone == order.zone && 
+                // sh.InTransiteBeginTime > DateTime.Now.Add(order.PrepareTime.Value)&&
+                // // in this condition we check if the order is HighUrgent and if it is , get the shipments that their InTransiteBeginTime are only 5 min more than the prepare time 
+                // (order.OrderPriority == OrderPriorityEnum.HighUrgent && sh.InTransiteBeginTime >= DateTime.Now.Add(order.PrepareTime.Value + TimeSpan.FromMinutes(5)))
+                // )
+                // .Include(s => s.Routes)
+                // .FirstOrDefaultAsync();
                 // 
 
-                if(shipment != null)
+                if (shipment != null)
                 {
                     // Update Route => Add Shipment Id
                     route.ShipmentID = shipment.Id;
@@ -707,13 +794,13 @@ namespace VROOM.Services
 
                     if(order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
-                        // ADD YOUR MAGNIFICENT FUNCTION HERE !!!!!!
-                        //shipment.ShipmentState = ShipmentStateEnum.Assigned; NIGGA DON"T FORGET TO ADD THIS SHIPMENT UPDATE IN YOUR FUNCTION
+                        AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
                         // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
                         //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
                     }
                     shipmentRepository.Update(shipment);
                    shipmentRepository.CustomSaveChanges();
+                    return true;
 
                 }
                 else
@@ -749,12 +836,14 @@ namespace VROOM.Services
                         // The MaxConsecutiveDeliveries would be based on the total order waight
                         MaxConsecutiveDeliveries = 10
                     }, route);
+
+                     return true;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Exception occurred while assigning Order to Rider.");
-                //return false;
+                return false;
             }
 
         }
@@ -842,7 +931,7 @@ namespace VROOM.Services
             }
         }
 
-        public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, int orderId)
+        public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, int orderId, Shipment shipment)
         {
             // Retrieve the business owner
             var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
@@ -853,7 +942,7 @@ namespace VROOM.Services
             var order = await orderRepository.GetAsync(orderId);
             // Get available riders for the business owner
             var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
-
+            
 
             // Filter riders based on vehicle status and weight capacity
             var filteredRiders = riders
@@ -892,6 +981,8 @@ namespace VROOM.Services
             // Assign the order to the best rider
             order.RiderID = bestRider.Rider.UserID;
             order.State = OrderStateEnum.Confirmed;
+            shipment.ShipmentState = ShipmentStateEnum.Assigned;
+            shipmentRepository.Update(shipment);
             orderRepository.Update(order);
             orderRepository.CustomSaveChanges();
 

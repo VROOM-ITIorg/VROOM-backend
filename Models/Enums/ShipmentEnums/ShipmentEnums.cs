@@ -9,6 +9,7 @@ namespace VROOM.Models
     public enum ShipmentStateEnum
     {
         Created,
+        Assigned,
         InTransit,
         Delivered,
         Cancelled

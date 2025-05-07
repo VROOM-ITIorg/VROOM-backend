@@ -11,6 +11,9 @@ using ViewModels.User;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.ViewModels;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 /*
 0- CRUD 
@@ -30,17 +33,12 @@ namespace VROOM.Repositories
         public class BusinessOwnerRepository : BaseRepository<BusinessOwner>
         {
             public BusinessOwnerRepository(VroomDbContext _dbContext): base(_dbContext){}
-
-
             public List<BusinessOwner> GetBusinessOwnersByType(string businessType) => context.BusinessOwners
                         .Where(b => b.BusinessType == businessType)
                         .ToList();
-
-
             public List<Rider> GetRidersForBusinessOwner(string businessOwnerId) => context.Riders
                         .Where(r => r.BusinessID == businessOwnerId)
                         .ToList();
-
             public void AssignRiderToBusinessOwner(string businessOwnerId, string riderId)
             {
                 context.RiderAssignments.Add(new RiderAssignment
@@ -52,8 +50,6 @@ namespace VROOM.Repositories
 
                 CustomSaveChanges();
             }
-
-
             public void RemoveRiderFromBusinessOwner(string riderId)
             {
                 var rider = context.Riders.FirstOrDefault(r => r.UserID == riderId);
@@ -63,16 +59,13 @@ namespace VROOM.Repositories
                     CustomSaveChanges();
                 }
             }
-
+           
         public BusinessOwner GetBusinessDetails(string businessOwnerUserName)
         {
             return context.BusinessOwners.Where(i => i.User.Name == businessOwnerUserName).FirstOrDefault();
 
         }
-
-
-
-        public PaginationViewModel<AdminBusOwnerDetialsVM> Search(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
+            public PaginationViewModel<AdminBusOwnerDetialsVM> Search(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
 
             var builder = PredicateBuilder.New<BusinessOwner>();
@@ -111,8 +104,7 @@ namespace VROOM.Repositories
             };
 
         }
-
-        public Rider GetBusinessOwnerByRiderId(string id)
+            public Rider GetBusinessOwnerByRiderId(string id)
         {
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 

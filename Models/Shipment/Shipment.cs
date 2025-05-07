@@ -14,6 +14,7 @@ namespace VROOM.Models
         public int Id { get; set; }
         public DateTime startTime { get; set; }
         public DateTime? RealEndTime { get; set; }
+        public DateTime? InTransiteBeginTime { get; set; }
         public DateTime? ExpectedEndTime { get; set; }
 
         public string  RiderID { get; set; }

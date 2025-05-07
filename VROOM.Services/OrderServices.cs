@@ -77,7 +77,7 @@ namespace VROOM.Services
             routeRepository = _routeRepository;
         }
 
-        public async Task CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
+        public async Task<Order> CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
         {
             // We will check if the customer is exists 
 
@@ -110,9 +110,9 @@ namespace VROOM.Services
           
 
             await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
-            await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
+            //await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
-
+            return order;
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)
@@ -159,6 +159,8 @@ namespace VROOM.Services
         // update Order Status
         public async Task<Order> UpdateOrderState(int orderID, OrderStateEnum orderState, string riderId, string businessOwnerId)
         {
+
+            Rider rider = await riderRepository.GetAsync(riderId);
             Order order = await orderRepository.GetAsync(orderID);
             if (order == null || order.IsDeleted) return null;
 
@@ -169,7 +171,6 @@ namespace VROOM.Services
             order.ModifiedBy = businessOwnerId;
             order.ModifiedAt = DateTime.Now;
             order.State = orderState;
-
             orderRepository.Update(order);
             orderRepository.CustomSaveChanges();
 

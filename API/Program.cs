@@ -38,6 +38,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();
@@ -109,7 +111,7 @@ builder.Services.AddScoped(typeof(IssuesRepository));
 builder.Services.AddScoped<OrderRiderRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<CustomerServices>();
-
+builder.Services.AddScoped<RiderService>();
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
 builder.Services.AddScoped<RouteRepository>();

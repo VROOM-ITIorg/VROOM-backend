@@ -63,7 +63,7 @@ namespace API.Controllers
             // There are 5 events can we update the state of the order this now
             var order = await orderService.UpdateOrderState(id, orderState, RiderId, BusinessId);
             // if the order is accepted we will retrun a good massege to the customer if not 
-            return Ok(new { Order = order, Message = "order is updated" });
+            return Ok(new {  Message = "order is updated" });
         }
 
         // Track order 

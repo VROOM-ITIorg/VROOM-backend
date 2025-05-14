@@ -167,7 +167,7 @@ namespace VROOM.Services
 
 
             order.RiderID = riderId;
-            //order.State = OrderStateEnum.Pending;
+            order.State = OrderStateEnum.Pending;
             order.ModifiedBy = businessOwnerId;
             order.ModifiedAt = DateTime.Now;
             order.State = orderState;

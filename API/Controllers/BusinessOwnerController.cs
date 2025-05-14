@@ -67,7 +67,7 @@ namespace API.Controllers
                 return BadRequest(new { message = "Invalid order or rider details." });
             }
 
-            var success = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId);
+            var success = await _businessOwnerService.AssignShipmentToRiderAsync(request.OrderId, request.RiderId);
             if (!success)
             {
                 return NotFound(new { message = "Unable to assign the order to the rider. Please check the details." });

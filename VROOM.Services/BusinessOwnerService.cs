@@ -3,13 +3,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Transactions;
 using ViewModels.Shipment;
@@ -19,9 +22,15 @@ using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.ViewModels;
-
 namespace VROOM.Services
 {
+    public class ClientHub : Hub
+    {
+        public async Task SendShipmentRequest(string riderId, object message)
+        {
+            await Clients.User(riderId).SendAsync("ReceiveShipmentRequest", message);
+        }
+    }
     public class BusinessOwnerService
     {
         //private readonly MyDbContext businessOwnerRepo;
@@ -41,6 +50,8 @@ namespace VROOM.Services
         private readonly OrderService orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserRepository _userRepository;
+        private readonly IHubContext<ClientHub> _hubContext;
+        private readonly ConcurrentDictionary<string, ShipmentConfirmation> _confirmationStore;
 
         public BusinessOwnerService(
             Microsoft.AspNetCore.Identity.UserManager<User> _userManager,
@@ -60,7 +71,9 @@ namespace VROOM.Services
             OrderService _orderService,
             RouteRepository _routeRepository,
             ShipmentServices _shipmentServices,
-            ShipmentRepository _shipmentRepository
+            ShipmentRepository _shipmentRepository,
+             IHubContext<ClientHub> hubContext,
+    ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore
             )
         {
             userManager = _userManager;
@@ -78,6 +91,8 @@ namespace VROOM.Services
             _userRepository = userRepository;
             shipmentServices = _shipmentServices;
             shipmentRepository = _shipmentRepository;
+            _hubContext = hubContext;
+            _confirmationStore = confirmationStore;
         }
 
 
@@ -300,7 +315,7 @@ namespace VROOM.Services
 
 
 
-        public async Task<bool> AssignOrderToRiderAsync(int orderId, string riderId)
+        public async Task<bool> AssignShipmentToRiderAsync(int orderId, string riderId)
         {
             try
             {
@@ -342,6 +357,9 @@ namespace VROOM.Services
 
 
                 await orderService.UpdateOrderState(order.Id, OrderStateEnum.Pending, riderId, businessOwnerId);
+                // داخل الدالة AssignShipmentToRiderAsync
+                await NotifyRiderForShipmentConfirmation(riderId, order.Id, businessOwnerId);
+                //StartShipmentConfirmationTimer(riderId, order.Id, businessOwnerId);
 
                 //orderRepository.Update(order);
                 //await Task.Run(() => orderRepository.CustomSaveChanges());
@@ -975,5 +993,114 @@ namespace VROOM.Services
             businessOwnerRepo.CustomSaveChanges();
         }
 
+        private async Task NotifyRiderForShipmentConfirmation(string riderId, int shipmentId, string businessOwnerId)
+        {
+            try
+            {
+                // جلب بيانات الطلب والمسار
+                var order = await orderRepository.GetAsync(shipmentId);
+                if (order == null)
+                {
+                    _logger.LogWarning($"Notification failed: Order {shipmentId} not found.");
+                    return;
+                }
+
+                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(shipmentId);
+                if (orderRoute == null)
+                {
+                    _logger.LogWarning($"Notification failed: Route for order {shipmentId} not found.");
+                    return;
+                }
+
+                var route = await routeRepository.GetAsync(orderRoute.RouteID);
+                if (route == null)
+                {
+                    _logger.LogWarning($"Notification failed: Route {orderRoute.RouteID} not found.");
+                    return;
+                }
+
+                var message = new ShipmentConfirmation
+                {
+                    ShipmentId = shipmentId,
+                    RiderId = riderId,
+                    BusinessOwnerId = businessOwnerId,
+                    ExpiryTime = DateTime.UtcNow.AddSeconds(30),
+                    Status = ConfirmationStatus.Pending
+                };
+
+                // تخزين الرسالة مؤقتًا
+                _confirmationStore[riderId] = message;
+
+                // إعداد بيانات الإشعار
+                var shipmentData = new
+                {
+                    shipmentId = shipmentId,
+                    orderTitle = $"Order #{shipmentId}",
+                    message = $"You have a new shipment #{shipmentId}. Please confirm within 30 seconds.",
+                    expiry = message.ExpiryTime.ToString("o"), // ISO format
+                    from = new
+                    {
+                        area = route.OriginArea,
+                        lat = route.OriginLat,
+                        lng = route.OriginLang
+                    },
+                    to = new
+                    {
+                        area = route.DestinationArea,
+                        lat = route.DestinationLat,
+                        lng = route.DestinationLang
+                    },
+                    pickupTime = order.PrepareTime?.ToString("o") ?? DateTime.UtcNow.ToString("o"),
+                    orderPriority = order.OrderPriority.ToString() ?? "Normal"
+                };
+
+                // إرسال الإشعار عبر SignalR
+                await _hubContext.Clients.User(riderId).SendAsync("ReceiveShipmentRequest", shipmentData);
+                _logger.LogInformation($"Notification sent to rider {riderId} for shipment {shipmentId} with data: {JsonSerializer.Serialize(shipmentData)}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to notify rider {riderId} for shipment {shipmentId}.");
+            }
+        }
+
+        private void StartShipmentConfirmationTimer(string riderId, int shipmentId, string businessOwnerId)
+        {
+            var timer = new Timer(async _ =>
+            {
+                if (_confirmationStore.TryGetValue(riderId, out var message) && message.Status == ConfirmationStatus.Pending)
+                {
+                    // rider لم يرد خلال 30 ثانية → نعتبره رفض تلقائيًا
+                    await HandleRiderShipmentTimeout(riderId, shipmentId, businessOwnerId);
+                }
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
+        }
+
+
+        private async Task HandleRiderShipmentTimeout(string riderId, int shipmentId, string businessOwnerId)
+        {
+            _logger.LogWarning($"Rider {riderId} did not respond within 30 seconds for shipment {shipmentId}");
+
+            // إعادة الشحن إلى الحالة Pending وإزالة Rider ID
+
+            // يمكنك هنا أيضًا البحث عن Rider آخر تلقائيًا
+            await AssignShipmentToAnotherRider(shipmentId, businessOwnerId);
+        }
+
+
+        private async Task AssignShipmentToAnotherRider(int shipmentId, string businessOwnerId)
+        {
+            // استدعاء خدمة التعيين الآلي مرة أخرى
+            var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipmentId);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation($"Shipment {shipmentId} reassigned to another rider.");
+            }
+            else
+            {
+                _logger.LogWarning($"No available riders for shipment {shipmentId} after timeout.");
+            }
+        }
     }
 }

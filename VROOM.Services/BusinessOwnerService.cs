@@ -1068,5 +1068,108 @@ namespace VROOM.Services
             businessOwnerRepo.CustomSaveChanges();
         }
 
+<<<<<<< Ibrahim-Mamdouh
+=======
+        private async Task NotifyRiderForShipmentConfirmation(string riderId, int shipmentId, string businessOwnerId)
+        {
+            try
+            {
+                var order = await orderRepository.GetAsync(shipmentId);
+                if (order == null)
+                {
+                    _logger.LogWarning($"Notification failed: Order {shipmentId} not found.");
+                    return;
+                }
+
+                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(shipmentId);
+                if (orderRoute == null)
+                {
+                    _logger.LogWarning($"Notification failed: Route for order {shipmentId} not found.");
+                    return;
+                }
+
+                var route = await routeRepository.GetAsync(orderRoute.RouteID);
+                if (route == null)
+                {
+                    _logger.LogWarning($"Notification failed: Route {orderRoute.RouteID} not found.");
+                    return;
+                }
+
+                var message = new ShipmentConfirmation
+                {
+                    ShipmentId = shipmentId,
+                    RiderId = riderId,
+                    BusinessOwnerId = businessOwnerId,
+                    ExpiryTime = DateTime.UtcNow.AddSeconds(30),
+                    Status = ConfirmationStatus.Pending
+                };
+
+                _confirmationStore[riderId] = message;
+
+                var shipmentData = new
+                {
+                    shipmentId = shipmentId,
+                    orderTitle = $"Order #{shipmentId}",
+                    message = $"You have a new shipment #{shipmentId}. Please confirm within 30 seconds.",
+                    expiry = message.ExpiryTime.ToString("o"), 
+                    from = new
+                    {
+                        area = route.OriginArea,
+                        lat = route.OriginLat,
+                        lng = route.OriginLang
+                    },
+                    to = new
+                    {
+                        area = route.DestinationArea,
+                        lat = route.DestinationLat,
+                        lng = route.DestinationLang
+                    },
+                    pickupTime = order.PrepareTime?.ToString("o") ?? DateTime.UtcNow.ToString("o"),
+                    orderPriority = order.OrderPriority.ToString() ?? "Normal"
+                };
+
+                await _hubContext.Clients.User(riderId).SendAsync("ReceiveShipmentRequest", shipmentData);
+                _logger.LogInformation($"Notification sent to rider {riderId} for shipment {shipmentId} with data: {JsonSerializer.Serialize(shipmentData)}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to notify rider {riderId} for shipment {shipmentId}.");
+            }
+        }
+
+        private void StartShipmentConfirmationTimer(string riderId, int shipmentId, string businessOwnerId)
+        {
+            var timer = new Timer(async _ =>
+            {
+                if (_confirmationStore.TryGetValue(riderId, out var message) && message.Status == ConfirmationStatus.Pending)
+                {
+                    await HandleRiderShipmentTimeout(riderId, shipmentId, businessOwnerId);
+                }
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
+        }
+
+
+        private async Task HandleRiderShipmentTimeout(string riderId, int shipmentId, string businessOwnerId)
+        {
+            _logger.LogWarning($"Rider {riderId} did not respond within 30 seconds for shipment {shipmentId}");
+
+            await AssignShipmentToAnotherRider(shipmentId, businessOwnerId);
+        }
+
+
+        private async Task AssignShipmentToAnotherRider(int shipmentId, string businessOwnerId)
+        {
+            var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipmentId);
+
+            if (result.IsSuccess)
+            {
+                _logger.LogInformation($"Shipment {shipmentId} reassigned to another rider.");
+            }
+            else
+            {
+                _logger.LogWarning($"No available riders for shipment {shipmentId} after timeout.");
+            }
+        }
+>>>>>>> local
     }
 }

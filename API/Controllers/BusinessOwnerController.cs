@@ -78,20 +78,15 @@ namespace API.Controllers
 
         [Authorize(Roles = "BusinessOwner")]
         [HttpPost("assignOrderAutomatically")]
-        public async Task<IActionResult> AssignOrderAutomatically([FromBody] AssignOrderAutomaticallyRequest request)
+        public async Task<IActionResult> AssignOrderAutomatically([FromBody] OrderCreateViewModel model)
         {
-            if (request == null || request.OrderId <= 0 || string.IsNullOrEmpty(request.BusinessOwnerId))
+            var result = await _businessOwnerService.PrepareOrder(model);
+            if (!result)
             {
-                return BadRequest(new { message = "Invalid order or business owner details." });
+                return BadRequest(new { message = $"Error Occured While Assigning the Rider with Id {model.RiderID}" });
             }
 
-            var result = await _businessOwnerService.AssignOrderAutomaticallyAsync(request.BusinessOwnerId, request.OrderId);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new { message = result.Message });
-            }
-
-            return Ok(new { message = result.Message });
+            return Ok(new { message = "Rider Assigned Successfully! " });
         }
 
         [HttpGet("riders")]

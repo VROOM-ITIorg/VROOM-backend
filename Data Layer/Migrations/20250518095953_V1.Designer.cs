@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250513210524_db")]
-    partial class db
+    [Migration("20250518095953_V1")]
+    partial class V1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -757,7 +757,6 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RiderID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ShipmentState")
@@ -1165,8 +1164,7 @@ namespace VROOM.Data.Migrations
                     b.HasOne("VROOM.Models.Rider", "Rider")
                         .WithMany("Shipments")
                         .HasForeignKey("RiderID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Rider");
                 });

@@ -55,7 +55,24 @@ namespace VROOM.Services
             
             return rider;
         }
+        public async Task<string> GetRiderNameAsync(string riderId)
+        {
+            if (string.IsNullOrEmpty(riderId))
+            {
+                throw new ArgumentException("Rider ID cannot be null or empty");
+            }
 
+            var rider = await _context.Riders
+                .Include(r => r.User)  // Include the related User entity
+                .FirstOrDefaultAsync(r => r.UserID == riderId);
+
+            if (rider == null)
+            {
+                throw new KeyNotFoundException($"Rider with ID {riderId} not found");
+            }
+
+            return rider.User?.Name ?? throw new InvalidOperationException("User name not found for rider");
+        }
         public async Task<Rider> GetRiderProfileAsync(string riderId)
         {
             var rider = await _riderRepository.GetAsync(riderId);

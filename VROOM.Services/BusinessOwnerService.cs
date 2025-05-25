@@ -117,6 +117,28 @@ namespace VROOM.Services
         }
 
 
+        public async Task<string> GetBusinessOwnerIdForRiderAsync(string riderId)
+        {
+            if (string.IsNullOrEmpty(riderId))
+            {
+                throw new ArgumentException("Rider ID cannot be null or empty");
+            }
+
+            var rider = await riderRepository.GetAsync(riderId);
+
+            if (rider == null)
+            {
+                throw new KeyNotFoundException($"Rider with ID {riderId} not found");
+            }
+
+            if (string.IsNullOrEmpty(rider.BusinessID))
+            {
+                throw new InvalidOperationException($"Rider {riderId} is not assigned to a business owner");
+            }
+
+            return rider.BusinessID;
+        }
+
 
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
         {

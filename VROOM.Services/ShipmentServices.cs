@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,35 @@ namespace VROOM.Services
         
             shipmentRepository = _shipmentRepository;
             routeRepository = _routeRepository;
+        }
+        public async Task<Shipment> GetCurrentShipmentForRider(string riderId)
+        {
+            return await shipmentRepository
+                .GetList(s => s.RiderID == riderId &&
+                            (s.ShipmentState == ShipmentStateEnum.Assigned ||
+                             s.ShipmentState == ShipmentStateEnum.InTransit) &&
+                            !s.IsDeleted)
+                .OrderByDescending(s => s.startTime)  // Using startTime for ordering
+                .FirstOrDefaultAsync();
+        }
+        public async Task<Shipment> GetShipmentWithDetails(int shipmentId)
+        {
+            return await shipmentRepository
+                .GetList(s => s.Id == shipmentId)
+                .Include(s => s.Rider)
+                .Include(s => s.Routes)
+                    .ThenInclude(r => r.Waypoints)
+                .FirstOrDefaultAsync();
+        }
+        public async Task<List<Shipment>> GetActiveShipmentsForRider(string riderId)
+        {
+            return await shipmentRepository
+                .GetList(s => s.RiderID == riderId &&
+                            (s.ShipmentState == ShipmentStateEnum.Assigned ||
+                             s.ShipmentState == ShipmentStateEnum.InTransit) &&
+                            !s.IsDeleted)
+                .OrderByDescending(s => s.startTime)
+                .ToListAsync();
         }
 
         public async Task CreateShipment(AddShipmentVM addShipmentVM, Route selectedRoute)

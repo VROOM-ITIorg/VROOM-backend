@@ -12,6 +12,7 @@ using Hangfire;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using VROOM.Repository;
+using Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +40,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200") // URL بتاع الـ Angular
+        policy.SetIsOriginAllowed(origin => true)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // لازم عشان SignalR مع التوثيق
@@ -152,7 +153,9 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
+            // دعم كل الـ Hubs (riderHub و ownerNotificationHub)
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerNotificationHub")))
             {
                 context.Token = accessToken;
             }
@@ -185,7 +188,8 @@ app.UseAuthorization();
 app.UseHangfireDashboard();
 
 // Map SignalR Hub
-app.MapHub<ClientHub>("/riderHub");
+app.MapHub<RiderHub>("/riderHub");
+app.MapHub<OwnerHub>("/ownerNotificationHub");
 
 app.MapControllerRoute(
     name: "default",

@@ -22,7 +22,7 @@ namespace VROOM.Services
             routeRepository = _routeRepository;
         }
 
-        public async Task CreateShipment(AddShipmentVM addShipmentVM, Route selectedRoute)
+        public void CreateShipment(AddShipmentVM addShipmentVM, Route selectedRoute)
         {
             var shipment = new Shipment
             {
@@ -35,6 +35,7 @@ namespace VROOM.Services
                EndLat = addShipmentVM.EndLat,
                EndArea = addShipmentVM.EndArea,
                MaxConsecutiveDeliveries = addShipmentVM.MaxConsecutiveDeliveries,
+               ShipmentState = ShipmentStateEnum.Assigned
             };
 
             shipmentRepository.Add(shipment);

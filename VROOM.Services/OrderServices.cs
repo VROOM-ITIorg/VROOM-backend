@@ -87,7 +87,7 @@ namespace VROOM.Services
 
             var order = new Order
             {
-                CustomerID = customer.UserID,
+                CustomerID = customer?.UserID,
                 RiderID = orderVM.RiderID,
                 ItemsType = orderVM.ItemsType,
                 Title = orderVM.Title,
@@ -95,6 +95,7 @@ namespace VROOM.Services
                 Notes = orderVM.Notes,
                 Details = orderVM.Details,
                 Weight = orderVM.Weight,
+                PrepareTime = orderVM.PrepareTime,
                 OrderPriority = orderVM.OrderPriority,
                 CustomerPriority = orderVM.CustomerPriority,
                 OrderPrice = orderVM.OrderPrice,
@@ -167,7 +168,7 @@ namespace VROOM.Services
 
 
             order.RiderID = riderId;
-            //order.State = OrderStateEnum.Pending;
+            order.State = OrderStateEnum.Confirmed;
             order.ModifiedBy = businessOwnerId;
             order.ModifiedAt = DateTime.Now;
             order.State = orderState;

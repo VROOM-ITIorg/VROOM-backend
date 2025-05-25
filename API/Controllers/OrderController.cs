@@ -13,10 +13,12 @@ namespace API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrderService orderService;
+        private readonly BusinessOwnerService _businessOwnerService;
 
-        public OrderController(OrderService _orderService)
+        public OrderController(OrderService _orderService, BusinessOwnerService businessOwnerService)
         {
             orderService = _orderService;
+            _businessOwnerService = businessOwnerService;
         }
 
         [HttpPost]
@@ -58,12 +60,12 @@ namespace API.Controllers
         //// update order status
         [Authorize(Roles = "Rider")]
         [HttpPost("updateOrder/{id}")]
-        public async Task<IActionResult> AccOrRejOrder(int id, [FromBody] OrderStateEnum orderState,  string RiderId, string BusinessId)
+        public async Task<IActionResult> AccOrRejOrder(int id, [FromBody] OrderStateEnum orderState, [FromQuery] string RiderId, [FromQuery] string BusinessId)
         {
             // There are 5 events can we update the state of the order this now
             var order = await orderService.UpdateOrderState(id, orderState, RiderId, BusinessId);
             // if the order is accepted we will retrun a good massege to the customer if not 
-            return Ok(new { Order = order, Message = "order is updated" });
+            return Ok(new { Message = "order is updated" });
         }
 
         // Track order 

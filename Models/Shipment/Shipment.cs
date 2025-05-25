@@ -17,7 +17,7 @@ namespace VROOM.Models
         public DateTime? InTransiteBeginTime { get; set; }
         public DateTime? ExpectedEndTime { get; set; }
 
-        public string  RiderID { get; set; }
+        public string? RiderID { get; set; }
 
         public ShipmentStateEnum ShipmentState {  get; set; } = ShipmentStateEnum.Created;
         public double BeginningLang { get; set; }

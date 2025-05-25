@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 using System.Data.Entity;
 using VROOM.Data;
 using VROOM.Models;
@@ -68,7 +69,8 @@ builder.Services.AddScoped(typeof(OrderRouteServices));
 builder.Services.AddScoped(typeof(ShipmentRepository));
 builder.Services.AddScoped(typeof(ShipmentServices));
 builder.Services.AddHttpClient();
-
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 
 

@@ -11,6 +11,7 @@ using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+using System.Collections.Concurrent;
 
 // using Serilog;
 //using VROOM.Services.Mapping;
@@ -123,9 +124,11 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped(typeof(OrderService));
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
+builder.Services.AddSignalR();
 
 
 

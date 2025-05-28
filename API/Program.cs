@@ -10,6 +10,8 @@ using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
 using System.Collections.Concurrent;
+using VROOM.Repository;
+using Hubs;
 
 // using Serilog;
 //using VROOM.Services.Mapping;

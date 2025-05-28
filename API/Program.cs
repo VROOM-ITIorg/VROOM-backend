@@ -12,6 +12,7 @@ using Hangfire;
 using System.Collections.Concurrent;
 using VROOM.Repository;
 using Hubs;
+using API.Myhubs;
 
 // using Serilog;
 //using VROOM.Services.Mapping;
@@ -24,12 +25,45 @@ using Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSignalR();
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//    });
+//});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetIsOriginAllowed(url => true)
+              .AllowCredentials();
+    });
+});
+
+// builder.Host.UseSerilog();
+// Log.Logger = new LoggerConfiguration()
+//     .ReadFrom.Configuration(builder.Configuration)
+//     .Enrich.FromLogContext()
+//     .CreateLogger();
+
+
 // Add services to the container
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    })
+    .AddNewtonsoftJson(options =>
+     {
+         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
+     });
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
@@ -193,11 +227,41 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Custom middleware to log request body for /api/user/register
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
+    {
+        context.Request.EnableBuffering();
+        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+        Console.WriteLine($"Request Body: {body}");
+        context.Request.Body.Position = 0; // Reset the stream position
+    }
+    await next();
+});
+
+
+//app.UseAuthentication();
+//app.UseAuthorization();
+
+// Enable Swagger middleware
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+    c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
+});
+//app.UseAuthorization();
+app.UseCors();
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
 app.UseCors("AllowAngularApp"); // لازم تكون قبل UseRouting
 app.UseRouting();
+
+app.MapHub<AcceptOrderHub>("/AcceptRejectOrders");
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();

@@ -18,8 +18,7 @@ namespace API.Controllers
         private readonly BusinessOwnerService _businessOwnerService;
         private readonly IHubContext<AcceptOrderHub> orderHub;
 
-        public OrderController(OrderService _orderService, BusinessOwnerService businessOwnerService)
-        public OrderController(OrderService _orderService,IHubContext<AcceptOrderHub> _orderHub)
+        public OrderController(OrderService _orderService,IHubContext<AcceptOrderHub> _orderHub, BusinessOwnerService businessOwnerService)
         {
             orderService = _orderService;
             _businessOwnerService = businessOwnerService;

@@ -474,7 +474,7 @@ namespace VROOM.Services
                         MaxConsecutiveDeliveries = 10
                         
                         
-                    }, route);
+                    });
                 }
 
                 _logger.LogInformation($"Order {orderId} successfully assigned to Rider {riderId} by BusinessOwner {businessOwnerId}.");
@@ -885,7 +885,7 @@ namespace VROOM.Services
                         zone = order.zone,
                         // The MaxConsecutiveDeliveries would be based on the total order waight
                         MaxConsecutiveDeliveries = 10
-                    }, route);
+                    });
                     
                     return true;
                 }

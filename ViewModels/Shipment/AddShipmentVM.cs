@@ -17,6 +17,7 @@ namespace ViewModels.Shipment
         public double BeginningLang { get; set; }
         public double BeginningLat { get; set; }
         public string BeginningArea { get; set; }
+        public List<int> OrderIds { get; set; }
 
         public double EndLang { get; set; }
         public double EndLat { get; set; }

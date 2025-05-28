@@ -9,10 +9,16 @@ using VROOM.Repositories;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using VROOM.Repository;
-using Hubs;
+
+// using Serilog;
+//using VROOM.Services.Mapping;
+
+
+
+// Log.Information("Logger configured.");
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,10 +121,17 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
+builder.Services.AddSignalR();
+
+
+
+
+//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";

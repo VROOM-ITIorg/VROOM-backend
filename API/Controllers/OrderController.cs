@@ -15,11 +15,14 @@ namespace API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly OrderService orderService;
+        private readonly BusinessOwnerService _businessOwnerService;
         private readonly IHubContext<AcceptOrderHub> orderHub;
 
+        public OrderController(OrderService _orderService, BusinessOwnerService businessOwnerService)
         public OrderController(OrderService _orderService,IHubContext<AcceptOrderHub> _orderHub)
         {
             orderService = _orderService;
+            _businessOwnerService = businessOwnerService;
             orderHub = _orderHub;
         }
 
@@ -98,7 +101,7 @@ namespace API.Controllers
             var order = await orderService.UpdateOrderState(id, orderState, RiderId, BusinessId);
             await orderHub.Clients.All.SendAsync("AcceptOrRejectOrder", id, orderState.ToString());
             // if the order is accepted we will retrun a good massege to the customer if not 
-            return Ok(new { Order = order, Message = "order is updated" });
+            return Ok(new { Message = "order is updated" });
         }
 
         // Track order 

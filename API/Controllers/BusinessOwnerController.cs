@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using VROOM.Services;
-using VROOM.Models;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
+using VROOM.Models;
 using VROOM.Repositories;
-using static VROOM.Services.BusinessOwnerService;
+using VROOM.Services;
 using VROOM.ViewModels;
+using static VROOM.Services.BusinessOwnerService;
 
 namespace API.Controllers
 {
@@ -54,7 +55,17 @@ namespace API.Controllers
         [HttpPost("registerRider")]
         public async Task<IActionResult> RegisterRider([FromBody] RiderRegisterRequest rider)
         {
-            var result = await _businessOwnerService.CreateRiderAsync(rider);
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Decode the JWT token
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // Access token claims (e.g., user ID, roles, etc.)
+            var BussinsId = jwtToken.Claims.FirstOrDefault()?.Value;
+
+            var result = await _businessOwnerService.CreateRiderAsync(rider, BussinsId);
             return Ok(result);
         }
 

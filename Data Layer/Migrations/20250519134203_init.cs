@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VROOM.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class HelloZones : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -342,6 +342,7 @@ namespace VROOM.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CustomerID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RiderID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    PrepareTime = table.Column<TimeSpan>(type: "time", nullable: true),
                     ItemsType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -408,6 +409,7 @@ namespace VROOM.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     startTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RealEndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    InTransiteBeginTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ExpectedEndTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RiderID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ShipmentState = table.Column<int>(type: "int", nullable: false),

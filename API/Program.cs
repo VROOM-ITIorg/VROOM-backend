@@ -11,6 +11,7 @@ using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+using API.Myhubs;
 
 // using Serilog;
 //using VROOM.Services.Mapping;
@@ -23,7 +24,27 @@ using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSignalR();
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//    });
+//});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetIsOriginAllowed(url => true)
+              .AllowCredentials();
+    });
+});
 
 // builder.Host.UseSerilog();
 // Log.Logger = new LoggerConfiguration()
@@ -37,7 +58,12 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    })
+    .AddNewtonsoftJson(options =>
+     {
+         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
+     });
+
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
@@ -199,9 +225,11 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
 });
 //app.UseAuthorization();
-
+app.UseCors();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.MapHub<AcceptOrderHub>("/AcceptRejectOrders");
 
 app.UseAuthentication();
 app.UseAuthorization();

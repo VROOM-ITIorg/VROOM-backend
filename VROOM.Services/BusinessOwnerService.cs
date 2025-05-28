@@ -118,7 +118,7 @@ namespace VROOM.Services
 
 
 
-        public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
+        public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request, string BusinessID)
         {
             _logger.LogInformation("Creating rider with email: {Email}", request.Email);
 
@@ -167,7 +167,7 @@ namespace VROOM.Services
                 var rider = new Rider
                 {
                     UserID = user.Id,
-                    BusinessID = request.BusinessID,
+                    BusinessID = BusinessID,
                     Status = RiderStatusEnum.Available,
                     VehicleType = request.VehicleType,
                     VehicleStatus = request.VehicleStatus,
@@ -475,11 +475,11 @@ namespace VROOM.Services
                 {
                     Id = order.Id,
                     Title = order.Title,
-                    State = order.State,
+                    State = order.State.ToString(),
                     RiderName = order.Rider.User.Name,
                     CustomerName = order.Customer.User.Name,
                     BusinessOwner = order.Rider.BusinessOwner.User.Name,
-                    Priority = order.OrderPriority,
+                    Priority = order.OrderPriority.ToString(),
                     OrderPrice = order.OrderPrice,
                     DeliveryPrice = order.DeliveryPrice,
                     Date = order.Date

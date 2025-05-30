@@ -161,17 +161,8 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddSignalR();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
+
 
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
@@ -264,7 +255,12 @@ app.UseSwaggerUI(c =>
 //app.UseAuthorization();
 app.UseCors();
 app.UseStaticFiles();
+
+// Apply CORS before routing and authentication
+app.UseCors("AllowAngularApp"); // لازم تكون قبل UseRouting
 app.UseRouting();
+
+app.MapHub<AcceptOrderHub>("/AcceptRejectOrders");
 
 app.UseAuthentication();
 app.UseAuthorization();

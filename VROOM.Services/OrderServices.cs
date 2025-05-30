@@ -88,7 +88,7 @@ namespace VROOM.Services
             var order = new Order
             {
                 CustomerID = customer.UserID,
-                RiderID = orderVM.RiderID,
+                // RiderID = orderVM.RiderID,
                 ItemsType = orderVM.ItemsType,
                 Title = orderVM.Title,
                 IsBreakable = orderVM.IsBreakable,
@@ -99,6 +99,7 @@ namespace VROOM.Services
                 CustomerPriority = orderVM.CustomerPriority,
                 OrderPrice = orderVM.OrderPrice,
                 DeliveryPrice = orderVM.DeliveryPrice,
+                PrepareTime = orderVM.PrepareTime,
                 Date = DateTime.Now
             };
 
@@ -109,8 +110,8 @@ namespace VROOM.Services
 
           
 
-            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
-            await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
+          //  await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
+           // await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
             return order;
         }

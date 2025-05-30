@@ -116,6 +116,27 @@ namespace API.Controllers
             return Ok(result.Value);
         }
 
+        [HttpPost("create-customer")]
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerRegisterRequest request)
+        {
+            var result = await _businessOwnerService.CreateCustomerAsync(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
+        }
+
+        [HttpGet("all-customers")]
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            var result = await _businessOwnerService.GetAllCustomers();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { error = result.Error });
+            }
+            return Ok(result.Value);
+        }
         public class AssignOrderToRiderRequest
         {
             public int OrderId { get; set; }

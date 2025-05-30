@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250503165829_Hello-Zones")]
-    partial class HelloZones
+    [Migration("20250519163924_First")]
+    partial class First
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -407,6 +407,9 @@ namespace VROOM.Data.Migrations
                     b.Property<int>("OrderPriority")
                         .HasColumnType("int");
 
+                    b.Property<TimeSpan?>("PrepareTime")
+                        .HasColumnType("time");
+
                     b.Property<string>("RiderID")
                         .HasColumnType("nvarchar(450)");
 
@@ -733,6 +736,9 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("float");
 
                     b.Property<DateTime?>("ExpectedEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("InTransiteBeginTime")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")

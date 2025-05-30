@@ -125,7 +125,15 @@ builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
@@ -156,6 +164,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 });
+
 
 var app = builder.Build();
 
@@ -199,7 +208,10 @@ app.UseSwaggerUI(c =>
 //app.UseAuthorization();
 
 app.UseStaticFiles();
+app.UseCors("AllowAngularApp");
 app.UseRouting();
+
+
 
 app.UseAuthentication();
 app.UseAuthorization();

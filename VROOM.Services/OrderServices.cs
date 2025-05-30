@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
-using LinqKit;
+﻿using LinqKit;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using ViewModels;
 using ViewModels.User;
 using VROOM.Models;
@@ -28,9 +30,9 @@ namespace VROOM.Services
                 BusinessOwner = o.Rider.BusinessOwner.User.Name,
                 RiderName = o.Rider.User?.Name,
                 CustomerName = o.Customer.User.Name,
-                Priority = o.OrderPriority,
+                Priority = o.OrderPriority.ToString(),
                 Details = o.Details,
-                State = o.State,
+                State = o.State.ToString(),
                 OrderPrice = o.OrderPrice,
                 DeliveryPrice = o.DeliveryPrice,
                 Date = o.Date,
@@ -49,6 +51,7 @@ namespace VROOM.Services
         }
 
         private OrderRepository orderRepository;
+        private BusinessOwnerRepository businessOwnerRepository;
         private RiderRepository riderRepository;
         private NotificationService notificationService;
         private CustomerServices customerService;
@@ -56,6 +59,7 @@ namespace VROOM.Services
         private RouteServices routeService;
         private readonly ShipmentRepository shipmentRepository;
         private readonly RouteRepository routeRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
         public OrderService(
             OrderRepository _orderRepository,
             NotificationService _notificationService,
@@ -64,7 +68,9 @@ namespace VROOM.Services
             RiderRepository _riderRepository,
             OrderRouteServices _orderRouteServices,
             ShipmentRepository _shipmentRepository,
-            RouteRepository _routeRepository
+            RouteRepository _routeRepository,
+            IHttpContextAccessor _httpContextAccessor,
+            BusinessOwnerRepository _businessOwnerRepository
             )
         {
             orderRepository = _orderRepository;
@@ -75,6 +81,8 @@ namespace VROOM.Services
             orderRouteServices = _orderRouteServices;
             shipmentRepository = _shipmentRepository;
             routeRepository = _routeRepository;
+            httpContextAccessor = _httpContextAccessor;
+            businessOwnerRepository = _businessOwnerRepository;
         }
 
         public async Task<Order> CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
@@ -88,13 +96,14 @@ namespace VROOM.Services
             var order = new Order
             {
                 CustomerID = customer.UserID,
-                // RiderID = orderVM.RiderID,
+                //RiderID = orderVM.RiderID,
                 ItemsType = orderVM.ItemsType,
                 Title = orderVM.Title,
                 IsBreakable = orderVM.IsBreakable,
                 Notes = orderVM.Notes,
                 Details = orderVM.Details,
                 Weight = orderVM.Weight,
+                PrepareTime = orderVM.PrepareTime,
                 OrderPriority = orderVM.OrderPriority,
                 CustomerPriority = orderVM.CustomerPriority,
                 OrderPrice = orderVM.OrderPrice,
@@ -111,13 +120,16 @@ namespace VROOM.Services
           
 
           //  await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
-           // await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
+           // //await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
             return order;
         }
 
         public async Task<object> GetOrderByIdAsync(int orderId)
         {
+            var businessOwnerId = httpContextAccessor.HttpContext?.User?
+                   .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var businessOwner = await businessOwnerRepository.GetAsync(businessOwnerId);
             Order order = await orderRepository.GetAsync(orderId);
             if (order == null || order.IsDeleted) return null;
 
@@ -125,19 +137,92 @@ namespace VROOM.Services
             {
                 Id = order.Id,
                 Title = order.Title,
-                State = order.State,
-                BusinessOwner = order.Rider.BusinessOwner.User.Name,
-                RiderName = order.Rider.User.Name,
+                State = order.State.ToString(),
+                BusinessOwner = businessOwner.User.Name,
                 CustomerName = order.Customer.User.Name,
-                Priority = order.OrderPriority,
+                Priority = order.OrderPriority.ToString(),
                 Details = order.Details,
                 OrderPrice = order.OrderPrice,
                 DeliveryPrice = order.DeliveryPrice,
                 Date = order.Date
             };
         }
+        public async Task<int> GetTotalOrders(OrderFilter filter = null)
+        {
+            var query = orderRepository.GetList(o => o.IsDeleted != true);
 
+            if (filter != null)
+            {
+                if (!string.IsNullOrEmpty(filter.State))
+                    query = query.Where(o => o.State.ToString() == filter.State);
+                if (!string.IsNullOrEmpty(filter.CustomerName))
+                    query = query.Where(o => o.Customer.User.Name.Contains(filter.CustomerName));
+                if (!string.IsNullOrEmpty(filter.RiderName))
+                    query = query.Where(o => o.Rider.User.Name.Contains(filter.RiderName));
+                if (!string.IsNullOrEmpty(filter.Priority))
+                    query = query.Where(o => o.OrderPriority.ToString() == filter.Priority);
+                if (filter.StartDate.HasValue)
+                    query = query.Where(o => o.Date >= filter.StartDate.Value);
+                if (filter.EndDate.HasValue)
+                    query = query.Where(o => o.Date <= filter.EndDate.Value);
+            }
 
+            return await query.CountAsync();
+        }
+        public async Task<List<OrderListDetailsViewModel>> GetAllOrders(OrderFilter filter = null,int pageNumber = 1, int pageSize = 1)
+        {
+            var query = orderRepository.GetList(o => o.IsDeleted != true);
+
+            // Apply filters if provided
+            if (filter != null)
+            {
+                if (!string.IsNullOrEmpty(filter.State))
+                {
+                    query = query.Where(o => o.State.ToString() == filter.State);
+                }
+
+                if (!string.IsNullOrEmpty(filter.CustomerName))
+                {
+                    query = query.Where(o => o.Customer.User.Name.Contains(filter.CustomerName));
+                }
+
+                if (!string.IsNullOrEmpty(filter.RiderName))
+                {
+                    query = query.Where(o => o.Rider.User.Name.Contains(filter.RiderName));
+                }
+
+                if (!string.IsNullOrEmpty(filter.Priority))
+                {
+                    query = query.Where(o => o.OrderPriority.ToString() == filter.Priority);
+                }
+
+                if (filter.StartDate.HasValue)
+                {
+                    query = query.Where(o => o.Date >= filter.StartDate.Value);
+                }
+
+                if (filter.EndDate.HasValue)
+                {
+                    query = query.Where(o => o.Date <= filter.EndDate.Value);
+                }
+            }
+
+            var orders = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => new OrderListDetailsViewModel
+                {
+                    Id = o.Id,
+                    Title = o.Title,
+                    State = o.State.ToString(),
+                    RiderName = o.Rider.User.Name,
+                    CustomerName = o.Customer.User.Name,
+                    Priority = o.OrderPriority.ToString(),
+                    Date = o.Date
+                })
+                .ToListAsync(); // Materialize the query
+            return orders;
+        }
         // We need to AssignOrderToRider with two diffrenet way (Manually and Automatically)
 
         // Assign an Order to a Rider
@@ -168,7 +253,7 @@ namespace VROOM.Services
 
 
             order.RiderID = riderId;
-            //order.State = OrderStateEnum.Pending;
+            order.State = OrderStateEnum.Confirmed;
             order.ModifiedBy = businessOwnerId;
             order.ModifiedAt = DateTime.Now;
             order.State = orderState;
@@ -279,8 +364,8 @@ namespace VROOM.Services
                     Title = o.Title,
                     CustomerName = o.Customer?.User.Name ?? o.CustomerID,
                     RiderName = o.Rider?.User?.Name,
-                    Priority = o.OrderPriority,
-                    State = o.State,
+                    Priority = o.OrderPriority.ToString(),
+                    State = o.State.ToString(),
                     IsBreakable = o.IsBreakable,
                     Details = o.Details,
                     OrderPrice = o.OrderPrice,

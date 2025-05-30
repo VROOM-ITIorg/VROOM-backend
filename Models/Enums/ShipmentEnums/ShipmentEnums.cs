@@ -16,12 +16,15 @@ namespace VROOM.Models
     }
 
     public enum ZoneEnum 
-    { 
-        Elsal,
+    {
+        AsSail,
         Kima,
-        Eltameen,
-        Ma7ta,
-        Akaleem
+        AsSadaqaWaAsSadd,
+        AlAqqad,
+        AlKornish,
+        AlMawqaf,
+        AswanAlJadida,
+        AlHakroub
     }
 
 

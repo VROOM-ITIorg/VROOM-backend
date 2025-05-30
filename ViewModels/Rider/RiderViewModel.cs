@@ -141,9 +141,6 @@ namespace VROOM.ViewModels
         public string Email { get; set; }
         public string Password { get; set; }
         public string ProfilePicture { get; set; }
-
-        // Rider-specific info
-        public string BusinessID { get; set; }
         public VehicleTypeEnum VehicleType { get; set; }
         public string VehicleStatus { get; set; }
         public float ExperienceLevel { get; set; }

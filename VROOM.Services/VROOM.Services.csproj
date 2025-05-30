@@ -10,9 +10,11 @@
     <PackageReference Include="Hangfire" Version="1.8.18" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.18" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.18" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.15" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hubs\Hubs.csproj" />
     <ProjectReference Include="..\Repository\VROOM.Repository.csproj" />
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
   </ItemGroup>

@@ -143,6 +143,23 @@ namespace API.Controllers
             }
             return Ok(result.Value);
         }
+
+        [HttpPost("create-order-with-assignment")]
+        public async Task<IActionResult> CreateOrderAndAssign([FromBody] CreateOrderWithAssignmentRequest request)
+        {
+            if (request == null || request.Order == null)
+            {
+                return BadRequest(new { error = "Request body is required and must include order details." });
+            }
+
+            var result = await _businessOwnerService.CreateOrderAndAssignAsync(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { error = result.Error });
+            }
+
+            return Ok(new { message = result.Value });
+        }
         public class AssignOrderToRiderRequest
         {
             public int OrderId { get; set; }

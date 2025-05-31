@@ -118,8 +118,8 @@ namespace VROOM.Services
 
           
 
-            await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
-            //await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
+          //  await notificationService.SendOrderStatusUpdateAsync(order.CustomerID, "New Order Created", order.Id, "Success");
+           // //await notificationService.NotifyRiderOfNewOrderAsync(order.RiderID, order.Title, order.Id, "Success");
 
             return order;
         }

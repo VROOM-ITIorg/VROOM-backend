@@ -1,4 +1,5 @@
-﻿using Hangfire.Server;
+using Hangfire;
+using Hangfire.Server;
 using Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
 using System.Collections.Concurrent;
@@ -18,6 +20,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using ViewModels.Shipment;
 using ViewModels.User;
+using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
@@ -48,6 +51,7 @@ namespace VROOM.Services
         private readonly IHubContext<RiderHub> _hubContext;
         private readonly IHubContext<OwnerHub> ownerContext;
             private readonly ConcurrentDictionary<string, ShipmentConfirmation> _confirmationStore;
+        private readonly CustomerRepository customerRepository;
 
         public BusinessOwnerService(
             UserManager<User> _userManager,
@@ -67,8 +71,9 @@ namespace VROOM.Services
             ShipmentRepository _shipmentRepository,
             IHubContext<RiderHub> hubContext,
             IHubContext<OwnerHub> _ownerContext,
-            ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore
-            
+            ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore,
+            CustomerRepository _customerRepository 
+
             )
         {
             userManager = _userManager;
@@ -89,6 +94,8 @@ namespace VROOM.Services
             _hubContext = hubContext;
             _confirmationStore = confirmationStore;
             ownerContext = _ownerContext;
+           customerRepository = _customerRepository;
+            
         }
 
 
@@ -250,6 +257,134 @@ namespace VROOM.Services
             public string BusinessType { get; set; }
         }
 
+
+
+
+        public async Task<Result<CustomerVM>> CreateCustomerAsync(CustomerRegisterRequest request)
+        {
+            _logger.LogInformation("Creating customer with email: {Email}", request.Email);
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var businessOwnerId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    if (string.IsNullOrEmpty(businessOwnerId))
+                    {
+                        _logger.LogWarning("Failed to create customer: Business Owner ID not found in token.");
+                        return Result<CustomerVM>.Failure("Business Owner ID not found in token.");
+                    }
+
+                    var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                    if (businessOwner == null)
+                    {
+                        _logger.LogWarning("Failed to create customer: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                        return Result<CustomerVM>.Failure("Business Owner not found.");
+                    }
+
+                    var roles = await userManager.GetRolesAsync(businessOwner.User);
+                    if (!roles.Contains(RoleConstants.BusinessOwner))
+                    {
+                        _logger.LogWarning("Failed to create customer: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                        return Result<CustomerVM>.Failure("Caller is not a Business Owner.");
+                    }
+
+                    var existingUser = await userManager.FindByEmailAsync(request.Email);
+                    if (existingUser != null)
+                    {
+                        _logger.LogWarning("A user with this email already exists: {Email}", request.Email);
+                        return Result<CustomerVM>.Failure("A user with this email already exists.");
+                    }
+
+                    var user = new User
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = request.Email,
+                        Email = request.Email,
+                        Name = request.Name,
+                        PhoneNumber = request.PhoneNumber,
+                        ProfilePicture = request.ProfilePicture,
+                        Address = new Address
+                        {
+                            Lat = request.Location?.Lat ?? 0,
+                            Lang = request.Location?.Lang ?? 0,
+                            Area = request.Location?.Area
+                        }
+                    };
+
+                    _logger.LogInformation("Attempting to create user: {Email}", request.Email);
+                    var creationResult = await userManager.CreateAsync(user, request.Password);
+                    if (!creationResult.Succeeded)
+                    {
+                        var errorMessages = string.Join(",", creationResult.Errors.Select(e => e.Description));
+                        _logger.LogError("Failed to create user: {Email}. Errors: {Errors}", request.Email, errorMessages);
+                        return Result<CustomerVM>.Failure(errorMessages);
+                    }
+
+                    _logger.LogInformation("User created successfully: {Email}", request.Email);
+
+                    var role = RoleConstants.Customer;
+                    if (!await _roleManager.RoleExistsAsync(role))
+                    {
+                        _logger.LogInformation("Role {Role} does not exist. Creating role...", role);
+                        await _roleManager.CreateAsync(new IdentityRole(role));
+                    }
+
+                    _logger.LogInformation("Assigning role {Role} to user: {Email}", role, request.Email);
+                    await userManager.AddToRoleAsync(user, role);
+
+                    // Ensure Address has the correct UserID
+                    user.Address.UserID = user.Id;
+
+                    var customer = new Customer
+                    {
+                        UserID = user.Id,
+                        User = user,
+                     
+                    };
+
+                    _logger.LogInformation("Adding customer to the repository for user: {Email}", request.Email);
+                    // Remove redundant save for User since userManager.CreateAsync already persists it
+                    // _userRepository.Add(user);
+                    // await _userRepository.CustomSaveChanges();
+
+                    customerRepository.Add(customer);
+                    await customerRepository.CustomSaveChangesAsync();
+
+                    // Enqueue the Hangfire background job
+                    BackgroundJob.Enqueue(() => LogCustomerCreation(user.Id, user.Email, user.PhoneNumber));
+
+                    var customerVM = new CustomerVM
+                    {
+                        UserID = user.Id,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber,
+                        Location = user.Address != null ? new LocationDto
+                        {
+                            Lat = user.Address.Lat,
+                            Lang = user.Address.Lang,
+                            Area = user.Address.Area
+                        } : null
+                    };
+
+                    scope.Complete();
+
+                    _logger.LogInformation("Customer created successfully: {Email}", request.Email);
+                    return Result<CustomerVM>.Success(customerVM);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while creating customer with email {Email}.", request.Email);
+                    return Result<CustomerVM>.Failure($"An error occurred while creating the customer: {ex.Message}");
+                }
+            }
+        }
+
+        public void LogCustomerCreation(string userId, string email, string phoneNumber)
+        {
+            _logger.LogInformation("Background task: Customer created with ID {UserId}, email {Email}, and phone {PhoneNumber} on {DateTime}.", userId, email, phoneNumber, DateTime.Now);
+        }
 
 
         public async Task<Result<BusinessOwnerViewModel>> CreateBusinessOwnerAsync(BusinessOwnerRegisterRequest request)
@@ -487,6 +622,16 @@ namespace VROOM.Services
             }
         }
 
+
+        public class CustomerRegisterRequest
+        {
+            public string Name { get; set; }
+            public string Email { get; set; }
+            public string PhoneNumber { get; set; }
+            public string Password { get; set; }
+            public string ProfilePicture { get; set; }
+            public LocationDto Location { get; set; }
+        }
         public async Task<OrderDetailsViewModel?> ViewAssignedOrderAsync(int orderId)
         {
             try
@@ -650,6 +795,7 @@ namespace VROOM.Services
                             UserID = customer.Id,
                             Name = customer.Name,
                             Email = customer.Email,
+                            PhoneNumber = customer.PhoneNumber, // Added
                             Location = customer.Address != null ? new LocationDto
                             {
                                 Lat = customer.Address.Lat,
@@ -665,13 +811,82 @@ namespace VROOM.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving customers for Business Owner with ID ");
+                _logger.LogError(ex, "An error occurred while retrieving customers for Business Owner with ID {BusinessOwnerId}.");
                 return Result<List<CustomerVM>>.Failure("An error occurred while retrieving customers.");
             }
         }
 
 
-        public async Task<bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
+        public async Task<Result<List<CustomerVM>>> GetAllCustomers()
+        {
+            try
+            {
+                // Extract Business Owner ID from the HTTP context
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    _logger.LogWarning("Failed to retrieve all customers: Business Owner ID not found in token.");
+                    return Result<List<CustomerVM>>.Failure("Business Owner ID not found in token.");
+                }
+
+                // Verify Business Owner exists
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning("Failed to retrieve all customers: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                    return Result<List<CustomerVM>>.Failure("Business Owner not found.");
+                }
+
+                // Verify the caller is a Business Owner
+                var roles = await userManager.GetRolesAsync(businessOwner.User);
+                if (!roles.Contains(RoleConstants.BusinessOwner))
+                {
+                    _logger.LogWarning("Failed to retrieve all customers: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                    return Result<List<CustomerVM>>.Failure("Caller is not a Business Owner.");
+                }
+
+                // Fetch all customers from the database
+                var customers = await customerRepository.GetAllAsync();
+
+                // Map customers to CustomerVM
+                var customerVMs = new List<CustomerVM>();
+                foreach (var customer in customers)
+                {
+                    var user = await userManager.FindByIdAsync(customer.UserID);
+                    if (user != null)
+                    {
+                        var customerRoles = await userManager.GetRolesAsync(user);
+                        if (customerRoles.Contains(RoleConstants.Customer))
+                        {
+                            customerVMs.Add(new CustomerVM
+                            {
+                                UserID = customer.UserID,
+                                Name = user.Name,
+                                Email = user.Email,
+                                PhoneNumber = user.PhoneNumber,
+                                Location = user.Address != null ? new LocationDto
+                                {
+                                    Lat = user.Address.Lat,
+                                    Lang = user.Address.Lang,
+                                    Area = user.Address.Area
+                                } : null
+                            });
+                        }
+                    }
+                }
+
+                _logger.LogInformation("Successfully retrieved {CustomerCount} customers from the database for Business Owner with ID {BusinessOwnerId}.", customerVMs.Count, businessOwnerId);
+                return Result<List<CustomerVM>>.Success(customerVMs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while retrieving all customers for Business Owner with ID {BusinessOwnerId}.");
+                return Result<List<CustomerVM>>.Failure("An error occurred while retrieving all customers.");
+            }
+        }
+
+        
+        public async Task <bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
         {
             try
             {

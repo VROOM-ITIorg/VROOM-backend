@@ -108,7 +108,6 @@ namespace VROOM.Services
                 CustomerPriority = orderVM.CustomerPriority,
                 OrderPrice = orderVM.OrderPrice,
                 DeliveryPrice = orderVM.DeliveryPrice,
-                PrepareTime = orderVM.PrepareTime,
                 Date = DateTime.Now
             };
 

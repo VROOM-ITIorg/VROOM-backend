@@ -51,6 +51,7 @@ namespace VROOM.Services
         private readonly IHubContext<RiderHub> _hubContext;
         private readonly IHubContext<OwnerHub> ownerContext;
             private readonly ConcurrentDictionary<string, ShipmentConfirmation> _confirmationStore;
+        private readonly CustomerRepository customerRepository;
 
         public BusinessOwnerService(
             UserManager<User> _userManager,
@@ -70,8 +71,9 @@ namespace VROOM.Services
             ShipmentRepository _shipmentRepository,
             IHubContext<RiderHub> hubContext,
             IHubContext<OwnerHub> _ownerContext,
-            ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore
-            
+            ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore,
+            CustomerRepository _customerRepository 
+
             )
         {
             userManager = _userManager;
@@ -92,6 +94,8 @@ namespace VROOM.Services
             _hubContext = hubContext;
             _confirmationStore = confirmationStore;
             ownerContext = _ownerContext;
+           customerRepository = _customerRepository;
+            
         }
 
 
@@ -344,8 +348,8 @@ namespace VROOM.Services
                     // _userRepository.Add(user);
                     // await _userRepository.CustomSaveChanges();
 
-                    _customerRepository.Add(customer);
-                    await _customerRepository.CustomSaveChangesAsync();
+                    customerRepository.Add(customer);
+                    await customerRepository.CustomSaveChangesAsync();
 
                     // Enqueue the Hangfire background job
                     BackgroundJob.Enqueue(() => LogCustomerCreation(user.Id, user.Email, user.PhoneNumber));
@@ -813,7 +817,6 @@ namespace VROOM.Services
         }
 
 
-        public async Task<bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
         public async Task<Result<List<CustomerVM>>> GetAllCustomers()
         {
             try
@@ -843,7 +846,7 @@ namespace VROOM.Services
                 }
 
                 // Fetch all customers from the database
-                var customers = await _customerRepository.GetAllAsync();
+                var customers = await customerRepository.GetAllAsync();
 
                 // Map customers to CustomerVM
                 var customerVMs = new List<CustomerVM>();
@@ -881,7 +884,9 @@ namespace VROOM.Services
                 return Result<List<CustomerVM>>.Failure("An error occurred while retrieving all customers.");
             }
         }
-        public async Task PrepareOrder(OrderCreateViewModel _orderCreateVM)
+
+        
+        public async Task <bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
         {
             try
             {

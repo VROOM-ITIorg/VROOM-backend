@@ -161,7 +161,6 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddSignalR();
 
 
 
@@ -212,6 +211,7 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
 
 var app = builder.Build();
 

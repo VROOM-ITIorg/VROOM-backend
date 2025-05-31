@@ -6,16 +6,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 using ViewModels.Shipment;
 using ViewModels.User;
 using VROOM.Models;
@@ -23,6 +29,7 @@ using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.ViewModels;
+
 namespace VROOM.Services
 {
    
@@ -128,7 +135,48 @@ namespace VROOM.Services
         }
 
 
+        private async Task SendWhatsAppMessage(string phoneNumber, string userMessage)
+        {
+            string formatedPhoneNumber = NormalizePhoneNumber(phoneNumber);
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer ed2a766dcd8fdc7ba0dcb7958b263f03727be139e06a2ad294973eaf04d0a69f6bf58f4b4c810c93");
+            var payload = new
+            {
+                phone = formatedPhoneNumber,
+                message = userMessage
+            };
 
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://api.wassenger.com/v1/messages", content);
+            response.EnsureSuccessStatusCode();
+
+
+            _logger.LogInformation(response.Content.ToString());
+
+        }
+
+        private string NormalizePhoneNumber(string phoneNumber)
+        {
+            // Remove any non-digit characters (e.g., spaces, dashes)
+            phoneNumber = Regex.Replace(phoneNumber ?? "", "[^0-9]", "");
+
+            // Ensure the phone number starts with the country code
+            if (!phoneNumber.StartsWith("+"))
+            {
+                // Example: Assume Egypt country code (+20) if the number starts with 0
+                if (phoneNumber.StartsWith("0"))
+                {
+                    phoneNumber = $"+20{phoneNumber.Substring(1)}";
+                }
+                else
+                {
+                    // Handle other cases or throw an exception if the number is invalid
+                    throw new ArgumentException("Invalid phone number format. Please provide a number with a country code or in a valid format.");
+                }
+            }
+
+            return phoneNumber;
+        }
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request, string BusinessID)
         {
             _logger.LogInformation("Creating rider with email: {Email}", request.Email);
@@ -144,16 +192,26 @@ namespace VROOM.Services
                     return Result<RiderVM>.Failure("A user with this email already exists.");
                 }
 
+                var businessOwner = await businessOwnerRepo.GetAsync(BusinessID);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning($"Assign failed: No BusinessOwner found with ID {BusinessID}");
+                 
+                }
+
                 var user = new User
                 {
                     UserName = request.Email,
-                    Email = request.Email,
+                    Email = request.Email,      
                     Name = request.Name,
+                    PhoneNumber = request.phoneNumber,
                     ProfilePicture = request.ProfilePicture
                 };
 
                 _logger.LogInformation("Attempting to create user: {Email}", request.Email);
+
                 var creationResult = await userManager.CreateAsync(user, request.Password);
+
                 if (!creationResult.Succeeded)
                 {
                     var errorMessages = string.Join(",", creationResult.Errors.Select(e => e.Description));
@@ -192,13 +250,14 @@ namespace VROOM.Services
                 _logger.LogInformation("Adding rider to the repository for user: {Email}", request.Email);
                 riderRepository.Add(rider);
                 riderRepository.CustomSaveChanges();
-
+                await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
 
                 var result = new RiderVM
                 {
                     UserID = user.Id,
                     Name = user.Name,
                     Email = user.Email,
+                    phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
                     VehicleStatus = rider.VehicleStatus,
@@ -215,6 +274,101 @@ namespace VROOM.Services
                 scope.Complete();
 
                 _logger.LogInformation("Rider created successfully: {Email}", request.Email);
+
+                return Result<RiderVM>.Success(result);
+            }
+        }
+
+        public async Task<Result<RiderVM>> UpdateRiderAsync(RiderRegisterRequest request, string BusinessID, string riderUserId)
+        {
+            _logger.LogInformation("Updating rider with email: {Email}", request.Email);
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var user = await userManager.FindByIdAsync(riderUserId);
+                if (user == null)
+                {
+                    _logger.LogWarning("No user found with ID: {UserId}", riderUserId);
+                    return Result<RiderVM>.Failure("User not found.");
+                }
+
+                var businessOwner = await businessOwnerRepo.GetAsync(BusinessID);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning($"Update failed: No BusinessOwner found with ID {BusinessID}");
+                    return Result<RiderVM>.Failure("Business owner not found.");
+                }
+
+                // Check if email is being updated to a new email that's already in use
+                if (user.Email != request.Email)
+                {
+                    var existingUser = await userManager.FindByEmailAsync(request.Email);
+                    if (existingUser != null)
+                    {
+                        _logger.LogWarning("A user with this email already exists: {Email}", request.Email);
+                        return Result<RiderVM>.Failure("A user with this email already exists.");
+                    }
+                }
+
+                // Update user properties
+                user.UserName = request.Email;
+                user.Email = request.Email;
+                user.Name = request.Name;
+                user.PhoneNumber = request.phoneNumber;
+                user.ProfilePicture = request.ProfilePicture;
+
+                _logger.LogInformation("Attempting to update user: {Email}", request.Email);
+                var updateResult = await userManager.UpdateAsync(user);
+
+                if (!updateResult.Succeeded)
+                {
+                    var errorMessages = string.Join(",", updateResult.Errors.Select(e => e.Description));
+                    _logger.LogError("Failed to update user: {Email}. Errors: {Errors}", request.Email, errorMessages);
+                    return Result<RiderVM>.Failure(errorMessages);
+                }
+
+                // Find and update rider
+                var rider = await riderRepository.GetAsync(riderUserId);
+                if (rider == null)
+                {
+                    _logger.LogWarning("No rider found for user ID: {UserId}", riderUserId);
+                    return Result<RiderVM>.Failure("Rider not found.");
+                }
+
+                // Update rider properties
+                rider.BusinessID = BusinessID;
+                rider.VehicleType = request.VehicleType;
+                rider.VehicleStatus = request.VehicleStatus;
+                rider.ExperienceLevel = request.ExperienceLevel;
+                rider.Lat = request.Location.Lat;
+                rider.Lang = request.Location.Lang;
+                rider.Area = request.Location.Area;
+
+                _logger.LogInformation("Updating rider in repository for user: {Email}", request.Email);
+                riderRepository.Update(rider);
+                riderRepository.CustomSaveChanges();
+
+                var result = new RiderVM
+                {
+                    UserID = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    phoneNumber = user.PhoneNumber,
+                    BusinessID = rider.BusinessID,
+                    VehicleType = rider.VehicleType,
+                    VehicleStatus = rider.VehicleStatus,
+                    ExperienceLevel = rider.ExperienceLevel,
+                    Location = new LocationDto
+                    {
+                        Lat = rider.Lat,
+                        Lang = rider.Lang,
+                        Area = rider.Area
+                    },
+                    Status = rider.Status
+                };
+
+                scope.Complete();
+                _logger.LogInformation("Rider updated successfully: {Email}", request.Email);
 
                 return Result<RiderVM>.Success(result);
             }

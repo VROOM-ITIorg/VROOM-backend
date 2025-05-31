@@ -88,23 +88,20 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]
-        public IActionResult Index(
-            [FromQuery] string name = "",
-            [FromQuery] string phoneNumber = "",
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 4)
+        public IActionResult GetAllRidersWithFilter(
+              [FromQuery] int status = -1,
+              [FromQuery] string name = "",
+              [FromQuery] string phoneNumber = "",
+              [FromQuery] int pageNumber = 1,
+              [FromQuery] int pageSize = 4,
+              [FromQuery] string sort = "name_asc",
+              [FromQuery] string owner = "All")
         {
             try
             {
-                var riders = _riderManager.Search(
-                    Name: name,
-                    PhoneNumber: phoneNumber,
-                    pageNumber: pageNumber,
-                    pageSize: pageSize,
-                    status: -1
-                    );
+                var riders = _riderManager.Search(status, name, phoneNumber, pageNumber, pageSize, sort, owner);
 
                 return Ok(riders);
             }
@@ -113,5 +110,7 @@ namespace API.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
+
+      
     }
 }

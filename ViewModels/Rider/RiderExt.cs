@@ -31,9 +31,10 @@ namespace ViewModels
                 UserID = rider.UserID,
                 UserName = rider.User?.Name ?? "Unknown",
                 Email = rider.User?.Email ?? "No Email",
+                VehicleType = rider.VehicleType.ToString(),
                 ImagePath = rider.User.ProfilePicture,
                 PhoneNumber = rider.User?.PhoneNumber ?? "No Phone Number",
-                Status = rider.Status,
+                Status = rider.Status.ToString(),
                 BusinessName = rider.BusinessOwner.User.Name                
             };
         }

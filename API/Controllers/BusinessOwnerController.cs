@@ -69,6 +69,35 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpPut("updateRider/{riderUserId}")]
+        public async Task<IActionResult> UpdateRider(string riderUserId, [FromBody] RiderRegisterRequest rider)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized("Invalid or missing authorization token.");
+            }
+
+            var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var businessId = jwtToken.Claims.FirstOrDefault()?.Value;
+            if (string.IsNullOrEmpty(businessId))
+            {
+                return Unauthorized("Invalid token: Business ID not found.");
+            }
+
+            var result = await _businessOwnerService.UpdateRiderAsync(rider, businessId, riderUserId);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return Ok(result.Value);
+        }
+
         [Authorize(Roles = "BusinessOwner")]
         [HttpPost("assignOrderManually")]
         public async Task<IActionResult> AssignOrderToRider([FromBody] AssignOrderToRiderRequest request)

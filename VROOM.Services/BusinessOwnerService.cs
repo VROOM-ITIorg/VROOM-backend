@@ -33,7 +33,7 @@ namespace VROOM.Services
     {
         public OrderCreateViewModel Order { get; set; }
         public string AssignmentType { get; set; } // "Manual" or "Automatic"
-        public string RiderId { get; set; } // Required for manual assignment
+        public string ? RiderId  { get; set; } // Required for manual assignment
     }
 
     public class BusinessOwnerService
@@ -1069,7 +1069,7 @@ namespace VROOM.Services
                        await AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
                         // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
                         //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
-                    }
+                    } 
                     shipmentRepository.Update(shipment);
                     shipmentRepository.CustomSaveChanges();
                     return true;

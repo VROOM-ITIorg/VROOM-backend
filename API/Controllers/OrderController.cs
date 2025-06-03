@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using VROOM.Models;
 using VROOM.Services;
 using VROOM.ViewModels;
@@ -19,51 +20,50 @@ namespace API.Controllers
             orderService = _orderService;
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         [Authorize(Roles = "BusinessOwner")]
-        [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateViewModel model)
         {
-
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             var token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            // Decode the JWT token
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
+            var businessId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            // Access token claims (e.g., user ID, roles, etc.)
-            var BussinsId = jwtToken.Claims.FirstOrDefault()?.Value;
+            // Modified to receive the created order
+            var createdOrder = await orderService.CreateOrder(model, businessId);
 
-
-            // Take CustomerInfo and call a func to check if the user exist or not and return id
-            // and if the customer is not exsit we will create a customer
-            // func here
-            await orderService.CreateOrder(model, BussinsId); // new method we'll define below
-
-            return CreatedAtAction(nameof(GetOrderById), new { Message = "The order is created" });
+            // Return with the correct route values
+            return CreatedAtAction(
+                actionName: nameof(GetOrderById),
+                routeValues: new { id = createdOrder.Id },
+                value: new { Order = createdOrder, Message = "Order created successfully" }
+            );
         }
 
-        [HttpGet("getOrder/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
-
-            var order = await orderService.GetOrderByIdAsync(id) ?? NotFound() ;
+            var order = await orderService.GetOrderByIdAsync(id);
+            if (order == null) return NotFound();
 
             return Ok(order);
         }
 
-        //// update order status
         [Authorize(Roles = "Rider")]
-        [HttpPost("updateOrder/{id}")]
-        public async Task<IActionResult> AccOrRejOrder(int id, [FromBody] OrderStateEnum orderState,  string RiderId, string BusinessId)
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] OrderStateUpdateRequest request)
         {
-            // There are 5 events can we update the state of the order this now
-            var order = await orderService.UpdateOrderState(id, orderState, RiderId, BusinessId);
-            // if the order is accepted we will retrun a good massege to the customer if not 
-            return Ok(new { Order = order, Message = "order is updated" });
+            var updatedOrder = await orderService.UpdateOrderState(
+                id,
+                request.OrderState,
+                request.RiderId,
+                request.BusinessId);
+
+            return Ok(new { Order = updatedOrder, Message = "Order status updated" });
         }
 
         // Track order 
@@ -75,5 +75,13 @@ namespace API.Controllers
             return Ok();
         }
     }
-
+    public class OrderStateUpdateRequest
+    {
+        public OrderStateEnum OrderState { get; set; }
+        public string RiderId { get; set; }
+        public string BusinessId { get; set; }
+    }
 }
+
+
+

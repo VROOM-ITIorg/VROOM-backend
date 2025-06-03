@@ -117,28 +117,6 @@ namespace VROOM.Services
         }
 
 
-        public async Task<string> GetBusinessOwnerIdForRiderAsync(string riderId)
-        {
-            if (string.IsNullOrEmpty(riderId))
-            {
-                throw new ArgumentException("Rider ID cannot be null or empty");
-            }
-
-            var rider = await riderRepository.GetAsync(riderId);
-
-            if (rider == null)
-            {
-                throw new KeyNotFoundException($"Rider with ID {riderId} not found");
-            }
-
-            if (string.IsNullOrEmpty(rider.BusinessID))
-            {
-                throw new InvalidOperationException($"Rider {riderId} is not assigned to a business owner");
-            }
-
-            return rider.BusinessID;
-        }
-
 
         public async Task<Result<RiderVM>> CreateRiderAsync(RiderRegisterRequest request)
         {
@@ -319,7 +297,27 @@ namespace VROOM.Services
             return Result<BusinessOwnerViewModel>.Success(businessowner);
         }
 
+        public async Task<string> GetBusinessOwnerIdForRiderAsync(string riderId)
+        {
+            if (string.IsNullOrEmpty(riderId))
+            {
+                throw new ArgumentException("Rider ID cannot be null or empty");
+            }
 
+            var rider = await riderRepository.GetAsync(riderId);
+
+            if (rider == null)
+            {
+                throw new KeyNotFoundException($"Rider with ID {riderId} not found");
+            }
+
+            if (string.IsNullOrEmpty(rider.BusinessID))
+            {
+                throw new InvalidOperationException($"Rider {riderId} is not assigned to a business owner");
+            }
+
+            return rider.BusinessID;
+        }
 
 
         public async Task<bool> AssignOrderToRiderAsync(int orderId, string riderId)
@@ -641,7 +639,7 @@ namespace VROOM.Services
             }
         }
 
-         
+
         public async Task<bool> PrepareOrder(OrderCreateViewModel _orderCreateVM)
         {
             try
@@ -664,7 +662,7 @@ namespace VROOM.Services
                 // Create order / order => high urgent / expected time = 0
                 var order = await orderService.CreateOrder(_orderCreateVM, businessOwnerId); // should be await
 
-           
+
 
                 var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(order.Id);
 
@@ -737,10 +735,10 @@ namespace VROOM.Services
                     if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
                         if (sh.InTransiteBeginTime >= DateTime.Now.Add(order.PrepareTime.Value + TimeSpan.FromMinutes(5)))
-        {
+                        {
                             Console.WriteLine($"Shipment {sh.Id} meets the HighUrgent requirement with InTransiteBeginTime ({sh.InTransiteBeginTime}) at least 5 minutes after the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
                         }
-        else
+                        else
                         {
                             Console.WriteLine($"Shipment {sh.Id} does not meet the HighUrgent requirement as its InTransiteBeginTime ({sh.InTransiteBeginTime}) is less than 5 minutes after the order's prepare time ({DateTime.Now.Add(order.PrepareTime.Value)}).");
                             continue;
@@ -814,14 +812,14 @@ namespace VROOM.Services
                         // بترجع تعمل Update للـ shipment بعد التعديل
                     }
 
-                    if(order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                    if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
                         AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
                         // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
                         //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
                     }
                     shipmentRepository.Update(shipment);
-                   shipmentRepository.CustomSaveChanges();
+                    shipmentRepository.CustomSaveChanges();
                     return true;
 
                 }
@@ -859,7 +857,7 @@ namespace VROOM.Services
                         MaxConsecutiveDeliveries = 10
                     }, route);
 
-                     return true;
+                    return true;
                 }
             }
             catch (Exception ex)
@@ -964,7 +962,7 @@ namespace VROOM.Services
             var order = await orderRepository.GetAsync(orderId);
             // Get available riders for the business owner
             var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
-            
+
 
             // Filter riders based on vehicle status and weight capacity
             var filteredRiders = riders

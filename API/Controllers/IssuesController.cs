@@ -5,7 +5,6 @@ using System.Security.Claims;
 using ViewModels;
 using VROOM.Models;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -95,7 +94,7 @@ namespace API.Controllers
                     Note = result.Value.Note,
                     ReportedAt = result.Value.ReportedAt,
                     ShipmentID = result.Value.ShipmentID,
-                    RiderLocation = new ViewModels.LocationDto
+                    RiderLocation = new LocationDto
                     {
                         Latitude = result.Value.Latitude,
                         Longitude = result.Value.Longitude,

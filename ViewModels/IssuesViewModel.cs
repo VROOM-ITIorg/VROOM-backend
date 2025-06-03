@@ -75,7 +75,7 @@ namespace ViewModels
         public IssueTypeEnum Type { get; set; }
 
         [Required]
-        [Range(0, 2, ErrorMessage = "Severity must be between 0 and 2")]
+        [Range(0, 3, ErrorMessage = "Severity must be between 0 and 3")]
         public issueSeverityEnum Severity { get; set; }
 
         [StringLength(500)]

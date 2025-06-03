@@ -1,17 +1,17 @@
-using System;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
-using VROOM.Repository;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
-
+using System.Collections.Concurrent;
+using VROOM.Repository;
+using API.Hubs;
 // using Serilog;
 //using VROOM.Services.Mapping;
 
@@ -24,6 +24,25 @@ using Hangfire;
 var builder = WebApplication.CreateBuilder(args);
 
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//    });
+//});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetIsOriginAllowed(url => true)
+              .AllowCredentials();
+    });
+});
 
 // builder.Host.UseSerilog();
 // Log.Logger = new LoggerConfiguration()
@@ -37,7 +56,12 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    })
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
     });
+
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
@@ -45,6 +69,21 @@ builder.Services.AddLogging(logging =>
     logging.AddConsole();
     logging.AddDebug();
     logging.SetMinimumLevel(LogLevel.Information);
+});
+
+// Configure SignalR
+builder.Services.AddSignalR();
+
+// Configure CORS to allow Angular frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // لازم عشان SignalR مع التوثيق
+    });
 });
 
 // Configure Swagger
@@ -77,40 +116,33 @@ builder.Services.AddSwaggerGen(c =>
 
 // Configure DbContext with lazy loading
 builder.Services.AddDbContext<VroomDbContext>(options =>
-    options
-        .UseSqlServer(builder.Configuration.GetConnectionString("DB"))
-        .UseLazyLoadingProxies());
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DB"))
+           .UseLazyLoadingProxies());
 
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<VroomDbContext>()
     .AddDefaultTokenProviders();
 
-// Add services to the container.
-
-//builder.Services.AddControllers();
-
+// Add Hangfire
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
-
-// Add Hangfire server to process background jobs
 builder.Services.AddHangfireServer();
+
+// Add repositories and services
 builder.Services.AddHttpClient();
-//builder.Services.AddDbContext<VroomDbContext>
-//    (i => i.UseLazyLoadingProxies().UseSqlServer(builder.Configuration.GetConnectionString("DB")));
-//builder.Services.AddIdentity<User, IdentityRole>()
-//    .AddEntityFrameworkStores<VroomDbContext>();
-builder.Services.AddScoped(typeof(RiderRepository));
-builder.Services.AddScoped(typeof(RoleRepository));
-builder.Services.AddScoped(typeof(AccountManager));
-builder.Services.AddScoped(typeof(OrderRepository));
-builder.Services.AddScoped(typeof(IssuesRepository));
+builder.Services.AddScoped<RiderRepository>();
+builder.Services.AddScoped<RoleRepository>();
+builder.Services.AddScoped<AccountManager>();
+builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<IssuesRepository>();
 builder.Services.AddScoped<OrderRiderRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<CustomerServices>();
+builder.Services.AddScoped<IRiderService, RiderService>();
 builder.Services.AddScoped<RiderService>();
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
@@ -120,24 +152,35 @@ builder.Services.AddScoped<OrderRouteRepository>();
 builder.Services.AddScoped<OrderRouteServices>();
 builder.Services.AddScoped<ShipmentRepository>();
 builder.Services.AddScoped<ShipmentServices>();
-builder.Services.AddScoped(typeof(OrderService));
+builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
+//builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
+builder.Services.AddSignalR();
 
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+});
 
+// Add authorization for hubs
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("HubPolicy", policy => {
+        policy.RequireAuthenticatedUser();
+    });
+});
 
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 
 // Configure JWT Authentication
-var jwtSecret = "ShampooShampooShampooShampooShampooShampoo";
+var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
 {
-    throw new InvalidOperationException("JWT Secret is missing or too short in configuration. It must be at least 16 characters long.");
+    throw new InvalidOperationException("JWT Secret is missing or too short. It must be at least 16 characters long.");
 }
 
 builder.Services.AddAuthentication(options =>
@@ -153,9 +196,34 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "VROOM",
-        ValidAudience = "VROOM",
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "VROOM",
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "VROOM",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+    };
+
+    // Handle JWT token for SignalR
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+
+            // Support token from query string for SignalR hubs
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerNotificationHub")))
+            {
+                context.Token = accessToken;
+            }
+
+            // Support token from authToken cookie for all requests
+            var cookieToken = context.Request.Cookies["authToken"];
+            if (!string.IsNullOrEmpty(cookieToken))
+            {
+                context.Token = cookieToken;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -168,7 +236,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
-        c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5169/)
+        c.RoutePrefix = string.Empty;
     });
 }
 
@@ -199,25 +267,25 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
 });
 //app.UseAuthorization();
-
 app.UseStaticFiles();
+
+// Apply CORS before routing and authentication
+app.UseCors("AllowAngularApp");
+// لازم تكون قبل UseRouting
 app.UseRouting();
+
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseHangfireDashboard();
+app.UseWebSockets();
+// Map SignalR Hub
+app.MapControllers();
+app.MapHub<RiderLocationHub>("/RiderLocationHub");
+//app.MapHub<ShipmentHub>("/ShipmentHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
-
-
-// Schedule the recurring job when the application starts
-RecurringJob.AddOrUpdate<OrderService>(
-    "track-order-job",
-    service => service.TrackOrdersAsync(), // Replace with actual job
-    "*/30 * * * * *"); // Every 30 seconds
-
 
 // Seed roles
 using (var scope = app.Services.CreateScope())
@@ -230,6 +298,5 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
-// Log.Information("Application starting...");
 
 app.Run();

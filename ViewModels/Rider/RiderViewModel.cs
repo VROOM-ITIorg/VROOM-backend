@@ -110,6 +110,14 @@ namespace VROOM.ViewModels
 
         public string Area { get; init; }
     }
+    public record LocationDtoUpdate
+    {
+        public double Lat { get; init; }
+
+        public double Lang { get; init; }
+
+        public string? Area { get; init; }
+    }
 
 
     public record RiderVM
@@ -146,6 +154,19 @@ namespace VROOM.ViewModels
         public string VehicleStatus { get; set; }
         public float ExperienceLevel { get; set; }
         public LocationDto Location { get; set; }
+    }
+
+    public class RiderUpdateRequest
+    {
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; } 
+        public string? ProfilePicture { get; set; }
+        public string? phoneNumber { get; set; }
+        public VehicleTypeEnum VehicleType { get; set; } 
+        public string? VehicleStatus { get; set; }
+        public float ExperienceLevel { get; set; } 
+        public LocationDtoUpdate? Location { get; set; }
     }
 
 }

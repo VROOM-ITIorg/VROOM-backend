@@ -70,7 +70,7 @@ namespace API.Controllers
         }
 
         [HttpPut("updateRider/{riderUserId}")]
-        public async Task<IActionResult> UpdateRider(string riderUserId, [FromBody] RiderRegisterRequest rider)
+        public async Task<IActionResult> UpdateRider(string riderUserId, [FromBody] RiderUpdateRequest rider)
         {
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))

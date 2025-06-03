@@ -286,7 +286,7 @@ namespace VROOM.Services
             }
         }
 
-        public async Task<Result<RiderVM>> UpdateRiderAsync(RiderRegisterRequest request, string BusinessID, string riderUserId)
+        public async Task<Result<RiderVM>> UpdateRiderAsync(RiderUpdateRequest request, string BusinessID, string riderUserId)
         {
             _logger.LogInformation("Updating rider with email: {Email}", request.Email);
 
@@ -307,7 +307,7 @@ namespace VROOM.Services
                 }
 
                 // Check if email is being updated to a new email that's already in use
-                if (user.Email != request.Email)
+                if (!string.IsNullOrEmpty(request.Email) && user.Email != request.Email)
                 {
                     var existingUser = await userManager.FindByEmailAsync(request.Email);
                     if (existingUser != null)
@@ -315,22 +315,25 @@ namespace VROOM.Services
                         _logger.LogWarning("A user with this email already exists: {Email}", request.Email);
                         return Result<RiderVM>.Failure("A user with this email already exists.");
                     }
+                    user.Email = request.Email;
+                    user.UserName = request.Email; // Update UserName if Email is provided
                 }
 
-                // Update user properties
-                user.UserName = request.Email;
-                user.Email = request.Email;
-                user.Name = request.Name;
-                user.PhoneNumber = request.phoneNumber;
-                user.ProfilePicture = request.ProfilePicture;
+                // Update user properties only if provided
+                if (!string.IsNullOrEmpty(request.Name))
+                    user.Name = request.Name;
+                if (!string.IsNullOrEmpty(request.phoneNumber))
+                    user.PhoneNumber = request.phoneNumber;
+                if (!string.IsNullOrEmpty(request.ProfilePicture))
+                    user.ProfilePicture = request.ProfilePicture;
 
-                _logger.LogInformation("Attempting to update user: {Email}", request.Email);
+                _logger.LogInformation("Attempting to update user: {Email}", user.Email);
                 var updateResult = await userManager.UpdateAsync(user);
 
                 if (!updateResult.Succeeded)
                 {
                     var errorMessages = string.Join(",", updateResult.Errors.Select(e => e.Description));
-                    _logger.LogError("Failed to update user: {Email}. Errors: {Errors}", request.Email, errorMessages);
+                    _logger.LogError("Failed to update user: {Email}. Errors: {Errors}", user.Email, errorMessages);
                     return Result<RiderVM>.Failure(errorMessages);
                 }
 
@@ -342,16 +345,27 @@ namespace VROOM.Services
                     return Result<RiderVM>.Failure("Rider not found.");
                 }
 
-                // Update rider properties
-                rider.BusinessID = BusinessID;
-                rider.VehicleType = request.VehicleType;
-                rider.VehicleStatus = request.VehicleStatus;
-                rider.ExperienceLevel = request.ExperienceLevel;
-                rider.Lat = request.Location.Lat;
-                rider.Lang = request.Location.Lang;
-                rider.Area = request.Location.Area;
+                // Update rider properties only if provided
+                if (!string.IsNullOrEmpty(BusinessID))
+                    rider.BusinessID = BusinessID;
+                if (request.VehicleType != default)
+                    rider.VehicleType = request.VehicleType;
+                if (!string.IsNullOrEmpty(request.VehicleStatus))
+                    rider.VehicleStatus = request.VehicleStatus;
+                if (request.ExperienceLevel != default)
+                    rider.ExperienceLevel = request.ExperienceLevel;
+                if (request.Location != null)
+                {
+                    // Update only provided location fields
+                    if (request.Location.Lat != default)
+                        rider.Lat = request.Location.Lat;
+                    if (request.Location.Lang != default)
+                        rider.Lang = request.Location.Lang;
+                    if (!string.IsNullOrEmpty(request.Location.Area))
+                        rider.Area = request.Location.Area;
+                }
 
-                _logger.LogInformation("Updating rider in repository for user: {Email}", request.Email);
+                _logger.LogInformation("Updating rider in repository for user: {Email}", user.Email);
                 riderRepository.Update(rider);
                 riderRepository.CustomSaveChanges();
 
@@ -375,7 +389,7 @@ namespace VROOM.Services
                 };
 
                 scope.Complete();
-                _logger.LogInformation("Rider updated successfully: {Email}", request.Email);
+                _logger.LogInformation("Rider updated successfully: {Email}", user.Email);
 
                 return Result<RiderVM>.Success(result);
             }

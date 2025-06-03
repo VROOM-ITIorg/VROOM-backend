@@ -8,6 +8,8 @@ namespace VROOM.Models
 {
     public class Result
     {
+        public readonly string Error;
+
         public bool IsSuccess { get; private set; }
         public string Message { get; private set; }
 

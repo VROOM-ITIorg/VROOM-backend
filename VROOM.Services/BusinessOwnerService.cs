@@ -28,7 +28,14 @@ using VROOM.Repository;
 using VROOM.ViewModels;
 namespace VROOM.Services
 {
-   
+
+    public class CreateOrderWithAssignmentRequest
+    {
+        public OrderCreateViewModel Order { get; set; }
+        public string AssignmentType { get; set; } // "Manual" or "Automatic"
+        public string ? RiderId  { get; set; } // Required for manual assignment
+    }
+
     public class BusinessOwnerService
     {
         //private readonly MyDbContext businessOwnerRepo;
@@ -1062,7 +1069,7 @@ namespace VROOM.Services
                        await AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
                         // We can't change the time to the high urgent order prepare time as there other oreders in the shipment need more time
                         //shipment.InTransiteBeginTime = DateTime.Now.Add(order.PrepareTime.Value); 
-                    }
+                    } 
                     shipmentRepository.Update(shipment);
                     shipmentRepository.CustomSaveChanges();
                     return true;
@@ -1579,6 +1586,88 @@ namespace VROOM.Services
             }
         }
 
+
+
+        //The function for requert to
+        public async Task<Result<string>> CreateOrderAndAssignAsync(CreateOrderWithAssignmentRequest request)
+{
+    try
+    {
+        var businessOwnerId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(businessOwnerId))
+        {
+            _logger.LogWarning("Failed to create order: Business Owner ID not found in token.");
+            return Result<string>.Failure("Business Owner ID not found in token.");
+        }
+
+        var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+        if (businessOwner == null)
+        {
+            _logger.LogWarning("Failed to create order: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+            return Result<string>.Failure("Business Owner not found.");
+        }
+
+        var roles = await userManager.GetRolesAsync(businessOwner.User);
+        if (!roles.Contains(RoleConstants.BusinessOwner))
+        {
+            _logger.LogWarning("Failed to create order: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+            return Result<string>.Failure("Caller is not a Business Owner.");
+        }
+
+               
+
+                // Handle assignment based on type
+                bool assignmentSuccess = false;
+        if (request.AssignmentType?.ToLower() == "manual" && !string.IsNullOrEmpty(request.RiderId))
+        {
+
+           var order = await orderService.CreateOrder(request.Order, businessOwnerId);
+
+                    if (order == null)
+                    {
+                        _logger.LogWarning("Failed to create order for Business Owner {BusinessOwnerId}.", businessOwnerId);
+                        return Result<string>.Failure("Failed to create order.");
+                    }
+
+                    assignmentSuccess = await AssignShipmentToRiderAsync(order.Id, request.RiderId);
+            if (!assignmentSuccess)
+            {
+                _logger.LogWarning("Manual assignment failed for order {OrderId} to rider {RiderId}.", order.Id, request.RiderId);
+                return Result<string>.Failure("Manual assignment failed.");
+            }
+        }
+        else if (request.AssignmentType?.ToLower() == "automatic")
+        {
+
+                    var result = await PrepareOrder(request.Order);
+            if (!result)
+            {
+                _logger.LogWarning("Automatic assignment failed for order {OrderId}: {Error}", result);
+                        return Result<string>.Failure("error in Automatic");
+            }
+            assignmentSuccess = true;
+        }
+        else
+        {
+            _logger.LogWarning("Invalid or missing assignment type for order {OrderId}.");
+            return Result<string>.Failure("Invalid or missing assignment type. Use 'Manual' or 'Automatic'.");
+        }
+
+                //_logger.LogInformation("Order {OrderId} created and assigned successfully by Business Owner {BusinessOwnerId}.", businessOwnerId);
+                //return Result<string>.Success($"Order { and assigned successfully.");
+
+               return Result<string>.Success($"Automatic assignment done ");
+
+            }
+            catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while creating and assigning order for Business Owner {BusinessOwnerId}.", _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        return Result<string>.Failure($"An error occurred: {ex.Message}");
+    }
+}
+
+
+    
         //private void StartShipmentConfirmationTimer(string riderId, int shipmentId, string businessOwnerId)
         //{
         //    var timer = new Timer(async _ =>
@@ -1645,7 +1734,7 @@ namespace VROOM.Services
         //    }
         //}
 
-      
+
     } 
 
 

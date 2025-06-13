@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+using Hubs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -22,7 +24,7 @@ namespace VROOM.Services
         private readonly ShipmentRepository shipmentRepository;
         private readonly ILogger<IssueService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
+        private readonly IHubContext<OwnerHub> _hubContext;
 
         public IssueService(
             IssuesRepository issuesRepository,
@@ -30,6 +32,7 @@ namespace VROOM.Services
             ILogger<IssueService> logger,
             IHttpContextAccessor httpContextAccessor,
             ShipmentRepository shipmentRepository
+
          )
         {
             this.issuesRepository = issuesRepository;
@@ -42,14 +45,14 @@ namespace VROOM.Services
 
         public async Task<Result<Issues>> ReportIssue(Issues issues)
         {
+            if (issues == null)
+            {
+                _logger.LogWarning("Issues data is null");
+                return Result<Issues>.Failure("Invalid issue data");
+            }
+
             try
             {
-                if (issues == null)
-                {
-                    _logger.LogWarning("Issues data is null");
-                    return Result<Issues>.Failure("Invalid issue data");
-                }
-
                 // Get Rider ID from claims
                 var riderId = _httpContextAccessor.HttpContext?.User?.Claims
                     .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -91,8 +94,37 @@ namespace VROOM.Services
                     ShipmentID = currentShipment?.Id
                 };
 
+                // Save the issue first
                 issuesRepository.Add(reportedIssue);
-                issuesRepository.CustomSaveChanges();
+                 issuesRepository.CustomSaveChanges();
+
+                // Notify owner after successful save
+                var owner = riderRepository.GetBusinessOwnerByRiderId(riderId);
+                if (owner != null)
+                {
+                    try
+                    {
+                        await _hubContext.Clients.User(owner.BusinessID.ToString())
+                            .SendAsync("ReceiveIssueNotification", new
+                            {
+                                RiderID = riderId,
+                                Note = reportedIssue.Note,
+                                Severity = reportedIssue.Severity,
+                                Type = reportedIssue.Type,
+                                Timestamp = reportedIssue.ReportedAt
+                            });
+                        _logger.LogInformation("Notification sent to OwnerID: {OwnerID} for RiderID: {RiderID}", owner.BusinessID, riderId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to send SignalR notification to OwnerID: {OwnerID} for RiderID: {RiderID}", owner.BusinessID, riderId);
+                        // Notification failure shouldn't fail the whole operation
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Owner not found for RiderID: {RiderID}", riderId);
+                }
 
                 return Result<Issues>.Success(reportedIssue);
             }
@@ -101,8 +133,6 @@ namespace VROOM.Services
                 _logger.LogError(ex, "Error reporting issue");
                 return Result<Issues>.Failure("Failed to report issue");
             }
-
-
         }
 
         public async Task<VROOM.ViewModels.LocationDto> GetRiderLocationAtTime(string riderId, DateTime reportedAt)
@@ -141,7 +171,7 @@ namespace VROOM.Services
                 var issues = await issuesRepository
                     .GetList(i => riderIds.Contains(i.RiderID))
                     .Include(i => i.Rider)
-                        .ThenInclude(r => r.User)  // Include rider's user data
+                    .ThenInclude(r => r.User)  
                     .Include(i => i.Shipment)      // Include shipment if exists
                     .OrderByDescending(i => i.ReportedAt)
                     .ToListAsync();
@@ -151,7 +181,7 @@ namespace VROOM.Services
                 {
                     Id = i.Id,
                     RiderID = i.RiderID,
-                    RiderName = i.Rider?.User?.Name ?? "Unknown Rider",
+                    RiderName = i.Rider?.User?.Name ?? "Unknown Rider", 
                     Type = i.Type,
                     Date = i.Date,
                     Note = i.Note ?? string.Empty,

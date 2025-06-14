@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
+using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -110,7 +113,50 @@ namespace API.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
+        [HttpGet("avaliableRiders")]
+        [Authorize(Roles = "Admin,BusinessOwner")]
+        public async Task<IActionResult> GetAllAvaliableRiders()
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized(new { message = "Invalid or missing Authorization header." });
+                }
 
-      
+                var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+
+                // Extract the business ID from the nameidentifier claim
+                var businessId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(businessId))
+                {
+                    return BadRequest(new { message = "Business ID not found in token." });
+                }
+
+                // Get available riders from the repository
+                var riders = await _riderManager.GetAvaliableRiders(businessId);
+
+                // Map riders to RiderDto to control the output
+                var riderDtos = riders.Select(r => new
+                {
+                    Id = r.User.Id,
+                    Name = r.User.Name,
+                    Email = r.User.Email,
+                    ProfilePicture = r.User.ProfilePicture
+                    // Add Status = r.Status if available in the Rider model
+                }).ToList();
+
+                return Ok(riderDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
+            }
+        }
+
+
     }
 }

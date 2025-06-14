@@ -65,35 +65,41 @@ namespace VROOM.Repositories
             return context.BusinessOwners.Where(i => i.User.Name == businessOwnerUserName).FirstOrDefault();
 
         }
-            public PaginationViewModel<AdminBusOwnerDetialsVM> Search(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
+        public PaginationViewModel<AdminBusOwnerDetialsVM> Search(int status = -1, string Name = "", string PhoneNumber = "", int pageNumber = 1, int pageSize = 4, string sort = "name_asc")
         {
-
             var builder = PredicateBuilder.New<BusinessOwner>();
 
-             builder = builder.And(i => i.User.IsDeleted == false);
+            builder = builder.And(i => i.User.IsDeleted == false);
 
-            if (!Name.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(Name))
             {
                 builder = builder.And(i => i.User.Name.ToLower().Contains(Name.ToLower()));
-
             }
 
-            if (!PhoneNumber.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(PhoneNumber))
+            {
                 builder = builder.And(i => i.User.PhoneNumber.Contains(PhoneNumber));
-
-
-            var count = base.GetList(builder).Count();
+            }
 
             var resultAfterPagination = base.Get(
-                 filter: builder,
-                 pageSize: pageSize,
-                 pageNumber: pageNumber)
+                filter: builder,
+                pageSize: pageSize,
+                pageNumber: pageNumber)
                 .Include(r => r.User)
-                     .ToList();
+                .ToList();
+
+            var count = resultAfterPagination.Count();
 
             var query = resultAfterPagination.Select(p => p.ToDetailsVModel()).ToList();
+
             if (sort == "name_desc")
-                query = resultAfterPagination.OrderByDescending(u => u.User.Name).Select(p => p.ToDetailsVModel()).ToList();
+            {
+                query = query.OrderByDescending(u => u.OwnerName).ToList();
+            }
+            else if (sort == "name_asc")
+            {
+                query = query.OrderBy(u => u.OwnerName).ToList();
+            }
 
             return new PaginationViewModel<AdminBusOwnerDetialsVM>
             {
@@ -102,9 +108,8 @@ namespace VROOM.Repositories
                 PageSize = pageSize,
                 Total = count
             };
-
         }
-            public Rider GetBusinessOwnerByRiderId(string id)
+        public Rider GetBusinessOwnerByRiderId(string id)
         {
             return context.Riders.Where(i => i.UserID == id).FirstOrDefault();
 

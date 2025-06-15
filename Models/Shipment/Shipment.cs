@@ -19,7 +19,7 @@ namespace VROOM.Models
 
         public string? RiderID { get; set; }
 
-        public ShipmentStateEnum ShipmentState {  get; set; } = ShipmentStateEnum.Created;
+        public ShipmentStateEnum ShipmentState { get; set; } = ShipmentStateEnum.Created;
         public double BeginningLang { get; set; }
         public double BeginningLat { get; set; }
         public string BeginningArea { get; set; }

@@ -1,4 +1,3 @@
-﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@ using ViewModels.Shipment;
 using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -27,8 +25,8 @@ namespace API.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        // GET: api/Shipment
         [HttpGet]
-        [Authorize(Roles = "Admin,BusinessOwner")]
         public async Task<ActionResult<IEnumerable<ShipmentDto>>> GetAllShipments()
         {
             try
@@ -45,8 +43,6 @@ namespace API.Controllers
 
         // GET: api/Shipment/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,BusinessOwner")]
-
         public async Task<ActionResult<ShipmentDto>> GetShipment(int id)
         {
             try
@@ -63,8 +59,30 @@ namespace API.Controllers
             }
         }
 
+        // GET: api/Shipment/rider/{riderId}
+        [HttpGet("rider/{riderId}")]
+        public async Task<ActionResult<IEnumerable<ShipmentDto>>> GetShipmentsByRiderId(string riderId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    _logger.LogWarning("RiderId is null or empty.");
+                    return BadRequest("RiderId is required.");
+                }
+
+                var shipments = await _shipmentServices.GetShipmentsByRiderIdAsync(riderId);
+                return Ok(shipments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving shipments for rider {riderId}.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving shipments.");
+            }
+        }
+
+        // POST: api/Shipment
         [HttpPost]
-        [Authorize(Roles = "Admin,BusinessOwner")]
         public async Task<ActionResult<ShipmentDto>> CreateShipments([FromBody] List<AddShipmentVM> shipmentVMs)
         {
             try
@@ -78,7 +96,6 @@ namespace API.Controllers
                 var shipments = new List<ShipmentDto>();
                 foreach (var vm in shipmentVMs)
                 {
-                    // Enforce RiderID as null during creation
                     if (!string.IsNullOrEmpty(vm.RiderID))
                     {
                         _logger.LogWarning($"RiderID must be null during shipment creation. Received: {vm.RiderID}");
@@ -141,7 +158,6 @@ namespace API.Controllers
 
         // PUT: api/Shipment/{id}/state
         [HttpPut("{id}/state")]
-        [Authorize(Roles = "Admin,BusinessOwner,Rider")]
         public async Task<ActionResult<Shipment>> UpdateShipmentState(int id, [FromBody] UpdateShipmentStateVM updateShipmentStateVM)
         {
             if (updateShipmentStateVM == null)
@@ -158,7 +174,6 @@ namespace API.Controllers
 
             try
             {
-                // Validate RiderID if provided
                 if (!string.IsNullOrEmpty(updateShipmentStateVM.RiderID))
                 {
                     bool riderExists = await _shipmentServices.RiderExistsAsync(updateShipmentStateVM.RiderID);
@@ -187,7 +202,6 @@ namespace API.Controllers
 
         // DELETE: api/Shipment/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,BusinessOwner")]
         public async Task<IActionResult> DeleteShipment(int id)
         {
             try
@@ -210,12 +224,11 @@ namespace API.Controllers
         }
     }
 
-    // ViewModel for updating shipment state
     public class UpdateShipmentStateVM
     {
         [EnumDataType(typeof(ShipmentStateEnum))]
         public ShipmentStateEnum ShipmentState { get; set; }
-        public string? RiderID { get; set; } // Nullable, as per previous request
+        public string? RiderID { get; set; }
         [Required]
         public string BusinessOwnerID { get; set; }
     }

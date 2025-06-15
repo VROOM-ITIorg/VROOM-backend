@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NuGet.Protocol.Core.Types;
+using System.Collections.Concurrent;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -32,7 +34,6 @@ using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.ViewModels;
-
 namespace VROOM.Services
 {
 
@@ -58,6 +59,7 @@ namespace VROOM.Services
         private readonly OrderRiderRepository orderRiderRepository;
         private readonly OrderRouteRepository orderRouteRepository;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserService _userService;
         private readonly OrderService orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -69,8 +71,11 @@ namespace VROOM.Services
 
         public BusinessOwnerService(
             UserManager<User> _userManager,
+            UserManager<User> _userManager,
             BusinessOwnerRepository _businessOwnerRepo,
             OrderRepository _orderRepository,
+            RiderRepository _riderRepository,
+            RoleManager<IdentityRole> roleManager,
             RiderRepository _riderRepository,
             RoleManager<IdentityRole> roleManager,
             UserService userService,
@@ -1086,11 +1091,12 @@ namespace VROOM.Services
             try
             {
                 var businessOwnerId = _httpContextAccessor.HttpContext?.User?
-               .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (string.IsNullOrEmpty(businessOwnerId))
                 {
                     _logger.LogWarning("Assign failed: BusinessOwner ID not found in context.");
+                    return false;
                     return false;
                 }
 
@@ -1099,9 +1105,8 @@ namespace VROOM.Services
                 {
                     _logger.LogWarning($"Assign failed: No BusinessOwner found with ID {businessOwnerId}");
                     return false;
+                    return false;
                 }
-                // Create order / order => high urgent / expected time = 0
-                var order = await orderService.CreateOrder(_orderCreateVM, businessOwnerId); // should be await
 
 
 
@@ -1210,36 +1215,28 @@ namespace VROOM.Services
 
                 if (shipment != null)
                 {
-                    // Update Route => Add Shipment Id
                     route.ShipmentID = shipment.Id;
                     routeRepository.Update(route);
                     routeRepository.CustomSaveChanges();
 
-
-                    // تعديل نهاية الشحنة لو المسار الجديد بعد المسار القديم
                     var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang).ThenByDescending(r => r.DestinationLat).FirstOrDefault();
 
                     if (lastRoute != null)
                     {
-                        // هنحسب المسافة التقريبية ما بين نقطة النهاية بتاعة آخر Route والنقطة الجديدة
                         double lastLat = lastRoute.DestinationLat;
                         double lastLng = lastRoute.DestinationLang;
 
                         double newLat = route.DestinationLat;
                         double newLng = route.DestinationLang;
 
-                        // Calculate Distance Between Two Points
                         double distance = Math.Sqrt(Math.Pow(newLat - lastLat, 2) + Math.Pow(newLng - lastLng, 2));
 
-                        // نحدد Threshold صغير نقول لو أقل من كده يبقى هو في نفس الاتجاه أو قريب
                         double threshold = 0.01;
 
                         if (distance > threshold)
                         {
                             Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea };
                             shipment.waypoints.Add(waypoint);
-
-                            // المسافة بعيدة – يبقى ممكن نحدث الـ shipment ونخلي EndLocation بتاعه هو ده
                             shipment.EndLat = newLat;
                             shipment.EndLang = newLng;
                             shipment.EndArea = route.DestinationArea;
@@ -1252,6 +1249,7 @@ namespace VROOM.Services
 
                     }
 
+                    if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
                        await AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
@@ -1304,8 +1302,8 @@ namespace VROOM.Services
             {
                 _logger.LogError(ex, $"Exception occurred while assigning Order to Rider.");
                 return false;
+                return false;
             }
-
         }
 
         public async Task<bool> ViewOrder(int orderId, string riderId, bool isAccepted)
@@ -1391,7 +1389,16 @@ namespace VROOM.Services
         }
 
         public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, int orderId, Shipment shipment)
+        public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, int orderId, Shipment shipment)
         {
+            try
+            {
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning($"Business owner with ID {businessOwnerId} not found.");
+                    return Result.Failure("Business owner not found.");
+                }
             try
             {
                 var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
@@ -1442,13 +1449,71 @@ namespace VROOM.Services
                     var filteredRiders = riders
                         .Where(r => !rejectedRiders.Contains(r.UserID) && r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, order))
                         .ToList();
+                var order = await orderRepository.GetAsync(orderId);
+                if (order == null || order.IsDeleted)
+                {
+                    _logger.LogWarning($"Order with ID {orderId} not found or deleted.");
+                    return Result.Failure("Order not found or deleted.");
+                }
+
+                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
+                if (orderRoute == null)
+                {
+                    _logger.LogWarning($"Route for order {orderId} not found.");
+                    return Result.Failure("Route not found.");
+                }
+
+                var route = await routeRepository.GetAsync(orderRoute.RouteID);
+                if (route == null)
+                {
+                    _logger.LogWarning($"Route with ID {orderRoute.RouteID} not found.");
+                    return Result.Failure("Route not found.");
+                }
+
+                int maxCycles = 3;
+                int currentCycle = 0;
+                var attemptedRiders = new HashSet<string>();
+                var rejectedRiders = new HashSet<string>();
+                TimeSpan delayBetweenCycles = TimeSpan.FromSeconds(10);
+
+                while (currentCycle < maxCycles)
+                {
+                    // Refresh order state
+                    order = await orderRepository.GetAsync(orderId);
+                    if (order == null || order.IsDeleted || order.State != OrderStateEnum.Created)
+                    {
+                        _logger.LogInformation($"Order {orderId} is no longer pending or was deleted. Stopping assignment.");
+                        return Result.Failure("Order is no longer pending or was deleted.");
+                    }
+
+                    var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
+                    var filteredRiders = riders
+                        .Where(r => !rejectedRiders.Contains(r.UserID) && r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, order))
+                        .ToList();
 
                     if (!filteredRiders.Any())
                     {
                         _logger.LogWarning($"No suitable riders for order {orderId} in cycle {currentCycle + 1}.");
                         return Result.Failure("No suitable riders found for this order.");
                     }
+                    if (!filteredRiders.Any())
+                    {
+                        _logger.LogWarning($"No suitable riders for order {orderId} in cycle {currentCycle + 1}.");
+                        return Result.Failure("No suitable riders found for this order.");
+                    }
 
+                    var scoredRiders = filteredRiders
+                        .Select(r =>
+                        {
+                            var distance = Haversine(route.OriginLat, route.OriginLang, r.Lat, r.Lang);
+                            var scoreDistance = CalculateDistanceScore(distance, filteredRiders, route.OriginLat, route.OriginLang) * 0.5;
+                            var scoreExperience = GetExperienceScore(r.ExperienceLevel) * 0.2;
+                            var scoreRating = r.Rating * 20 * 0.3;
+                            var totalScore = scoreDistance + scoreExperience + scoreRating;
+                            return new { Rider = r, TotalScore = totalScore, Distance = distance };
+                        })
+                        .OrderByDescending(x => x.TotalScore)
+                        .ToList();
                     var scoredRiders = filteredRiders
                         .Select(r =>
                         {
@@ -1479,7 +1544,42 @@ namespace VROOM.Services
                         order.ModifiedAt = DateTime.Now;
                         orderRepository.Update(order);
                         orderRepository.CustomSaveChanges();
+                    foreach (var scoredRider in scoredRiders)
+                    {
+                        if (attemptedRiders.Contains(scoredRider.Rider.UserID))
+                            continue;
 
+                        var rider = scoredRider.Rider;
+                        attemptedRiders.Add(rider.UserID);
+
+                        _logger.LogInformation($"Attempting to assign order {orderId} to rider {rider.UserID} (Cycle {currentCycle + 1}/{maxCycles}, Score: {scoredRider.TotalScore:F2}).");
+
+                        // Assign order temporarily
+                        order.RiderID = rider.UserID;
+                        order.State = OrderStateEnum.Pending;
+                        order.ModifiedBy = businessOwnerId;
+                        order.ModifiedAt = DateTime.Now;
+                        orderRepository.Update(order);
+                        orderRepository.CustomSaveChanges();
+
+                        var notificationSent = await NotifyRiderWithRetry(rider.UserID, orderId, businessOwnerId, maxRetries: 2, retryDelay: TimeSpan.FromSeconds(5));
+                        if (!notificationSent)
+                        {
+                            _logger.LogWarning($"Failed to notify rider {rider.UserID} for order {orderId} after retries.");
+                            rejectedRiders.Add(rider.UserID);
+                            continue;
+                        }
+
+                        var confirmation = await WaitForRiderResponse(rider.UserID, orderId, timeoutSeconds: 30);
+                        if (confirmation == ConfirmationStatus.Accepted)
+                        {
+                            // Double-check order state
+                            order = await orderRepository.GetAsync(orderId);
+                            if (order.State != OrderStateEnum.Pending)
+                            {
+                                _logger.LogInformation($"Order {orderId} is no longer pending. Stopping assignment.");
+                                return Result.Success("Order assigned successfully.");
+                            }
                         var notificationSent = await NotifyRiderWithRetry(rider.UserID, orderId, businessOwnerId, maxRetries: 2, retryDelay: TimeSpan.FromSeconds(5));
                         if (!notificationSent)
                         {

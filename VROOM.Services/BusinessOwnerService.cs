@@ -547,7 +547,7 @@ namespace VROOM.Services
                 rider.Status = RiderStatusEnum.OnDelivery;
                 riderRepository.Update(rider);
                 // Create or update shipment
-                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
+                var orderRoute =  orderRouteRepository.GetOrderRouteByOrderID(orderId);
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
 
                 var shipment = await shipmentRepository
@@ -917,7 +917,7 @@ namespace VROOM.Services
 
 
 
-                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(order.Id);
+                var orderRoute =  orderRouteRepository.GetOrderRouteByOrderID(order.Id);
 
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
                 // order->zone / search for all shipments with the same zone and be created
@@ -1083,6 +1083,7 @@ namespace VROOM.Services
                     {
                         setWaitingTime = order.PrepareTime;
 
+
                     }
                     else if (order.OrderPriority == OrderPriorityEnum.Urgent)
                     {
@@ -1094,7 +1095,7 @@ namespace VROOM.Services
                         setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
                     }
 
-                    shipmentServices.CreateShipment(new AddShipmentVM
+                    shipment = await shipmentServices.CreateShipment(new AddShipmentVM
                     {
                         startTime = route.Start,
                         InTransiteBeginTime = DateTime.Now.Add(setWaitingTime.Value),
@@ -1106,9 +1107,11 @@ namespace VROOM.Services
                         EndArea = route.DestinationArea,
                         zone = order.zone,
                         // The MaxConsecutiveDeliveries would be based on the total order waight
-                        MaxConsecutiveDeliveries = 10
+                        MaxConsecutiveDeliveries = 10,
+                        OrderIds = [order.Id]
                     });
-                    
+                    await AssignOrderAutomaticallyAsync(businessOwnerId, order.Id, shipment);
+
                     return true;
                 }
             }
@@ -1220,7 +1223,7 @@ namespace VROOM.Services
                     return Result.Failure("Order not found or deleted.");
                 }
 
-                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(orderId);
+                var orderRoute =  orderRouteRepository.GetOrderRouteByOrderID(orderId);
                 if (orderRoute == null)
                 {
                     _logger.LogWarning($"Route for order {orderId} not found.");
@@ -1313,6 +1316,9 @@ namespace VROOM.Services
 
                             // Update shipment state
                             shipment.ShipmentState = ShipmentStateEnum.Assigned;
+                            order.State = OrderStateEnum.Confirmed;
+                            orderRepository.Update(order);
+                            orderRepository.CustomSaveChanges();
                             shipmentRepository.Update(shipment);
                             shipmentRepository.CustomSaveChanges();
 
@@ -1527,7 +1533,7 @@ namespace VROOM.Services
                     return;
                 }
 
-                var orderRoute = await orderRouteRepository.GetOrderRouteByOrderID(shipmentId);
+                var orderRoute =  orderRouteRepository.GetOrderRouteByOrderID(shipmentId);
                 if (orderRoute == null)
                 {
                     _logger.LogWarning($"Notification failed: Route for order {shipmentId} not found.");

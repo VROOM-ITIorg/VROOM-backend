@@ -41,5 +41,6 @@
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string Area { get; set; }
+        public int orderId {  get; set; }
     }
 }

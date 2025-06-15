@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +11,8 @@ using System.Text.Json.Serialization;
 using Hangfire;
 using System.Collections.Concurrent;
 using VROOM.Repository;
-using API.Hubs;
-using API.Myhubs;
+using Hubs;
+using VROOM.Models;
 // using Serilog;
 //using VROOM.Services.Mapping;
 
@@ -88,21 +87,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure SignalR
-builder.Services.AddSignalR();
-
-// Configure CORS to allow Angular frontend
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularApp", policy =>
-    {
-        policy.SetIsOriginAllowed(origin => true)
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials(); // لازم عشان SignalR مع التوثيق
-    });
-});
-
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
@@ -135,15 +119,12 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<VroomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DB"))
            .UseLazyLoadingProxies());
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DB"))
-           .UseLazyLoadingProxies());
 
 // Configure Identity
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<VroomDbContext>()
     .AddDefaultTokenProviders();
 
-// Add Hangfire
 // Add Hangfire
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
@@ -153,14 +134,7 @@ builder.Services.AddHangfire(configuration => configuration
 builder.Services.AddHangfireServer();
 
 // Add repositories and services
-
-// Add repositories and services
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<RiderRepository>();
-builder.Services.AddScoped<RoleRepository>();
-builder.Services.AddScoped<AccountManager>();
-builder.Services.AddScoped<OrderRepository>();
-builder.Services.AddScoped<IssuesRepository>();
 builder.Services.AddScoped<RiderRepository>();
 builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<AccountManager>();
@@ -180,7 +154,6 @@ builder.Services.AddScoped<OrderRouteServices>();
 builder.Services.AddScoped<ShipmentRepository>();
 builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
 //builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
@@ -188,6 +161,8 @@ builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
 builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 builder.Services.AddSignalR(options => {
     options.EnableDetailedErrors = true;
@@ -206,10 +181,8 @@ builder.Services.AddAuthorization(options => {
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
-var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
 {
-    throw new InvalidOperationException("JWT Secret is missing or too short. It must be at least 16 characters long.");
     throw new InvalidOperationException("JWT Secret is missing or too short. It must be at least 16 characters long.");
 }
 
@@ -226,8 +199,6 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "VROOM",
-        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "VROOM",
         ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "VROOM",
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? "VROOM",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
@@ -259,7 +230,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -269,7 +239,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
-        c.RoutePrefix = string.Empty;
         c.RoutePrefix = string.Empty;
     });
 }
@@ -316,7 +285,8 @@ app.UseWebSockets();
 // Map SignalR Hub
 app.MapControllers();
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
-//app.MapHub<ShipmentHub>("/ShipmentHub");
+app.MapHub<RiderHub>("/riderHub");
+app.MapHub<OwnerHub>("/ownerHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");

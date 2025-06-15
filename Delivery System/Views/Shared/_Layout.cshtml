@@ -7,19 +7,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>@ViewData["Title"]</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-	<style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
         :root {
             /* Primary colors */
-            --primary-color: #eb002b; /* Primary */
-            --primary-light: #ff1a43; /* Primary Light */
-            --primary-dark: #cc0026; /* Primary Dark */
+            --primary-color: #eb002b;
+            --primary-light: #ff1a43;
+            --primary-dark: #cc0026;
             /* Neutral colors */
-            --neutral-900: #171717; /* Darkest neutral */
+            --neutral-900: #171717;
             --neutral-800: #262626;
             --neutral-700: #404040;
             --neutral-600: #525252;
@@ -30,27 +30,26 @@
             --neutral-100: #f5f5f5;
             --neutral-50: #fafafa;
             /* Semantic colors */
-            --success-color: #22c55e; /* Success */
-            --warning-color: #fbbf24; /* Warning */
-            --danger-color: #ef4444; /* Error */
-            --info-color: #3b82f6; /* Info */
-
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --dark-color: #111827;
+            --secondary-color: #6b7280;
             --light-bg: var(--neutral-100);
             --dark-bg: var(--neutral-900);
-            --secondary-color: var(--primary-dark);
-            --accent-color: var(--primary-light);
             --sidebar-width: 250px;
             --sidebar-collapsed-width: 70px;
             --header-height: 60px;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: var(--light-bg);
             overflow-x: hidden;
         }
 
-        /* Improved Sidebar */
+        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--dark-bg);
@@ -137,6 +136,7 @@
                 background-color: rgba(235, 0, 43, 0.2);
                 color: white;
                 border-left-color: var(--primary-color);
+                transition: background-color 0.3s ease, border-left-color 0.3s ease;
             }
 
             .menu-item i {
@@ -166,6 +166,7 @@
             transition: all 0.3s ease;
             min-height: 100vh;
             padding-top: calc(var(--header-height) + 20px);
+            overflow: visible;
         }
 
             .main-content.expanded {
@@ -194,7 +195,7 @@
             margin-left: var(--sidebar-collapsed-width);
         }
 
-        /* Sidebar scrollbar customization */
+        /* Sidebar scrollbar */
         .sidebar::-webkit-scrollbar {
             width: 8px;
             background: transparent;
@@ -214,10 +215,6 @@
 
         .sidebar.show-scroll::-webkit-scrollbar-thumb {
             opacity: 1;
-        }
-
-        .main-content.expanded .top-navbar {
-            margin-left: var(--sidebar-collapsed-width);
         }
 
         .search-box {
@@ -273,46 +270,112 @@
             transform: translateX(0);
         }
 
-        /* Cards and other components */
+        /* General Card Styles */
         .card {
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: none;
-            overflow: hidden;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            overflow: visible;
         }
 
             .card:hover {
                 transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             }
 
         .stats-card {
-            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
-            color: white;
+            background: white;
+            border-left: 5px solid transparent;
+            position: relative;
+            overflow: visible;
         }
 
-        .stats-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .stats-card:hover::before {
+                opacity: 1;
+            }
+
+        /* Card Variants */
+        .card-primary {
+            border-left-color: #1e3a8a;
         }
 
-        .page-title {
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+        .card-success {
+            border-left-color: var(--success-color);
         }
 
-        .table-container {
+        .card-info {
+            border-left-color: var(--info-color);
+        }
+
+        .card-warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .card-danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .card-secondary {
+            border-left-color: var(--secondary-color);
+        }
+
+        .card-dark {
+            border-left-color: var(--dark-color);
+        }
+
+        /* Section Titles */
+        .chart-title, .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            background: linear-gradient(90deg, var(--primary-light) 0%, var(--neutral-100) 100%);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+            .chart-title::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                width: 30px;
+                height: 3px;
+                background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+                border-radius: 3px;
+            }
+
+        .table-container, .chart-container {
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             padding: 20px;
+            margin-bottom: 20px;
+            overflow: visible;
+            position: relative;
+        }
+
+        .table-responsive {
+            overflow: visible !important;
         }
 
         .status-badge {
@@ -327,7 +390,6 @@
             transition: all 0.3s;
         }
 
-        /* Bootstrap button overrides */
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
@@ -364,7 +426,6 @@
             background-color: var(--info-color);
         }
 
-        /* Dropdown customization */
         .dropdown-menu {
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -392,7 +453,6 @@
             font-weight: 600;
         }
 
-        /* Mobile responsiveness improvements */
         @@media (max-width: 991.98px) {
             .sidebar
 
@@ -409,231 +469,229 @@
         }
 
         }
-	</style>
+    </style>
 </head>
 <body>
-	<!-- Mobile Overlay -->
-	<div class="mobile-overlay" id="mobileOverlay"></div>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
 
-	<!-- Sidebar -->
-	<div class="sidebar" id="sidebar">
-		<div class="sidebar-header">
-			<i class="bi bi-grid-3x3-gap-fill logo-icon"></i>
-			<h3 class="logo-text">Admin Panel</h3>
-		</div>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-grid-3x3-gap-fill logo-icon"></i>
+            <h3 class="logo-text">Admin Panel</h3>
+        </div>
 
-		<div class="sidebar-content">
-			<div class="menu-category">Main</div>
-			<a asp-controller="Dashboard" asp-action="Index" class="menu-item">
-				<i class="bi bi-speedometer2"></i>
-				<span>Dashboard</span>
-			</a>
+        <div class="sidebar-content">
+            <div class="menu-category">Main</div>
+            <a asp-controller="Dashboard" asp-action="Index" class="menu-item" data-route="/dashboard/index">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
 
-			<div class="menu-category">Management</div>
-			<a asp-controller="Rider" asp-action="Index" class="menu-item">
-				<i class="bi bi-people-fill"></i>
-				<span>Riders</span>
-			</a>
-            <a asp-controller="BusinessOwner" asp-action="GetAllOwners" class="menu-item">
-				<i class="bi bi-building"></i>
-				<span>Businesses</span>
-			</a>
-			<a asp-controller="Order" asp-action="ActiveOrders" class="menu-item">
-				<i class="bi bi-cart-fill"></i>
-				<span>Orders</span>
-			</a>
-			<a asp-controller="Shipment" asp-action="GetAll" class="menu-item">
-				<i class="bi bi-truck"></i>
-				<span>Shipments</span>
-			</a>
+            <div class="menu-category">Management</div>
+            <a asp-controller="Rider" asp-action="Index" class="menu-item" data-route="/rider/index">
+                <i class="bi bi-people-fill"></i>
+                <span>Riders</span>
+            </a>
+            <a asp-controller="BusinessOwner" asp-action="GetAllOwners" class="menu-item" data-route="/businessowner/getallowners">
+                <i class="bi bi-building"></i>
+                <span>Businesses</span>
+            </a>
+            <a asp-controller="Order" asp-action="ActiveOrders" class="menu-item" data-route="/order/activeorders">
+                <i class="bi bi-cart-fill"></i>
+                <span>Orders</span>
+            </a>
+            <a asp-controller="Shipment" asp-action="GetAll" class="menu-item" data-route="/shipment/getall">
+                <i class="bi bi-truck"></i>
+                <span>Shipments</span>
+            </a>
 
-			<div class="menu-category">Analytics</div>
-			<a asp-controller="Report" asp-action="Index" class="menu-item">
-				<i class="bi bi-bar-chart-fill"></i>
-				<span>Reports</span>
-			</a>
-			<a asp-controller="Statistics" asp-action="Index" class="menu-item">
-				<i class="bi bi-graph-up"></i>
-				<span>Statistics</span>
-			</a>
+            <div class="menu-category">Analytics</div>
+            <a asp-controller="Report" asp-action="Index" class="menu-item" data-route="/report/index">
+                <i class="bi bi-bar-chart-fill"></i>
+                <span>Reports</span>
+            </a>
+            <a asp-controller="Statistics" asp-action="Index" class="menu-item" data-route="/statistics/index">
+                <i class="bi bi-graph-up"></i>
+                <span>Statistics</span>
+            </a>
 
-			<div class="menu-category">Settings</div>
-			<a asp-controller="Settings" asp-action="System" class="menu-item">
-				<i class="bi bi-gear-fill"></i>
-				<span>System Settings</span>
-			</a>
-			<a asp-controller="User" asp-action="GetAll" class="menu-item">
-				<i class="bi bi-person-fill"></i>
-				<span>User Management</span>
-			</a>
-			<a asp-controller="Permission" asp-action="GetAll" class="menu-item">
-				<i class="bi bi-shield-lock-fill"></i>
-				<span>Permissions</span>
-			</a>
+            <div class="menu-category">Settings</div>
+            <a asp-controller="Settings" asp-action="System" class="menu-item" data-route="/settings/system">
+                <i class="bi bi-gear-fill"></i>
+                <span>System Settings</span>
+            </a>
+            <a asp-controller="User" asp-action="GetAll" class="menu-item" data-route="/user/getall">
+                <i class="bi bi-person-fill"></i>
+                <span>User Management</span>
+            </a>
+            <a asp-controller="Permission" asp-action="GetAll" class="menu-item" data-route="/permission/getall">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Permissions</span>
+            </a>
 
-			<div class="menu-category">Account</div>
-			<a asp-controller="Profile" asp-action="Index" class="menu-item">
-				<i class="bi bi-person-circle"></i>
-				<span>Profile</span>
-			</a>
-            <a asp-controller="Account" asp-action="SignOutUser" class="menu-item">
-				<i class="bi bi-box-arrow-right"></i>
-				<span>Logout</span>
-			</a>
-		</div>
-	</div>
+            <div class="menu-category">Account</div>
+            <a asp-controller="Profile" asp-action="Index" class="menu-item" data-route="/profile/index">
+                <i class="bi bi-person-circle"></i>
+                <span>Profile</span>
+            </a>
+            <a asp-controller="Account" asp-action="SignOutUser" class="menu-item" data-route="/account/signoutuser">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
 
-	<!-- Top Navbar -->
-	<div class="top-navbar d-flex align-items-center justify-content-between">
-		<div class="d-flex align-items-center">
-			<button class="btn btn-sm text-dark me-3" id="toggleSidebar">
-				<i class="bi bi-list fs-4"></i>
-			</button>
-			<div class="d-none d-md-block">
-				<h5 class="mb-0">Welcome Back, @Admin</h5>
-			</div>
-		</div>
+    <!-- Top Navbar -->
+    <div class="top-navbar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-sm text-dark me-3" id="toggleSidebar">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="d-none d-md-block">
+                <h5 class="mb-0">Welcome Back, @Admin</h5>
+            </div>
+        </div>
 
-		<div class="d-flex align-items-center">
-			<div class="search-box me-3 d-none d-md-block">
-				<input type="text" class="form-control" placeholder="Search...">
-				<i class="bi bi-search search-icon"></i>
-			</div>
+        <div class="d-flex align-items-center">
+            <div class="search-box me-3 d-none d-md-block">
+                <input type="text" class="form-control" placeholder="Search...">
+                <i class="bi bi-search search-icon"></i>
+            </div>
 
-			<div class="dropdown mx-3">
-				<button class="btn btn-link text-dark position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
-					<i class="bi bi-bell-fill fs-5"></i>
-					<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-						3
-					</span>
-				</button>
-				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
-					<li><h6 class="dropdown-header">Notifications</h6></li>
-					<li><a class="dropdown-item" href="#">New rider registered</a></li>
-					<li><a class="dropdown-item" href="#">New order received</a></li>
-					<li><a class="dropdown-item" href="#">System update available</a></li>
-					<li><hr class="dropdown-divider"></li>
-					<li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
-				</ul>
-			</div>
+            <div class="dropdown mx-3">
+                <button class="btn btn-link text-dark position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell-fill fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        3
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                    <li><h6 class="dropdown-header">Notifications</h6></li>
+                    <li><a class="dropdown-item" href="#">New rider registered</a></li>
+                    <li><a class="dropdown-item" href="#">New order received</a></li>
+                    <li><a class="dropdown-item" href="#">System update available</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
+                </ul>
+            </div>
 
-			<div class="dropdown">
-				<button class="btn btn-link text-dark d-flex align-items-center p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
-					<img src="https://via.placeholder.com/36" class="rounded-circle" alt="Admin">
-				</button>
-				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-					<li><h6 class="dropdown-header">John Doe</h6></li>
-					<li><a class="dropdown-item" href="#">Profile</a></li>
-					<li><a class="dropdown-item" href="#">Settings</a></li>
-					<li><hr class="dropdown-divider"></li>
-					<li><a class="dropdown-item" href="#">Logout</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
+            <div class="dropdown">
+                <button class="btn btn-link text-dark d-flex align-items-center p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                    <img src="https://via.placeholder.com/36" class="rounded-circle" alt="Admin">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><h6 class="dropdown-header">John Doe</h6></li>
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-	<!-- Main Content Area -->
-	<div class="main-content" id="content">
-		<!-- This is where RenderBody() will go -->
-		@RenderBody()
-	</div>
+    <!-- Main Content Area -->
+    <div class="main-content" id="content">
+        @RenderBody()
+    </div>
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			const sidebar = document.getElementById('sidebar');
-			const content = document.getElementById('content');
-			const toggleBtn = document.getElementById('toggleSidebar');
-			const mobileOverlay = document.getElementById('mobileOverlay');
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+            const menuItems = document.querySelectorAll('.menu-item');
 
-			// Toggle sidebar
-			toggleBtn.addEventListener('click', function() {
-				const isMobile = window.innerWidth < 992;
+            // Function to set active menu item
+            function setActiveMenuItem() {
+                menuItems.forEach(item => item.classList.remove('active'));
+                let activeRoute = localStorage.getItem('activeMenuItem');
+                if (!activeRoute) {
+                    activeRoute = '/dashboard/index';
+                    localStorage.setItem('activeMenuItem', activeRoute);
+                }
+                const activeItem = Array.from(menuItems).find(item => item.getAttribute('data-route') === activeRoute);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                } else {
+                    const dashboardItem = Array.from(menuItems).find(item => item.getAttribute('data-route') === '/dashboard/index');
+                    if (dashboardItem) dashboardItem.classList.add('active');
+                }
+                const currentPath = window.location.pathname.toLowerCase();
+                const matchingItem = Array.from(menuItems).find(item => item.getAttribute('data-route') === currentPath);
+                if (matchingItem) {
+                    menuItems.forEach(item => item.classList.remove('active'));
+                    matchingItem.classList.add('active');
+                    localStorage.setItem('activeMenuItem', currentPath);
+                }
+            }
 
-				if (isMobile) {
-					sidebar.classList.toggle('mobile-active');
-					mobileOverlay.classList.toggle('active');
-				} else {
-					sidebar.classList.toggle('collapsed');
-					content.classList.toggle('expanded');
-				}
-			});
+            // Toggle sidebar
+            toggleBtn.addEventListener('click', function () {
+                const isMobile = window.innerWidth < 992;
+                if (isMobile) {
+                    sidebar.classList.toggle('mobile-active');
+                    mobileOverlay.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    content.classList.toggle('expanded');
+                }
+            });
 
-			// Close sidebar when clicking on overlay (mobile)
-			mobileOverlay.addEventListener('click', function() {
-				sidebar.classList.remove('mobile-active');
-				mobileOverlay.classList.remove('active');
-			});
+            // Close sidebar on mobile overlay click
+            mobileOverlay.addEventListener('click', function () {
+                sidebar.classList.remove('mobile-active');
+                mobileOverlay.classList.remove('active');
+            });
 
-			// Resize handler
-			window.addEventListener('resize', function() {
-				const isMobile = window.innerWidth < 992;
+            // Handle menu item clicks
+            menuItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    if (this.getAttribute('href') && this.getAttribute('href').indexOf('asp-') === -1) {
+                        // Allow navigation
+                    } else {
+                        e.preventDefault();
+                    }
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    const route = this.getAttribute('data-route');
+                    if (route) {
+                        localStorage.setItem('activeMenuItem', route);
+                    }
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('mobile-active');
+                        mobileOverlay.classList.remove('active');
+                    }
+                    if (this.getAttribute('href') && this.getAttribute('href').indexOf('asp-') === -1) {
+                        window.location.href = this.getAttribute('href');
+                    }
+                });
+            });
 
-				if (isMobile) {
-					sidebar.classList.remove('collapsed');
-					content.classList.remove('expanded');
+            // Resize handler
+            window.addEventListener('resize', function () {
+                const isMobile = window.innerWidth < 992;
+                if (isMobile) {
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                    if (sidebar.classList.contains('mobile-active')) {
+                        mobileOverlay.classList.add('active');
+                    }
+                } else {
+                    sidebar.classList.remove('mobile-active');
+                    mobileOverlay.classList.remove('active');
+                }
+            });
 
-					if (sidebar.classList.contains('mobile-active')) {
-						mobileOverlay.classList.add('active');
-					}
-				} else {
-					sidebar.classList.remove('mobile-active');
-					mobileOverlay.classList.remove('active');
-				}
-			});
+            // Set active menu item on page load
+            setActiveMenuItem();
+        });
+    </script>
 
-			// For demo purposes - make menu items clickable
-			const menuItems = document.querySelectorAll('.menu-item');
-			menuItems.forEach(item => {
-				item.addEventListener('click', function() {
-					menuItems.forEach(i => i.classList.remove('active'));
-					this.classList.add('active');
-
-					// On mobile, close the sidebar after clicking
-					if (window.innerWidth < 992) {
-						sidebar.classList.remove('mobile-active');
-						mobileOverlay.classList.remove('active');
-					}
-				});
-			});
-		});
-
-		document.addEventListener('DOMContentLoaded', function() {
-
-			const menuItems = document.querySelectorAll('.menu-item');
-			menuItems.forEach(item => {
-				item.addEventListener('click', function(e) {
-					if (this.getAttribute('href') && this.getAttribute('href').indexOf('asp-') === -1) {
-					} else {
-						e.preventDefault();
-					}
-
-					menuItems.forEach(i => i.classList.remove('active'));
-
-					this.classList.add('active');
-
-					if (this.getAttribute('href')) {
-						localStorage.setItem('activeMenuItem', this.getAttribute('href'));
-					}
-
-					if (window.innerWidth < 992) {
-						sidebar.classList.remove('mobile-active');
-						mobileOverlay.classList.remove('active');
-					}
-				});
-			});
-
-			const storedActiveItem = localStorage.getItem('activeMenuItem');
-			if (storedActiveItem) {
-				menuItems.forEach(item => {
-					if (item.getAttribute('href') === storedActiveItem) {
-						item.classList.add('active');
-					}
-				});
-			}
-		});
-	</script>
-
-	@await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

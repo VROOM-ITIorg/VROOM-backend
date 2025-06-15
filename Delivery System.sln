@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VROOM.Data", "Data Layer\VR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VROOM.Services", "VROOM.Services\VROOM.Services.csproj", "{5CE14C66-6037-4F6E-BF5A-180CC9F97F1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hubs", "Hubs\Hubs.csproj", "{CBF2FDC9-4720-4DAC-AFC1-A5B1F206B5C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,8 +53,15 @@ Global
 		{5CE14C66-6037-4F6E-BF5A-180CC9F97F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CE14C66-6037-4F6E-BF5A-180CC9F97F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CE14C66-6037-4F6E-BF5A-180CC9F97F1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBF2FDC9-4720-4DAC-AFC1-A5B1F206B5C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBF2FDC9-4720-4DAC-AFC1-A5B1F206B5C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBF2FDC9-4720-4DAC-AFC1-A5B1F206B5C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBF2FDC9-4720-4DAC-AFC1-A5B1F206B5C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89153EC1-3976-4C81-8BEE-91BBC750D762}
 	EndGlobalSection
 EndGlobal

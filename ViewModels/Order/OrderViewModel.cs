@@ -60,6 +60,16 @@ namespace VROOM.ViewModels
         public decimal DeliveryPrice { get; set; }
     }
 
+    public class OrderListDetailsViewModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public DateTime Date { get; set; }
+        public string CustomerName { get; set; }
+        public string Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
+        public string State { get; set; }
+        public string RiderName { get; set; }
+    }
     public class OrderDetailsViewModel
     {
         public int Id { get; set; }
@@ -67,8 +77,8 @@ namespace VROOM.ViewModels
         public string BusinessOwner { get; set; }
         public string CustomerName { get; set; }
         public string RiderName { get; set; }
-        public OrderPriorityEnum Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
-        public OrderStateEnum State { get; set; }
+        public string Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
+        public string State { get; set; }
         public bool IsBreakable { get; set; }
         public string Details { get; set; }
         public string Notes { get; set; }
@@ -87,6 +97,16 @@ namespace VROOM.ViewModels
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
         public int Total { get; set; }
+    }
+
+    public class OrderFilter
+    {
+        public string? State { get; set; }
+        public string? CustomerName { get; set; }
+        public string? RiderName { get; set; }
+        public string? Priority { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
 

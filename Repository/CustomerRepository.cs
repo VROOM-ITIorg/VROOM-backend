@@ -29,5 +29,21 @@ namespace VROOM.Repository
         //{
         //    return await userManager.FindByEmailAsync(email);
         //}
+
+
+        public async Task CustomSaveChangesAsync()
+        {
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log the exception or handle it as needed
+                throw new Exception("An error occurred while saving changes to the database.", ex);
+            }
+        }
+
+
     }
 }

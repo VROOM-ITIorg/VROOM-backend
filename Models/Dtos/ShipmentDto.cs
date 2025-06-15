@@ -5,7 +5,6 @@
         public int Id { get; set; }
         public DateTime StartTime { get; set; }
         public string? RiderID { get; set; }
-        public string? BusinessOwnerId { get; set; }
         public double BeginningLat { get; set; }
         public double BeginningLang { get; set; }
         public string BeginningArea { get; set; }

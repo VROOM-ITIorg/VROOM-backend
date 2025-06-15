@@ -1,7 +1,7 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +11,7 @@ using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Services;
+using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -141,22 +142,20 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]
-        public IActionResult Index(
-            [FromQuery] string name = "",
-            [FromQuery] string phoneNumber = "",
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 4)
+        public IActionResult GetAllRidersWithFilter(
+              [FromQuery] int status = -1,
+              [FromQuery] string name = "",
+              [FromQuery] string phoneNumber = "",
+              [FromQuery] int pageNumber = 1,
+              [FromQuery] int pageSize = 4,
+              [FromQuery] string sort = "name_asc",
+              [FromQuery] string owner = "All")
         {
             try
             {
-                var riders = _riderManager.Search(
-                    Name: name,
-                    PhoneNumber: phoneNumber,
-                    pageNumber: pageNumber,
-                    pageSize: pageSize,
-                    status: -1);
+                var riders = _riderManager.Search(status, name, phoneNumber, pageNumber, pageSize, sort, owner);
 
                 return Ok(riders);
             }
@@ -166,5 +165,50 @@ namespace API.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
+        [HttpGet("avaliableRiders")]
+        [Authorize(Roles = "Admin,BusinessOwner")]
+        public async Task<IActionResult> GetAllAvaliableRiders()
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized(new { message = "Invalid or missing Authorization header." });
+                }
+
+                var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+
+                // Extract the business ID from the nameidentifier claim
+                var businessId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(businessId))
+                {
+                    return BadRequest(new { message = "Business ID not found in token." });
+                }
+
+                // Get available riders from the repository
+                var riders = await _riderManager.GetAvaliableRiders(businessId);
+
+                // Map riders to RiderDto to control the output
+                var riderDtos = riders.Select(r => new
+                {
+                    Id = r.User.Id,
+                    Name = r.User.Name,
+                    Email = r.User.Email,
+                    ProfilePicture = r.User.ProfilePicture
+                    // Add Status = r.Status if available in the Rider model
+                }).ToList();
+
+                return Ok(riderDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
+            }
+        }
+
+
     }
 }

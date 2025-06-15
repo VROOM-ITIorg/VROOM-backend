@@ -44,61 +44,6 @@ namespace VROOM.Services
             logger = _logger ?? throw new ArgumentNullException(nameof(_logger));
         }
 
-        public async Task<Shipment> GetCurrentShipmentForRider(string riderId)
-        {
-            return await shipmentRepository
-                .GetList(s => s.RiderID == riderId &&
-                            (s.ShipmentState == ShipmentStateEnum.Assigned ||
-                             s.ShipmentState == ShipmentStateEnum.InTransit) &&
-                            !s.IsDeleted)
-                .OrderByDescending(s => s.startTime)  // Using startTime for ordering
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<Shipment> GetShipmentWithDetails(int shipmentId)
-        {
-            return await shipmentRepository
-                .GetList(s => s.Id == shipmentId)
-                .Include(s => s.Rider)
-                .Include(s => s.Routes)
-                    .ThenInclude(r => r.Waypoints)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<List<Shipment>> GetActiveShipmentsForRider(string riderId)
-        {
-            return await shipmentRepository
-                .GetList(s => s.RiderID == riderId &&
-                            (s.ShipmentState == ShipmentStateEnum.Assigned ||
-                             s.ShipmentState == ShipmentStateEnum.InTransit) &&
-                            !s.IsDeleted)
-                .OrderByDescending(s => s.startTime)
-                .ToListAsync();
-        }
-
-        public async Task CreateShipment(AddShipmentVM addShipmentVM, Route selectedRoute)
-        {
-            var shipment = new Shipment
-            {
-                startTime = DateTime.Now,
-                RiderID = addShipmentVM.RiderID,
-                BeginningLang = addShipmentVM.BeginningLang,
-                BeginningLat = addShipmentVM.BeginningLat,
-                BeginningArea = addShipmentVM.BeginningArea,
-                EndLang = addShipmentVM.EndLang,
-                EndLat = addShipmentVM.EndLat,
-                EndArea = addShipmentVM.EndArea,
-                MaxConsecutiveDeliveries = addShipmentVM.MaxConsecutiveDeliveries,
-            };
-
-            shipmentRepository.Add(shipment);
-            shipmentRepository.CustomSaveChanges();
-
-            selectedRoute.ShipmentID = shipment.Id;
-            routeRepository.Update(selectedRoute);
-            routeRepository.CustomSaveChanges();
-        }
-
         public async Task<List<ShipmentDto>> GetAllShipmentsAsync()
         {
             var shipments = await shipmentRepository.GetList(s => !s.IsDeleted)

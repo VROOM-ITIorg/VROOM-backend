@@ -31,7 +31,9 @@ namespace VROOM.Services
             RiderRepository riderRepository,
             ILogger<IssueService> logger,
             IHttpContextAccessor httpContextAccessor,
-            ShipmentRepository shipmentRepository
+            ShipmentRepository shipmentRepository,
+            IHubContext<OwnerHub> hubContext
+
 
          )
         {
@@ -40,6 +42,7 @@ namespace VROOM.Services
             this._logger = logger;
             this._httpContextAccessor = httpContextAccessor;
             this.shipmentRepository = shipmentRepository;
+            this._hubContext = hubContext;
 
         }
 
@@ -105,13 +108,13 @@ namespace VROOM.Services
                     try
                     {
                         await _hubContext.Clients.User(owner.BusinessID.ToString())
-                            .SendAsync("ReceiveIssueNotification", new
+                            .SendAsync("ReceiveIssueNotification", new IssuesViewModel
                             {
                                 RiderID = riderId,
                                 Note = reportedIssue.Note,
                                 Severity = reportedIssue.Severity,
                                 Type = reportedIssue.Type,
-                                Timestamp = reportedIssue.ReportedAt
+                                ReportedAt = reportedIssue.ReportedAt
                             });
                         _logger.LogInformation("Notification sent to OwnerID: {OwnerID} for RiderID: {RiderID}", owner.BusinessID, riderId);
                     }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ViewModels.Shipment;
 using VROOM.Models;
@@ -19,12 +20,14 @@ namespace API.Controllers
     public class ShipmentController : ControllerBase
     {
         private readonly ShipmentServices _shipmentServices;
+        private readonly IRiderService _riderService;
         private readonly ILogger<ShipmentController> _logger;
 
-        public ShipmentController(ShipmentServices shipmentServices, ILogger<ShipmentController> logger)
+        public ShipmentController(ShipmentServices shipmentServices, ILogger<ShipmentController> logger, IRiderService riderService)
         {
             _shipmentServices = shipmentServices ?? throw new ArgumentNullException(nameof(shipmentServices));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _riderService = riderService;
         }
 
         [HttpGet]
@@ -45,15 +48,57 @@ namespace API.Controllers
 
         // GET: api/Shipment/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,BusinessOwner")]
-
+        [Authorize]
         public async Task<ActionResult<ShipmentDto>> GetShipment(int id)
         {
             try
             {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userRole))
+                {
+                    _logger.LogWarning("Unauthorized access attempt: No user ID or role found.");
+                    return Unauthorized("User not authenticated.");
+                }
+
                 var shipment = await _shipmentServices.GetShipmentByIdAsync(id);
                 if (shipment == null)
+                {
+                    _logger.LogWarning($"Shipment {id} not found or deleted.");
                     return NotFound("Shipment not found or deleted.");
+                }
+
+                // Check if the shipment has a rider assigned
+                if (string.IsNullOrEmpty(shipment.RiderID))
+                {
+                    _logger.LogWarning($"Shipment {id} has no rider assigned.");
+                    return BadRequest("No rider assigned to this shipment.");
+                }
+
+                // Role-based authorization
+                if (userRole == "Rider")
+                {
+                    // Riders can only access shipments assigned to them
+                    if (shipment.RiderID != userId)
+                    {
+                        _logger.LogWarning($"Rider {userId} attempted to access shipment {id} not assigned to them.");
+                        return Forbid(); // Simply return a 403 without a custom scheme
+                    }
+                }
+                else if (userRole == "BusinessOwner")
+                {
+                    // Business owners can only access shipments if they manage the assigned rider
+                    var riderBusinessOwnerId = await _riderService.GetBusinessOwnerByRiderIdAsync(shipment.RiderID);
+                    if (riderBusinessOwnerId != userId)
+                    {
+                        _logger.LogWarning($"BusinessOwner {userId} not authorized to track rider {shipment.RiderID} for shipment {id}.");
+                        return StatusCode(StatusCodes.Status403Forbidden, "You are not authorized to track this rider."); // Return a 403 with a custom message
+                    }
+                }
+                // Admins have unrestricted access
+
+                _logger.LogInformation($"Shipment {id} retrieved successfully for user {userId} ({userRole}).");
                 return Ok(shipment);
             }
             catch (Exception ex)
@@ -63,7 +108,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("yarab")]
         [Authorize(Roles = "Admin,BusinessOwner")]
         public async Task<ActionResult<ShipmentDto>> CreateShipments([FromBody] List<AddShipmentVM> shipmentVMs)
         {
@@ -106,7 +151,9 @@ namespace API.Controllers
                         {
                             Latitude = w.Lat,
                             Longitude = w.Lang,
-                            Area = w.Area
+                            Area = w.Area,
+                            orderId = w.orderId
+
                         }).ToList(),
                         Routes = shipment.Routes?.Select(r => new TheRouteDto
                         {
@@ -208,6 +255,9 @@ namespace API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Error deleting shipment: {ex.Message}");
             }
         }
+
+
+
     }
 
     // ViewModel for updating shipment state

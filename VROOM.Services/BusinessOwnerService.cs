@@ -765,7 +765,15 @@ namespace VROOM.Services
 
                         if (distance > threshold)
                         {
-                            Waypoint waypoint = new Waypoint { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea };
+                            Waypoint waypoint = new Waypoint
+                            {
+                                ShipmentID = shipment.Id,
+                                Lang = shipment.EndLang,
+                                Lat = shipment.EndLat,
+                                Area = shipment.EndArea,
+                                orderId = orderId // Set OrderId
+
+                            };
                             shipment.waypoints.Add(waypoint);
                             shipment.EndLat = newLat;
                             shipment.EndLang = newLng;
@@ -773,7 +781,14 @@ namespace VROOM.Services
                         }
                         else
                         {
-                            Waypoint waypoint = new Waypoint { ShipmentID = shipment.Id, Lang = route.DestinationLang, Lat = route.DestinationLat, Area = route.DestinationArea };
+                            Waypoint waypoint = new Waypoint
+                            {
+                                ShipmentID = shipment.Id,
+                                Lang = route.DestinationLang,
+                                Lat = route.DestinationLat,
+                                Area = route.DestinationArea,
+                                orderId = orderId // Set OrderId
+                            };
                             shipment?.waypoints?.Add(waypoint);
                         }
 

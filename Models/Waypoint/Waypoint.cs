@@ -14,5 +14,8 @@ namespace VROOM.Models
         public string Area { get; set; }
         public int ShipmentID { get; set; }
         public virtual Shipment Shipment { get; set; }
+
+        public int orderId { get; set; }
+        public virtual Order Order { get; set; }
     }
 }

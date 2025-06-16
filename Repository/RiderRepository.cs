@@ -99,10 +99,12 @@ namespace VROOM.Repositories
         public async Task<List<ShowShipment>> GetRiderShipments(string riderId)
         {
             return await context.Shipments.Where(r => r.RiderID == riderId && r.ShipmentState == ShipmentStateEnum.Assigned).Select(s=> new ShowShipment { 
-                zone=s.zone,
-                BeginningArea = s.BeginningArea,
-                EndArea = s.EndArea,
-                MaxConsecutiveDeliveries = s.MaxConsecutiveDeliveries
+                id = s.Id,
+                beginningArea = s.BeginningArea,
+                endArea = s.EndArea,
+                routes = s.Routes.Select(r=> new routesFront { Id = r.Id,OrderIds = r.OrderRoutes}).ToList(),
+                realEndTime = s.RealEndTime,
+                shipmentState= s.ShipmentState
             }).ToListAsync();
         } 
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VROOM.Models;
+using VROOM.Models.Dtos;
 
 namespace ViewModels.Shipment
 {
@@ -30,10 +31,19 @@ namespace ViewModels.Shipment
 
     public class ShowShipment
     {
-        public ZoneEnum zone { get; set; }
-        public int MaxConsecutiveDeliveries { get; set; }
-        public string BeginningArea { get; set; }
-        public string EndArea { get; set; }
+        public int id { get; set; }
+        public string riderID { get; set; }
+        public ShipmentStateEnum shipmentState { get; set; }
+        public string beginningArea { get; set; }
+        public List<routesFront> routes { get; set; }
+        public string endArea { get; set; }
+        public DateTime? realEndTime { get; set; }
+    }
+
+    public class routesFront
+    {
+        public int Id { get; set; }
+        public ICollection<OrderRoute> OrderIds { get; set; }
     }
 
 }

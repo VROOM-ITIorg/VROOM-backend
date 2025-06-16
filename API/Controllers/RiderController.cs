@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace API.Controllers
         private readonly VroomDbContext _context;
         private readonly RiderRepository _riderManager;
         private readonly BusinessOwnerService _businessOwnerService;
+        private readonly ShipmentServices _shipmentService;
         private readonly RiderService _riderService;
         private readonly ILogger<RiderController> _logger;
 
@@ -30,12 +32,14 @@ namespace API.Controllers
             RiderRepository riderManager,
             BusinessOwnerService businessOwnerService,
             RiderService riderService,
+            ShipmentServices shipmentService,
             IRiderService rideService,
             ILogger<RiderController> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _riderManager = riderManager ?? throw new ArgumentNullException(nameof(riderManager));
             _businessOwnerService = businessOwnerService ?? throw new ArgumentNullException(nameof(businessOwnerService));
+            _shipmentService = shipmentService ?? throw new ArgumentNullException(nameof(shipmentService));
             _riderService = riderService ?? throw new ArgumentNullException(nameof(riderService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -83,6 +87,161 @@ namespace API.Controllers
             }
         }
 
+
+        // Retrieve rider profile data
+        [HttpGet("{riderId}")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> GetRiderProfile(string riderId)
+        {
+            try
+            {
+                // Verify that riderId matches the authenticated user
+                var currentRiderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (currentRiderId != riderId)
+                    return Unauthorized(new { error = "You are not authorized to access this rider's data." });
+
+                // Fetch rider data
+                var rider = await _riderService.GetRiderProfileAsync(riderId);
+
+                // Fetch shipment and order statistics
+                var shipments = await _context.Shipments
+                    .Where(s => s.RiderID == riderId && !s.IsDeleted)
+                    .ToListAsync();
+                var orders = await _context.Orders
+                    .Where(o => o.RiderID == riderId && !o.IsDeleted)
+                    .ToListAsync();
+
+                // Fetch the latest 3 feedbacks
+                var feedbacks = await _context.Feedbacks
+                    .Where(f => f.RiderID == riderId && !f.IsDeleted)
+                    .OrderByDescending(f => f.ModifiedAt)
+                    .Take(3)
+                    .Select(f => new
+                    {
+                        Comment = f.Message,
+                        f.Rating,
+                        f.ModifiedAt
+                    })
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    id = rider.UserID,
+                    name = rider.User?.Name,
+                    email = rider.User?.Email,
+                    phone = rider.User?.PhoneNumber,
+                    status = rider.Status.ToString(),
+                    vehicleType = rider.VehicleType.ToString(),
+                    vehicleStatus = rider.VehicleStatus,
+                    location = new
+                    {
+                        latitude = rider.Lat,
+                        longitude = rider.Lang, // Using Lang
+                        area = rider.Area
+                    },
+                    experienceLevel = rider.ExperienceLevel,
+                    rating = rider.Rating,
+                    feedbacks,
+                    stats = new
+                    {
+                        assignedShipments = shipments.Count(s => s.ShipmentState == ShipmentStateEnum.Assigned),
+                        completedShipments = shipments?.Count(s => s.ShipmentState == ShipmentStateEnum.Delivered) ?? 0,
+                        assignedOrders = orders?.Count(o => o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Confirmed) ?? 0,
+                        completedOrders = orders?.Count(o => o.State == OrderStateEnum.Delivered) ?? 0
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while retrieving rider data.", details = ex.Message });
+            }
+        }
+
+        // Update rider profile data
+        [HttpPut("{riderId}")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> UpdateRiderProfile(string riderId, [FromBody] UpdateRiderDto dto)
+        {
+            try
+            {
+                // Verify that riderId matches the authenticated user
+                var currentRiderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (currentRiderId != riderId)
+                    return Unauthorized(new { error = "You are not authorized to update this rider's data." });
+
+                // Retrieve rider with user data
+                var rider = await _context.Riders
+                    .Include(r => r.User)
+                    .FirstOrDefaultAsync(r => r.UserID == riderId);
+
+                if (rider == null)
+                    return NotFound(new { error = "The rider does not exist." });
+
+                // Validate the data
+                var validationContext = new ValidationContext(dto);
+                var validationResults = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(dto, validationContext, validationResults, true))
+                {
+                    var errors = validationResults.Select(vr => vr.ErrorMessage).ToList();
+                    return BadRequest(new { error = "Invalid data.", errors });
+                }
+
+                // Update fields
+                var modifiedAt = DateTime.UtcNow;
+                bool isModified = false;
+
+                if (!string.IsNullOrEmpty(dto.Name))
+                {
+                    rider.User.Name = dto.Name;
+                    rider.User.ModifiedBy = riderId;
+                    rider.User.ModifiedAt = modifiedAt;
+                    isModified = true;
+                }
+                if (!string.IsNullOrEmpty(dto.Email))
+                {
+                    rider.User.Email = dto.Email;
+                    rider.User.ModifiedBy = riderId;
+                    rider.User.ModifiedAt = modifiedAt;
+                    isModified = true;
+                }
+                if (!string.IsNullOrEmpty(dto.Phone))
+                {
+                    rider.User.PhoneNumber = dto.Phone;
+                    rider.User.ModifiedBy = riderId;
+                    rider.User.ModifiedAt = modifiedAt;
+                    isModified = true;
+                }
+                if (dto.Lat.HasValue)
+                {
+                    rider.Lat = dto.Lat.Value;
+                    isModified = true;
+                }
+                if (dto.Lang.HasValue)
+                {
+                    rider.Lang = dto.Lang.Value; // Using Lang
+                    isModified = true;
+                }
+                if (!string.IsNullOrEmpty(dto.Area))
+                {
+                    rider.Area = dto.Area;
+                    isModified = true;
+                }
+
+                // Save changes if any field was modified
+                if (isModified)
+                {
+                    await _context.SaveChangesAsync();
+                    return Ok(new { message = "Rider data updated successfully." });
+                }
+
+                return Ok(new { message = "No changes were made." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "An error occurred while updating rider data.", details = ex.Message });
+            }
+        }
+       
         [HttpGet("assigned/{orderId}")]
         [Authorize(Roles = "Rider")]
         public async Task<IActionResult> ViewAssignedOrder(int orderId)
@@ -100,14 +259,15 @@ namespace API.Controllers
 
         [HttpPost("start-delivery")]
         [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> StartDelivery([FromQuery] string riderId, [FromBody] List<int> orderIds)
+        public async Task<IActionResult> StartDelivery([FromQuery] int shipmentId)
         {
-            if (string.IsNullOrEmpty(riderId) || orderIds == null || !orderIds.Any())
-                return BadRequest(new { message = "Invalid rider ID or order IDs." });
+            if (shipmentId == null)
+                return BadRequest(new { error = "Invalid rider ID or order IDs." });
 
-            var result = await _riderService.StartDeliveriesAsync(riderId, orderIds);
+            var result = await _shipmentService.StartShipment(shipmentId);
+
             if (result == null)
-                return BadRequest(new { message = "Unable to start delivery. Check rider status or order state." });
+                return BadRequest(new { error = "Unable to start SHIPMENT. Check rider status or order state." });
 
             return Ok(result);
         }

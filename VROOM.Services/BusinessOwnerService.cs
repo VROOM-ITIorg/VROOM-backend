@@ -1519,6 +1519,7 @@ namespace VROOM.Services
 
                             // Update shipment state
                             shipment.ShipmentState = ShipmentStateEnum.Assigned;
+                            shipment.RiderID = rider.UserID;
                             order.State = OrderStateEnum.Confirmed;
                             orderRepository.Update(order);
                             orderRepository.CustomSaveChanges();

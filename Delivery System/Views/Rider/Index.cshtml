@@ -104,7 +104,7 @@
                                 <img src="@rider.ImagePath" class="rider-image" alt="@rider.ImagePath">
                             </div>
                             <div class="rider-status">
-                                <span class="badge @(rider.Status == RiderStatusEnum.Unavailable ? "bg-danger" : rider.Status == RiderStatusEnum.OnDelivery ? "bg-warning" : rider.Status == RiderStatusEnum.Available ? "bg-success" : "")">@rider.Status</span>
+                                <span class="badge @(rider.Status == "Unavailable" ? "bg-danger" : rider.Status == "OnDelivery" ? "bg-warning" : rider.Status == "Available" ? "bg-success" : "")">@rider.Status</span>
                             </div>
                         </div>
                         <div class="card-body pt-4">

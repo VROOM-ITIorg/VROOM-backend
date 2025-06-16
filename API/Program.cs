@@ -246,17 +246,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Custom middleware to log request body for /api/user/register
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
-    {
-        context.Request.EnableBuffering();
-        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-        Console.WriteLine($"Request Body: {body}");
-        context.Request.Body.Position = 0; // Reset the stream position
-    }
-    await next();
-});
+//app.Use(async (context, next) =>
+//{
+//    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
+//    {
+//        context.Request.EnableBuffering();
+//        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+//        Console.WriteLine($"Request Body: {body}");
+//        context.Request.Body.Position = 0; // Reset the stream position
+//    }
+//    await next();
+//});
 
 
 //app.UseAuthentication();

@@ -27,4 +27,13 @@ namespace ViewModels.Shipment
 
         public int MaxConsecutiveDeliveries { get; set; }
     }
+
+    public class ShowShipment
+    {
+        public ZoneEnum zone { get; set; }
+        public int MaxConsecutiveDeliveries { get; set; }
+        public string BeginningArea { get; set; }
+        public string EndArea { get; set; }
+    }
+
 }

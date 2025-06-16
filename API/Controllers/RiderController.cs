@@ -157,6 +157,38 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("riderShipment")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> GetRiderShipments()
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized(new { message = "Invalid or missing Authorization header." });
+                }
+
+                var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+
+                // Extract the business ID from the nameidentifier claim
+                var riderId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    return BadRequest(new { message = "Business ID not found in token." });
+                }
+
+                var ridersShipments = await _riderManager.GetRiderShipments(riderId);
+
+                return Ok(ridersShipments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
+            }
+        }
 
     }
 }

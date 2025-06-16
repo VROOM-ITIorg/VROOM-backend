@@ -113,5 +113,15 @@ namespace VROOM.Repositories
                 .Where(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted)
                 .ToListAsync();
         }
+        public async Task<Rider> GetRiderByIdAsync(string riderId)
+        {
+            return await context.Riders
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.UserID == riderId);
+        }
     }
 }
+
+
+
+

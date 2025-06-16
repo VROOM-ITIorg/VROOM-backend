@@ -1,85 +1,27 @@
-﻿using System.Collections.Concurrent;
-using System.Security.Claims;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
-using VROOM.Models;
+using VROOM.Services;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 
-namespace Hubs
+namespace API.Hubs
 {
-    public class RiderHub : Hub
-    {
-        private readonly ConcurrentDictionary<string, ShipmentConfirmation> _confirmationStore;
-
-        public RiderHub(ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore)
-        {
-            _confirmationStore = confirmationStore;
-        }
-        public override Task OnConnectedAsync()
-        {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!string.IsNullOrEmpty(userId))
-            {
-                Context.Items["UserId"] = userId;
-            }
-            return base.OnConnectedAsync();
-        }
-        public async Task SendShipmentRequest(string riderId, object message)
-        {
-            await Clients.Users(riderId).SendAsync("ReceiveShipmentRequest", message);
-        }
-        public async Task ReceiveRiderResponse(int shipmentId, bool isAccepted)
-        {
-            var riderId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(riderId))
-            {
-                return;
-            }
-
-            if (_confirmationStore.TryGetValue(riderId, out var confirmation) && confirmation.ShipmentId == shipmentId)
-            {
-                if (confirmation.Status == ConfirmationStatus.Pending)
-                {
-                    confirmation.Status = isAccepted ? ConfirmationStatus.Accepted : ConfirmationStatus.Rejected;
-                    _confirmationStore[riderId] = confirmation;
-
-                    await Clients.User(confirmation.BusinessOwnerId).SendAsync("RiderResponseReceived", new
-                    {
-                        ShipmentId = shipmentId,
-                        RiderId = riderId,
-                        IsAccepted = isAccepted
-                    });
-                }
-
-            }
-        }
-
-
-    }
-
-    public class OwnerHub : Hub
-    {
-        public override Task OnConnectedAsync()
-        {
-            return base.OnConnectedAsync();
-        }
-
-    }
-
-
+    [Authorize]
     public class RiderLocationHub : Hub
     {
         private readonly VroomDbContext _context;
+        private readonly IRiderService _riderService;
         private readonly ILogger<RiderLocationHub> _logger;
 
-        public RiderLocationHub(VroomDbContext context, ILogger<RiderLocationHub> logger)
+        public RiderLocationHub(VroomDbContext context, IRiderService riderService, ILogger<RiderLocationHub> logger)
         {
             _context = context;
+            _riderService = riderService;
             _logger = logger;
         }
 
@@ -142,12 +84,8 @@ namespace Hubs
                         break;
 
                     case "businessowner":
-                        // Check if the rider belongs to this business owner
-                        var rider = await _context.Riders
-                            .Include(r => r.BusinessOwner)
-                            .FirstOrDefaultAsync(r => r.UserID == riderId);
-
-                        if (rider?.BusinessOwner?.UserID == userId)
+                        var riderBusinessOwnerId = await _riderService.GetBusinessOwnerByRiderIdAsync(riderId);
+                        if (riderBusinessOwnerId == userId)
                         {
                             canJoinGroup = true;
                             reason = "Business owner managing this rider";

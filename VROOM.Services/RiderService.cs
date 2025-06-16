@@ -1,18 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using ViewModels.Shipment;
 using VROOM.Data;
 using VROOM.Models;
+using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
 
 namespace VROOM.Services
 {
-    public class RiderService
+    public interface IRiderService
     {
+        Task<RiderLocationDto> GetRiderLastLocationAsync(string riderId);
+        Task<string> GetBusinessOwnerByRiderIdAsync(string riderId);
+    }
+
+    public class RiderService : IRiderService
+    {
+        private readonly Dictionary<string, RiderLocationDto> _riderLocations = new();
+        private readonly Dictionary<string, string> _riderToBusinessOwner = new();
+
         private readonly RiderRepository _riderRepository;
         private readonly OrderRouteRepository _orderRouteRepository;
         private readonly OrderRepository _orderRepository;
@@ -20,12 +31,12 @@ namespace VROOM.Services
 
         private readonly RouteRepository _routeRepository;
         private readonly VroomDbContext _context;
-        private readonly DbSet<Order> _orders;
-        private readonly DbSet<OrderRider> _orderRiders;
+        private readonly Microsoft.EntityFrameworkCore.DbSet<Order> _orders;
+        private readonly Microsoft.EntityFrameworkCore.DbSet<OrderRider> _orderRiders;
         private readonly ShipmentServices _shipmentServices;
         private readonly OrderService _orderService;
 
-        public RiderService(RiderRepository riderRepository, VroomDbContext context,OrderRepository orderRepository, ShipmentRepository shipmentRepository, ShipmentServices shipmentServices,OrderRouteRepository orderRouteRepository,RouteRepository routeRepository, OrderService orderService)
+        public RiderService(RiderRepository riderRepository, VroomDbContext context, OrderRepository orderRepository, ShipmentRepository shipmentRepository, ShipmentServices shipmentServices, OrderRouteRepository orderRouteRepository, RouteRepository routeRepository, OrderService orderService)
         {
             _riderRepository = riderRepository ?? throw new ArgumentNullException(nameof(riderRepository));
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -50,10 +61,26 @@ namespace VROOM.Services
             if (rider.Status == default)
                 rider.Status = RiderStatusEnum.Available;
 
-             _riderRepository.Add(rider);
-             _riderRepository.CustomSaveChanges();
-            
+            _riderRepository.Add(rider);
+            _riderRepository.CustomSaveChanges();
+
             return rider;
+        }
+        public async Task<RiderLocationDto> GetRiderLastLocationAsync(string riderId)
+        {
+            var location = await _context.Riders
+                .Where(l => l.UserID == riderId)
+                .OrderByDescending(l => l.Lastupdated)
+                .Select(l => new RiderLocationDto
+                {
+                    RiderId = l.UserID,
+                    Latitude = l.Lat,
+                    Longitude = l.Lang,
+                    LastUpdated = l.Lastupdated
+                })
+                .FirstOrDefaultAsync();
+
+            return location;
         }
 
         public async Task<Rider> GetRiderProfileAsync(string riderId)
@@ -66,25 +93,55 @@ namespace VROOM.Services
             return rider;
         }
 
-        public async Task<List<Order>> GetAssignedOrdersAsync(string riderId)
+
+        // In RiderService.cs
+        public async Task<string> GetRiderNameAsync(string riderId)
         {
+            if (string.IsNullOrEmpty(riderId))
+            {
+                throw new ArgumentException("Rider ID cannot be null or empty");
+            }
+
             var rider = await _riderRepository.GetAsync(riderId);
+
             if (rider == null)
-                throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
+            {
+                throw new KeyNotFoundException($"Rider with ID {riderId} not found");
+            }
 
-            var assignedOrders = await _orderRiders
-                .Where(or => or.RiderID == riderId && !or.IsDeleted)
-                .Join(
-                    _orders.Where(o => !o.IsDeleted && o.State == OrderStateEnum.Pending),
-                    or => or.OrderID,
-                    o => o.Id,
-                    (or, o) => o)
-                .Include(o => o.Customer)
-                .Include(o => o.OrderRoute)
-                .ToListAsync();
-
-            return assignedOrders;
+            return rider.User?.Name ?? throw new InvalidOperationException("User name not found for rider");
         }
+
+        //public async Task<List<Order>> GetAssignedOrdersAsync(string riderId)
+        //{
+        //    var rider = await _riderRepository.GetAsync(riderId);
+        //    if (rider == null)
+        //        throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
+
+        //    var assignedOrders = await _orderRiders
+        //        .Where(or => or.RiderID == riderId && !or.IsDeleted)
+        //        .Join(
+        //            _orders.Where(o => !o.IsDeleted && o.State == OrderStateEnum.Pending),
+        //            or => or.OrderID,
+        //            o => o.Id,
+        //            (or, o) => o)
+        //        .Include(o => o.Customer)
+        //        .Include(o => o.OrderRoute)
+        //        .ToListAsync();
+
+        //    return assignedOrders;
+        //}
+        //public async Task<string> GetBusinessOwnerByRiderIdAsync(string riderId)
+        //{
+        //    // Implement logic to find the business owner associated with the rider
+        //    // This is a placeholder; adjust based on your database schema
+        //    var rider = await _context.Riders
+        //        .Where(r => r.UserID == riderId)
+        //        .Select(r => r.BusinessID)
+        //        .FirstOrDefaultAsync();
+
+        //    return rider ?? string.Empty;
+        //}
 
         public async Task<Order> AcceptOrderAsync(string riderId, int orderId)
         {
@@ -119,6 +176,40 @@ namespace VROOM.Services
 
             await _context.SaveChangesAsync();
             return order;
+        }
+        public async Task<string> GetBusinessOwnerByRiderIdAsync(string riderId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    return null;
+                }
+
+                // Assuming you have a DbContext and a table that maps Riders to BusinessOwners
+                var rider = _riderRepository.GetBusinessOwnerByRiderId(riderId);
+
+                if (rider == null)
+                {
+                    return null;
+                }
+
+                if (string.IsNullOrEmpty(rider.BusinessOwner.UserID))
+                {
+                    return null;
+                }
+
+                return rider.BusinessOwner.UserID;
+            }
+            catch (Exception ex)
+            {
+                throw; // Rethrow the exception to be handled by the caller (e.g., GetShipment)
+            }
+        }
+        public async Task UpdateRiderLocationAsync(RiderLocationDto location)
+        {
+            _riderLocations[location.RiderId] = location;
+            await Task.CompletedTask;
         }
 
         public async Task<Order> RejectOrderAsync(string riderId, int orderId)
@@ -254,7 +345,7 @@ namespace VROOM.Services
                     RiderID = riderId,
                     Rider = rider,
                     startTime = DateTime.UtcNow,
-                    ShipmentState = ShipmentStateEnum.Created,
+                    ShipmentState = ShipmentStateEnum.InTransit,
                     ModifiedBy = rider.UserID,
                     ModifiedAt = DateTime.UtcNow,
                 };

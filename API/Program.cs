@@ -12,8 +12,7 @@ using Hangfire;
 using System.Collections.Concurrent;
 using VROOM.Repository;
 using Hubs;
-using API.Myhubs;
-
+using VROOM.Models;
 // using Serilog;
 //using VROOM.Services.Mapping;
 
@@ -25,7 +24,6 @@ using API.Myhubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSignalR();
 
 //builder.Services.AddCors(options =>
 //{
@@ -61,9 +59,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
     .AddNewtonsoftJson(options =>
-     {
-         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
-     });
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
+    });
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
@@ -145,6 +143,7 @@ builder.Services.AddScoped<IssuesRepository>();
 builder.Services.AddScoped<OrderRiderRepository>();
 builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<CustomerServices>();
+builder.Services.AddScoped<IRiderService, RiderService>();
 builder.Services.AddScoped<RiderService>();
 builder.Services.AddScoped<BusinessOwnerRepository>();
 builder.Services.AddScoped<BusinessOwnerService>();
@@ -157,12 +156,24 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
+//builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
+builder.Services.AddSignalR();
 
+builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
+builder.Services.AddSignalR(options => {
+    options.EnableDetailedErrors = true;
+});
+
+// Add authorization for hubs
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("HubPolicy", policy => {
+        policy.RequireAuthenticatedUser();
+    });
+});
 
 
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
@@ -201,17 +212,23 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            // دعم كل الـ Hubs (riderHub و ownerNotificationHub)
+            // Support token from query string for SignalR hubs
             if (!string.IsNullOrEmpty(accessToken) &&
                 (path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerNotificationHub")))
             {
                 context.Token = accessToken;
             }
+
+            // Support token from authToken cookie for all requests
+            var cookieToken = context.Request.Cookies["authToken"];
+            if (!string.IsNullOrEmpty(cookieToken))
+            {
+                context.Token = cookieToken;
+            }
             return Task.CompletedTask;
         }
     };
 });
-
 
 var app = builder.Build();
 
@@ -253,23 +270,23 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
 });
 //app.UseAuthorization();
-app.UseCors();
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
-app.UseCors("AllowAngularApp"); // لازم تكون قبل UseRouting
+app.UseCors("AllowAngularApp");
+// لازم تكون قبل UseRouting
 app.UseRouting();
 
-app.MapHub<AcceptOrderHub>("/AcceptRejectOrders");
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
-
+app.UseWebSockets();
 // Map SignalR Hub
+app.MapControllers();
+app.MapHub<RiderLocationHub>("/RiderLocationHub");
 app.MapHub<RiderHub>("/riderHub");
-app.MapHub<OwnerHub>("/ownerNotificationHub");
-
+app.MapHub<OwnerHub>("/ownerHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");

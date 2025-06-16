@@ -32,7 +32,22 @@ namespace API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var result = await _userService.LoginAsync(request.Email, request.Password);
-            return result.IsSuccess ? Ok(new { Token = result.Value }) : BadRequest(result.Error);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+
+            // Set the authToken cookie
+            Response.Cookies.Append("authToken", result.Value, new CookieOptions
+            {
+                HttpOnly = true, // Secure against XSS
+                Secure = false,  // False for localhost (http)
+                SameSite = SameSiteMode.Lax, // Works with CORS
+                Path = "/",
+                Expires = DateTime.UtcNow.AddHours(1)
+            });
+
+            return Ok(new { Token = result.Value }); // Optional: Keep for frontend if needed
         }
 
         // POST: api/user/assign-role

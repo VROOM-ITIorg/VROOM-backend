@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using VROOM.Models;
 using VROOM.Services;
 using VROOM.ViewModels;
@@ -25,18 +26,16 @@ namespace API.Controllers
             orderHub = _orderHub;
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         [Authorize(Roles = "BusinessOwner")]
         [Route("create")]
         public async Task<IActionResult> CreateOrder([FromBody] ICollection<OrderCreateViewModel> model)
         {
-
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var authorizationHeader = Request.Headers["Authorization"].ToString();
             var token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            // Decode the JWT token
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
 
@@ -64,8 +63,8 @@ namespace API.Controllers
         [HttpGet("getOrder/{id}")]
         public async Task<IActionResult> GetOrderById(int id)
         {
-
-            var order = await orderService.GetOrderByIdAsync(id) ?? NotFound() ;
+            var order = await orderService.GetOrderByIdAsync(id);
+            if (order == null) return NotFound();
 
             return Ok(order);
         }
@@ -117,5 +116,13 @@ namespace API.Controllers
             return Ok();
         }
     }
-
+    public class OrderStateUpdateRequest
+    {
+        public OrderStateEnum OrderState { get; set; }
+        public string RiderId { get; set; }
+        public string BusinessId { get; set; }
+    }
 }
+
+
+

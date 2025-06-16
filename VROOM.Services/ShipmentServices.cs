@@ -12,6 +12,7 @@ using VROOM.Models.Dtos;
 using VROOM.Data;
 using Microsoft.Extensions.Logging;
 using VROOM.Repository;
+using ViewModels.Route;
 
 namespace VROOM.Services
 {
@@ -71,7 +72,8 @@ namespace VROOM.Services
                 {
                     Latitude = w.Lat,
                     Longitude = w.Lang,
-                    Area = w.Area
+                    Area = w.Area,
+                    orderId = w.orderId
                 }).ToList(),
                 Routes = s.Routes.Select(r => new TheRouteDto
                 {
@@ -129,7 +131,8 @@ namespace VROOM.Services
                 {
                     Latitude = w.Lat,
                     Longitude = w.Lang,
-                    Area = w.Area
+                    Area = w.Area,
+                    orderId = w.orderId
                 }).ToList(),
                 Routes = shipment.Routes?.Select(r => new TheRouteDto
                 {
@@ -201,7 +204,8 @@ namespace VROOM.Services
             {
                 Latitude = o.OrderRoute.Route.DestinationLat,
                 Longitude = o.OrderRoute.Route.DestinationLang,
-                Area = o.OrderRoute.Route.DestinationArea
+                Area = o.OrderRoute.Route.DestinationArea,
+                Oid = o.Id
             }).ToList();
             var waypointsJson = JsonSerializer.Serialize(waypoints);
 
@@ -231,7 +235,8 @@ namespace VROOM.Services
                 {
                     Lat = w.Latitude,
                     Lang = w.Longitude,
-                    Area = w.Area
+                    Area = w.Area,
+                    orderId = w.Oid
                 }).ToList()
             };
 

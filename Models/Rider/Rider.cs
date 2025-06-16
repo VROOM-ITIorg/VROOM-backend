@@ -13,10 +13,10 @@ namespace VROOM.Models
     //    public double Lat { get; set; }
     //    public string Area { get; set; }
 
-    
+
     public class Rider
     {
-        
+
         public string BusinessID { get; set; }
         public string UserID { get; set; }
         public RiderStatusEnum Status { get; set; } = RiderStatusEnum.Unavailable;
@@ -28,6 +28,8 @@ namespace VROOM.Models
 
         public float ExperienceLevel { get; set; }
         public float Rating { get; set; }
+
+        public DateTime Lastupdated { get; set; }
 
         public virtual BusinessOwner BusinessOwner { get; set; }
         public virtual User User { get; set; }

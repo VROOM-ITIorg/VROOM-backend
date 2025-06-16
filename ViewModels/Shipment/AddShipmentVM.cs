@@ -12,11 +12,12 @@ namespace ViewModels.Shipment
         public DateTime startTime { get; set; }
         public DateTime? EndTime { get; set; }
         public DateTime? InTransiteBeginTime { get; set; }
-        public string RiderID { get; set; }
+        public string? RiderID { get; set; }
 
         public double BeginningLang { get; set; }
         public double BeginningLat { get; set; }
         public string BeginningArea { get; set; }
+        public List<int> OrderIds { get; set; }
 
         public double EndLang { get; set; }
         public double EndLat { get; set; }

@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using VROOM.Services;
-using VROOM.Models;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
+using VROOM.Models;
 using VROOM.Repositories;
-using static VROOM.Services.BusinessOwnerService;
+using VROOM.Services;
 using VROOM.ViewModels;
+using static VROOM.Services.BusinessOwnerService;
 
 namespace API.Controllers
 {
@@ -54,8 +55,47 @@ namespace API.Controllers
         [HttpPost("registerRider")]
         public async Task<IActionResult> RegisterRider([FromBody] RiderRegisterRequest rider)
         {
-            var result = await _businessOwnerService.CreateRiderAsync(rider);
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            // Decode the JWT token
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // Access token claims (e.g., user ID, roles, etc.)
+            var BussinsId = jwtToken.Claims.FirstOrDefault()?.Value;
+
+            var result = await _businessOwnerService.CreateRiderAsync(rider, BussinsId);
             return Ok(result);
+        }
+
+        [HttpPut("updateRider/{riderUserId}")]
+        public async Task<IActionResult> UpdateRider(string riderUserId, [FromBody] RiderUpdateRequest rider)
+        {
+            var authorizationHeader = Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+            {
+                return Unauthorized("Invalid or missing authorization token.");
+            }
+
+            var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            var businessId = jwtToken.Claims.FirstOrDefault()?.Value;
+            if (string.IsNullOrEmpty(businessId))
+            {
+                return Unauthorized("Invalid token: Business ID not found.");
+            }
+
+            var result = await _businessOwnerService.UpdateRiderAsync(rider, businessId, riderUserId);
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return Ok(result.Value);
         }
 
         [Authorize(Roles = "BusinessOwner")]
@@ -67,7 +107,7 @@ namespace API.Controllers
                 return BadRequest(new { message = "Invalid order or rider details." });
             }
 
-            var success = await _businessOwnerService.AssignOrderToRiderAsync(request.OrderId, request.RiderId);
+            var success = await _businessOwnerService.AssignShipmentToRiderAsync(request.OrderId, request.RiderId);
             if (!success)
             {
                 return NotFound(new { message = "Unable to assign the order to the rider. Please check the details." });
@@ -78,20 +118,15 @@ namespace API.Controllers
 
         [Authorize(Roles = "BusinessOwner")]
         [HttpPost("assignOrderAutomatically")]
-        public async Task<IActionResult> AssignOrderAutomatically([FromBody] AssignOrderAutomaticallyRequest request)
+        public async Task<IActionResult> AssignOrderAutomatically([FromBody] OrderCreateViewModel model)
         {
-            if (request == null || request.OrderId <= 0 || string.IsNullOrEmpty(request.BusinessOwnerId))
+            var result = await _businessOwnerService.PrepareOrder(model);
+            if (!result)
             {
-                return BadRequest(new { message = "Invalid order or business owner details." });
+                return BadRequest(new { message = $"Error Occured While Assigning the Rider with Id {model.RiderID}" });
             }
 
-            var result = await _businessOwnerService.AssignOrderAutomaticallyAsync(request.BusinessOwnerId, request.OrderId);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(new { message = result.Message });
-            }
-
-            return Ok(new { message = result.Message });
+            return Ok(new { message = "Rider Assigned Successfully! " });
         }
 
         [HttpGet("riders")]
@@ -116,6 +151,44 @@ namespace API.Controllers
             return Ok(result.Value);
         }
 
+        [HttpPost("create-customer")]
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerRegisterRequest request)
+        {
+            var result = await _businessOwnerService.CreateCustomerAsync(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
+        }
+
+        [HttpGet("all-customers")]
+        public async Task<IActionResult> GetAllCustomers()
+        {
+            var result = await _businessOwnerService.GetAllCustomers();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { error = result.Error });
+            }
+            return Ok(result.Value);
+        }
+
+        [HttpPost("create-order-with-assignment")]
+        public async Task<IActionResult> CreateOrderAndAssign([FromBody] CreateOrderWithAssignmentRequest request)
+        {
+            if (request == null || request.Order == null)
+            {
+                return BadRequest(new { error = "Request body is required and must include order details." });
+            }
+
+            var result = await _businessOwnerService.CreateOrderAndAssignAsync(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { error = result.Error });
+            }
+
+            return Ok(new { message = result.Value });
+        }
         public class AssignOrderToRiderRequest
         {
             public int OrderId { get; set; }

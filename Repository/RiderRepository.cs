@@ -3,6 +3,7 @@ using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ViewModels;
+using ViewModels.Shipment;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Repository;
@@ -94,6 +95,16 @@ namespace VROOM.Repositories
         {
             return await context.Riders.Where(r => r.BusinessID == businessOwnerId && r.Status == RiderStatusEnum.Available).ToListAsync();
         }
+
+        public async Task<List<ShowShipment>> GetRiderShipments(string riderId)
+        {
+            return await context.Shipments.Where(r => r.RiderID == riderId && r.ShipmentState == ShipmentStateEnum.Assigned).Select(s=> new ShowShipment { 
+                zone=s.zone,
+                BeginningArea = s.BeginningArea,
+                EndArea = s.EndArea,
+                MaxConsecutiveDeliveries = s.MaxConsecutiveDeliveries
+            }).ToListAsync();
+        } 
 
         public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)
         {

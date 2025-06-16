@@ -317,30 +317,42 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "An error occurred while retrieving riders.", details = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
-    }
 
-    // DTO model for updating rider data
-    public class UpdateRiderDto
-    {
-        [StringLength(100, ErrorMessage = "The name cannot exceed 100 characters.")]
-        public string Name { get; set; }
+        [HttpGet("riderShipment")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> GetRiderShipments()
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized(new { message = "Invalid or missing Authorization header." });
+                }
 
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; }
+                var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
 
-        [Phone(ErrorMessage = "Invalid phone number.")]
-        public string Phone { get; set; }
+                // Extract the business ID from the nameidentifier claim
+                var riderId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    return BadRequest(new { message = "Business ID not found in token." });
+                }
 
-        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
-        public double? Lat { get; set; }
+                var ridersShipments = await _riderManager.GetRiderShipments(riderId);
 
-        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
-        public double? Lang { get; set; } // Using Lang
+                return Ok(ridersShipments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
+            }
+        }
 
-        [StringLength(200, ErrorMessage = "The area cannot exceed 200 characters.")]
-        public string Area { get; set; }
     }
 }

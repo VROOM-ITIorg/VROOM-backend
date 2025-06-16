@@ -151,6 +151,7 @@ namespace API.Controllers
             }
         }
 
+
         [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]
         public IActionResult GetAllRidersWithFilter(

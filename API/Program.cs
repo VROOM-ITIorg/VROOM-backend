@@ -9,47 +9,13 @@ using VROOM.Repositories;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using VROOM.Repository;
-using Hubs;
-using VROOM.Models;
-// using Serilog;
-//using VROOM.Services.Mapping;
-
-
-
-// Log.Information("Logger configured.");
-
-
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyHeader()
-//              .AllowAnyMethod();
-//    });
-//});
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyMethod()
-              .AllowAnyHeader()
-              .SetIsOriginAllowed(url => true)
-              .AllowCredentials();
-    });
-});
-
-// builder.Host.UseSerilog();
-// Log.Logger = new LoggerConfiguration()
-//     .ReadFrom.Configuration(builder.Configuration)
-//     .Enrich.FromLogContext()
-//     .CreateLogger();
 
 
 // Add services to the container
@@ -58,13 +24,13 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
-    .AddNewtonsoftJson(options =>
+.AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 
 builder.Services.AddControllers()
-    .AddNewtonsoftJson();
+                .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();
@@ -160,24 +126,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddSignalR();
-
-builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
-
-builder.Services.AddSignalR(options => {
-    options.EnableDetailedErrors = true;
-});
-
-// Add authorization for hubs
-builder.Services.AddAuthorization(options => {
-    options.AddPolicy("HubPolicy", policy => {
-        policy.RequireAuthenticatedUser();
-    });
-});
-
-
-//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
+builder.Services.AddScoped<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
@@ -212,18 +161,9 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            // Support token from query string for SignalR hubs
-            if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerNotificationHub")))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
             {
                 context.Token = accessToken;
-            }
-
-            // Support token from authToken cookie for all requests
-            var cookieToken = context.Request.Cookies["authToken"];
-            if (!string.IsNullOrEmpty(cookieToken))
-            {
-                context.Token = cookieToken;
             }
             return Task.CompletedTask;
         }
@@ -273,20 +213,15 @@ app.UseSwaggerUI(c =>
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
-app.UseCors("AllowAngularApp");
-// لازم تكون قبل UseRouting
+app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
 app.UseRouting();
-
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
-app.UseWebSockets();
+
 // Map SignalR Hub
-app.MapControllers();
-app.MapHub<RiderLocationHub>("/RiderLocationHub");
-app.MapHub<RiderHub>("/riderHub");
-app.MapHub<OwnerHub>("/ownerHub");
+app.MapHub<ClientHub>("/riderHub");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");

@@ -34,11 +34,11 @@ namespace VROOM.Data
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
-        //    optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data source = .; Initial catalog = VROOM; Integrated security= true; trustservercertificate = true;MultipleActiveResultSets=True");
+        //    optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data source = .; Initial catalog = VROOMfn; Integrated security= true; trustservercertificate = true;MultipleActiveResultSets=True");
 
         //    base.OnConfiguring(optionsBuilder);
         //}
-    
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

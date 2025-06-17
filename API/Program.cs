@@ -9,47 +9,14 @@ using VROOM.Repositories;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using VROOM.Repository;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
 using Hubs;
-using VROOM.Models;
-// using Serilog;
-//using VROOM.Services.Mapping;
-
-
-
-// Log.Information("Logger configured.");
-
-
 
 var builder = WebApplication.CreateBuilder(args);
-
-
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyHeader()
-//              .AllowAnyMethod();
-//    });
-//});
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyMethod()
-              .AllowAnyHeader()
-              .SetIsOriginAllowed(url => true)
-              .AllowCredentials();
-    });
-});
-
-// builder.Host.UseSerilog();
-// Log.Logger = new LoggerConfiguration()
-//     .ReadFrom.Configuration(builder.Configuration)
-//     .Enrich.FromLogContext()
-//     .CreateLogger();
 
 
 // Add services to the container
@@ -58,13 +25,13 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
-    .AddNewtonsoftJson(options =>
+.AddNewtonsoftJson(options =>
     {
-        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // For Newtonsoft.Json
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 
 builder.Services.AddControllers()
-    .AddNewtonsoftJson();
+                .AddNewtonsoftJson();
 builder.Services.AddLogging(logging =>
 {
     logging.AddConsole();
@@ -160,24 +127,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddSignalR();
-
-builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();
-
-builder.Services.AddSignalR(options => {
-    options.EnableDetailedErrors = true;
-});
-
-// Add authorization for hubs
-builder.Services.AddAuthorization(options => {
-    options.AddPolicy("HubPolicy", policy => {
-        policy.RequireAuthenticatedUser();
-    });
-});
-
-
-//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
+builder.Services.AddScoped<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
@@ -212,18 +162,9 @@ builder.Services.AddAuthentication(options =>
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
 
-            // Support token from query string for SignalR hubs
-            if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerNotificationHub")))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
             {
                 context.Token = accessToken;
-            }
-
-            // Support token from authToken cookie for all requests
-            var cookieToken = context.Request.Cookies["authToken"];
-            if (!string.IsNullOrEmpty(cookieToken))
-            {
-                context.Token = cookieToken;
             }
             return Task.CompletedTask;
         }
@@ -246,17 +187,17 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Custom middleware to log request body for /api/user/register
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
-    {
-        context.Request.EnableBuffering();
-        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-        Console.WriteLine($"Request Body: {body}");
-        context.Request.Body.Position = 0; // Reset the stream position
-    }
-    await next();
-});
+//app.Use(async (context, next) =>
+//{
+//    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
+//    {
+//        context.Request.EnableBuffering();
+//        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+//        Console.WriteLine($"Request Body: {body}");
+//        context.Request.Body.Position = 0; // Reset the stream position
+//    }
+//    await next();
+//});
 
 
 //app.UseAuthentication();
@@ -273,17 +214,13 @@ app.UseSwaggerUI(c =>
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
-app.UseCors("AllowAngularApp");
-// لازم تكون قبل UseRouting
+app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
 app.UseRouting();
-
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
-app.UseWebSockets();
+
 // Map SignalR Hub
-app.MapControllers();
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
 app.MapHub<RiderHub>("/riderHub");
 app.MapHub<OwnerHub>("/ownerHub");
@@ -292,15 +229,15 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=index}");
 
 // Seed roles
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+//    foreach (var role in roles)
+//    {
+//        if (!await roleManager.RoleExistsAsync(role))
+//            await roleManager.CreateAsync(new IdentityRole(role));
+//    }
+//}
 
 app.Run();

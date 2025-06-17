@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
-using VROOM.Models;
+
 
 namespace Hubs
 {

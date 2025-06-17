@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using VROOM.Repository;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
+using Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -220,22 +221,23 @@ app.UseAuthorization();
 app.UseHangfireDashboard();
 
 // Map SignalR Hub
-app.MapHub<ClientHub>("/riderHub");
-
+app.MapHub<RiderLocationHub>("/RiderLocationHub");
+app.MapHub<RiderHub>("/riderHub");
+app.MapHub<OwnerHub>("/ownerHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
 
 // Seed roles
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+//    foreach (var role in roles)
+//    {
+//        if (!await roleManager.RoleExistsAsync(role))
+//            await roleManager.CreateAsync(new IdentityRole(role));
+//    }
+//}
 
 app.Run();

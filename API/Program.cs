@@ -123,11 +123,10 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-//builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
+builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddScoped<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";

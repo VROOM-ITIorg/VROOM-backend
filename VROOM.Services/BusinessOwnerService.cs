@@ -777,6 +777,8 @@ namespace VROOM.Services
                             shipment.EndLat = newLat;
                             shipment.EndLang = newLng;
                             shipment.EndArea = route.DestinationArea;
+                            shipment.RiderID = riderId;
+
                         }
                         else
                         {
@@ -789,6 +791,7 @@ namespace VROOM.Services
                                 orderId = orderId // Set OrderId
                             };
                             shipment?.waypoints?.Add(waypoint);
+                            shipment.RiderID = riderId;
                         }
 
                         shipmentRepository.Update(shipment);

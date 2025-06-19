@@ -58,6 +58,7 @@ namespace VROOM.ViewModels
         public CustomerPriorityEnum CustomerPriority { get; set; }
         public decimal OrderPrice { get; set; }
         public decimal DeliveryPrice { get; set; }
+        public ZoneEnum zone { get; set; }
     }
 
     public class OrderListDetailsViewModel

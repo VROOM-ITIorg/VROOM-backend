@@ -19,10 +19,10 @@ namespace VROOM.Repositories
         //}
 
         //// Read Order by ID
-        //public Order GetOrderById(int orderId)
-        //{
-        //    return _context.Orders.Find(orderId);
-        //}
+        public Order GetOrderById(int orderId)
+        {
+            return context.Orders.Find(orderId);
+        }
 
         //// Update Order
         //public void UpdateOrder(Order updatedOrder)

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
-using VROOM.Models;
+
 
 namespace Hubs
 {
@@ -113,6 +113,7 @@ namespace Hubs
                 {
                     throw new HubException("Rider ID cannot be empty.");
                 }
+
 
                 var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var userRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value;

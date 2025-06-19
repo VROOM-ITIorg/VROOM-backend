@@ -233,11 +233,11 @@ namespace VROOM.Services
                     logger.LogWarning($"Order {order.Id} does not have a valid route.");
                     throw new ArgumentException($"Order {order.Id} does not have a valid route.");
                 }
-                if (order.State != OrderStateEnum.Created && order.State != OrderStateEnum.Pending)
-                {
-                    logger.LogWarning($"Order {order.Id} is not in a valid state for shipment (Current: {order.State}).");
-                    throw new ArgumentException($"Order {order.Id} is not in a valid state for shipment (must be Created or Pending).");
-                }
+                //if (order.State == OrderStateEnum.Created || order.State == OrderStateEnum.Pending)
+                //{
+                //    logger.LogWarning($"Order {order.Id} is not in a valid state for shipment (Current: {order.State}).");
+                //    throw new ArgumentException($"Order {order.Id} is not in a valid state for shipment (must be Created or Pending).");
+                //}
             }
 
             var firstOrderRoute = orders.First().OrderRoute.Route;
@@ -425,6 +425,49 @@ namespace VROOM.Services
             return 3;
         }
 
+        public async Task<Shipment> StartShipment(int shipmentId)
+        {
+
+            var shipment = await shipmentRepository.GetAsync(shipmentId);
+            if (shipment == null || shipment.IsDeleted)
+            {
+                logger.LogWarning($"Shipment with ID {shipmentId} not found or deleted.");
+                return null;
+            }
+
+
+            var rider = shipment.Rider;
+            ICollection<Waypoint> waypoints = shipment.waypoints;
+
+            foreach (var waypoint in waypoints)
+            {
+                var order = orderRepository.GetOrderById(waypoint.orderId);
+                order.State = OrderStateEnum.Shipped;
+                orderRepository.Update(order);
+                orderRepository.CustomSaveChanges();
+            }
+
+            rider.Status = RiderStatusEnum.OnDelivery;
+            riderRepository.Update(rider);
+            riderRepository.CustomSaveChanges();
+
+
+            shipment.ShipmentState = ShipmentStateEnum.InTransit;
+
+            shipment.ModifiedAt = DateTime.Now;
+
+
+
+            shipmentRepository.Update(shipment);
+            shipmentRepository.CustomSaveChanges();
+
+            string message = shipment.ShipmentState == ShipmentStateEnum.Assigned
+                ? $"Shipment {shipmentId} has been accepted."
+                : $"Shipment {shipmentId} has been rejected.";
+            //await notificationService.SendShipmentStatusUpdateAsync(shipment.RiderID, message, shipmentId, shipmentState.ToString());
+
+            return shipment;
+        }
         private DateTime CalculateInTransiteBeginTime(List<Order> orders)
         {
             var highestPriority = orders

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +23,7 @@ namespace API.Controllers
         private readonly VroomDbContext _context;
         private readonly RiderRepository _riderManager;
         private readonly BusinessOwnerService _businessOwnerService;
+        private readonly ShipmentServices _shipmentService;
         private readonly RiderService _riderService;
         private readonly ILogger<RiderController> _logger;
 
@@ -31,12 +32,14 @@ namespace API.Controllers
             RiderRepository riderManager,
             BusinessOwnerService businessOwnerService,
             RiderService riderService,
+            ShipmentServices shipmentService,
             IRiderService rideService,
             ILogger<RiderController> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _riderManager = riderManager ?? throw new ArgumentNullException(nameof(riderManager));
             _businessOwnerService = businessOwnerService ?? throw new ArgumentNullException(nameof(businessOwnerService));
+            _shipmentService = shipmentService ?? throw new ArgumentNullException(nameof(shipmentService));
             _riderService = riderService ?? throw new ArgumentNullException(nameof(riderService));
         }
 
@@ -193,7 +196,7 @@ namespace API.Controllers
                 return StatusCode(500, new { error = "An error occurred while updating rider data.", details = ex.Message });
             }
         }
-
+       
         [HttpGet("assigned/{orderId}")]
         [Authorize(Roles = "Rider")]
         public async Task<IActionResult> ViewAssignedOrder(int orderId)
@@ -211,14 +214,15 @@ namespace API.Controllers
 
         [HttpPost("start-delivery")]
         [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> StartDelivery([FromQuery] string riderId, [FromBody] List<int> orderIds)
+        public async Task<IActionResult> StartDelivery([FromQuery] int shipmentId)
         {
-            if (string.IsNullOrEmpty(riderId) || orderIds == null || !orderIds.Any())
+            if (shipmentId == null)
                 return BadRequest(new { error = "Invalid rider ID or order IDs." });
 
-            var result = await _riderService.StartDeliveriesAsync(riderId, orderIds);
+            var result = await _shipmentService.StartShipment(shipmentId);
+
             if (result == null)
-                return BadRequest(new { error = "Unable to start delivery. Check rider status or order state." });
+                return BadRequest(new { error = "Unable to start SHIPMENT. Check rider status or order state." });
 
             return Ok(result);
         }
@@ -227,27 +231,41 @@ namespace API.Controllers
         [Authorize(Roles = "Rider")]
         public Task<Order> UpdateDeliveryStatusAsync(string riderId, int orderId, OrderStateEnum newState)
         {
-            if (string.IsNullOrEmpty(riderId) || orderId <= 0)
-                return BadRequest(new { error = "Invalid rider ID or order ID." });
-
             try
             {
-                var updatedOrder = await _riderService.UpdateDeliveryStatusAsync(riderId, orderId, newState);
-                return Ok(new
+                //_logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
+                //    orderId, riderId, newState);
+
+                var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+                if (order == null)
                 {
-                    message = $"Order delivery status successfully updated to {newState}.",
-                    order = updatedOrder
-                });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { error = ex.Message });
+                    _logger.LogWarning("Order not found for OrderId={OrderId}", orderId);
+                    throw new InvalidOperationException($"Order with ID {orderId} not found.");
+                }
+
+                if (order.RiderID != riderId)
+                {
+                    _logger.LogWarning("Rider mismatch for OrderId={OrderId}, ExpectedRiderId={ExpectedRiderId}, ProvidedRiderId={ProvidedRiderId}",
+                        orderId, order.RiderID, riderId);
+                    throw new InvalidOperationException("Rider is not assigned to this order.");
+                }
+
+                order.State = newState;
+                order.ModifiedAt = DateTime.UtcNow;
+
+                //_logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
+                _context.SaveChanges();
+
+                //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
+                return Task.FromResult(order);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "An error occurred while updating delivery status.", details = ex.Message });
+                //_logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
+                throw;
             }
         }
+
 
         [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]
@@ -262,12 +280,7 @@ namespace API.Controllers
         {
             try
             {
-                var riders = _riderManager.Search(
-                    Name: name,
-                    PhoneNumber: phoneNumber,
-                    pageNumber: pageNumber,
-                    pageSize: pageSize,
-                    status: -1);
+                var riders = _riderManager.Search(status, name, phoneNumber, pageNumber, pageSize, sort, owner);
 
                 return Ok(riders);
             }
@@ -277,6 +290,7 @@ namespace API.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
+
         [HttpGet("avaliableRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]
         public async Task<IActionResult> GetAllAvaliableRiders()
@@ -317,30 +331,42 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "An error occurred while retrieving riders.", details = ex.Message });
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
             }
         }
-    }
 
-    // DTO model for updating rider data
-    public class UpdateRiderDto
-    {
-        [StringLength(100, ErrorMessage = "The name cannot exceed 100 characters.")]
-        public string Name { get; set; }
+        [HttpGet("riderShipment")]
+        [Authorize(Roles = "Rider")]
+        public async Task<IActionResult> GetRiderShipments()
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized(new { message = "Invalid or missing Authorization header." });
+                }
 
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; }
+                var token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
 
-        [Phone(ErrorMessage = "Invalid phone number.")]
-        public string Phone { get; set; }
+                // Extract the business ID from the nameidentifier claim
+                var riderId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(riderId))
+                {
+                    return BadRequest(new { message = "Business ID not found in token." });
+                }
 
-        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
-        public double? Lat { get; set; }
+                var ridersShipments = await _riderManager.GetRiderShipments(riderId);
 
-        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
-        public double? Lang { get; set; } // Using Lang
+                return Ok(ridersShipments);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving riders.", error = ex.Message });
+            }
+        }
 
-        [StringLength(200, ErrorMessage = "The area cannot exceed 200 characters.")]
-        public string Area { get; set; }
     }
 }

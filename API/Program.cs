@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using VROOM.Repository;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
+using Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +26,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
 .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+});
 
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -122,11 +123,10 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-//builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
+builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddScoped<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
@@ -153,18 +153,30 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 
-    // Handle JWT token for SignalR
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Query["access_token"];
+            var accessToken = context.Request.Query["access_token"]; // Use access_token
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/RiderLocationHub") || path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerHub")))
             {
                 context.Token = accessToken;
             }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogError("Authentication failed: {Exception}", context.Exception);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogInformation("Token validated for user: {User}", context.Principal?.Identity?.Name);
             return Task.CompletedTask;
         }
     };
@@ -184,6 +196,32 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Custom middleware to log request body for /api/user/register
+//app.Use(async (context, next) =>
+//{
+//    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
+//    {
+//        context.Request.EnableBuffering();
+//        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+//        Console.WriteLine($"Request Body: {body}");
+//        context.Request.Body.Position = 0; // Reset the stream position
+//    }
+//    await next();
+//});
+
+
+//app.UseAuthentication();
+//app.UseAuthorization();
+
+// Enable Swagger middleware
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
+    c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
+});
+//app.UseAuthorization();
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
@@ -194,22 +232,23 @@ app.UseAuthorization();
 app.UseHangfireDashboard();
 
 // Map SignalR Hub
-app.MapHub<ClientHub>("/riderHub");
-
+app.MapHub<RiderLocationHub>("/RiderLocationHub");
+app.MapHub<RiderHub>("/riderHub");
+app.MapHub<OwnerHub>("/ownerHub");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
 
 // Seed roles
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+//    foreach (var role in roles)
+//    {
+//        if (!await roleManager.RoleExistsAsync(role))
+//            await roleManager.CreateAsync(new IdentityRole(role));
+//    }
+//}
 
 app.Run();

@@ -114,6 +114,7 @@ namespace Hubs
                     throw new HubException("Rider ID cannot be empty.");
                 }
 
+
                 var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var userRole = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
 

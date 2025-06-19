@@ -233,8 +233,8 @@ namespace API.Controllers
         {
             try
             {
-                _logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
-                    orderId, riderId, newState);
+                //_logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
+                //    orderId, riderId, newState);
 
                 var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
                 if (order == null)
@@ -253,15 +253,15 @@ namespace API.Controllers
                 order.State = newState;
                 order.ModifiedAt = DateTime.UtcNow;
 
-                _logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
+                //_logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
                 _context.SaveChanges();
 
-                _logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
+                //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
                 return Task.FromResult(order);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
+                //_logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
                 throw;
             }
         }

@@ -26,9 +26,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
 .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+});
 
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -153,18 +153,30 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 
-    // Handle JWT token for SignalR
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Query["access_token"];
+            var accessToken = context.Request.Query["access_token"]; // Use access_token
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/RiderLocationHub") || path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerHub")))
             {
                 context.Token = accessToken;
             }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogError("Authentication failed: {Exception}", context.Exception);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogInformation("Token validated for user: {User}", context.Principal?.Identity?.Name);
             return Task.CompletedTask;
         }
     };

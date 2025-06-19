@@ -233,7 +233,7 @@ namespace VROOM.Services
                     logger.LogWarning($"Order {order.Id} does not have a valid route.");
                     throw new ArgumentException($"Order {order.Id} does not have a valid route.");
                 }
-                if (order.State != OrderStateEnum.Created && order.State != OrderStateEnum.Pending)
+                if (order.State == OrderStateEnum.Created || order.State == OrderStateEnum.Pending)
                 {
                     logger.LogWarning($"Order {order.Id} is not in a valid state for shipment (Current: {order.State}).");
                     throw new ArgumentException($"Order {order.Id} is not in a valid state for shipment (must be Created or Pending).");

@@ -732,8 +732,10 @@ namespace VROOM.Services
 
                 rider.Status = RiderStatusEnum.OnDelivery;
                 riderRepository.Update(rider);
+                riderRepository.CustomSaveChanges();
                 // Create or update shipment
                 var orderRoute = orderRouteRepository.GetOrderRouteByOrderID(orderId);
+
                 var route = await routeRepository.GetAsync(orderRoute.RouteID);
 
                 var shipment = await shipmentRepository
@@ -806,10 +808,10 @@ namespace VROOM.Services
                 else
                 {
                     // Create new shipment
-                    shipmentServices.CreateShipment(new AddShipmentVM
+                   shipment = await shipmentServices.CreateShipment(new AddShipmentVM
                     {
                         startTime = route.Start,
-                        RiderID = riderId,
+                        RiderID = null,
                         BeginningLang = route.OriginLang,
                         BeginningLat = route.OriginLat,
                         BeginningArea = route.OriginArea,
@@ -817,10 +819,15 @@ namespace VROOM.Services
                         EndLat = route.DestinationLat,
                         EndArea = route.DestinationArea,
                         zone = order.zone,
-                        MaxConsecutiveDeliveries = 10
-
+                        MaxConsecutiveDeliveries = 10,
+                        OrderIds = [orderId]
 
                     });
+
+                    shipment.RiderID = riderId;
+                    shipmentRepository.Update(shipment);
+                    shipmentRepository.CustomSaveChanges();
+
                 }
 
                 _logger.LogInformation($"Order {orderId} successfully assigned to Rider {riderId} by BusinessOwner {businessOwnerId}.");

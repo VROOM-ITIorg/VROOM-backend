@@ -261,7 +261,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
+                //_logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
                 throw;
             }
         }

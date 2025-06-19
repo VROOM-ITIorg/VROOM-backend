@@ -148,25 +148,25 @@ namespace VROOM.Services
         }
 
 
-        private async Task SendWhatsAppMessage(string phoneNumber, string userMessage)
-        {
-            string formatedPhoneNumber = NormalizePhoneNumber(phoneNumber);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer ed2a766dcd8fdc7ba0dcb7958b263f03727be139e06a2ad294973eaf04d0a69f6bf58f4b4c810c93");
-            var payload = new
-            {
-                phone = formatedPhoneNumber,
-                message = userMessage
-            };
+        //private async Task SendWhatsAppMessage(string phoneNumber, string userMessage)
+        //{
+        //    string formatedPhoneNumber = NormalizePhoneNumber(phoneNumber);
+        //    var client = new HttpClient();
+        //    client.DefaultRequestHeaders.Add("Authorization", "Bearer ed2a766dcd8fdc7ba0dcb7958b263f03727be139e06a2ad294973eaf04d0a69f6bf58f4b4c810c93");
+        //    var payload = new
+        //    {
+        //        phone = formatedPhoneNumber,
+        //        message = userMessage
+        //    };
 
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.wassenger.com/v1/messages", content);
-            response.EnsureSuccessStatusCode();
+        //    var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        //    var response = await client.PostAsync("https://api.wassenger.com/v1/messages", content);
+        //    response.EnsureSuccessStatusCode();
 
 
-            _logger.LogInformation(response.Content.ToString());
+        //    _logger.LogInformation(response.Content.ToString());
 
-        }
+        //}
 
         private string NormalizePhoneNumber(string phoneNumber)
         {
@@ -217,7 +217,7 @@ namespace VROOM.Services
                     UserName = request.Email,
                     Email = request.Email,
                     Name = request.Name,
-                    PhoneNumber = request.phoneNumber,
+                    //PhoneNumber = request.phoneNumber,
                     ProfilePicture = request.ProfilePicture
                 };
 
@@ -263,14 +263,14 @@ namespace VROOM.Services
                 _logger.LogInformation("Adding rider to the repository for user: {Email}", request.Email);
                 riderRepository.Add(rider);
                 riderRepository.CustomSaveChanges();
-                await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
+                //await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
 
                 var result = new RiderVM
                 {
                     UserID = user.Id,
                     Name = user.Name,
                     Email = user.Email,
-                    phoneNumber = user.PhoneNumber,
+                    //phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
                     VehicleStatus = rider.VehicleStatus,
@@ -291,7 +291,6 @@ namespace VROOM.Services
                 return Result<RiderVM>.Success(result);
             }
         }
-
         public async Task<Result<RiderVM>> UpdateRiderAsync(RiderUpdateRequest request, string BusinessID, string riderUserId)
         {
             _logger.LogInformation("Updating rider with email: {Email}", request.Email);

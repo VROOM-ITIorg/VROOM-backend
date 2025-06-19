@@ -26,9 +26,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
 .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+});
 
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -123,11 +123,10 @@ builder.Services.AddScoped<ShipmentServices>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-//builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
+builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmation>());
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-builder.Services.AddScoped<ConcurrentDictionary<string, ShipmentConfirmation>>();
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
@@ -154,18 +153,30 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 
-    // Handle JWT token for SignalR
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Query["access_token"];
+            var accessToken = context.Request.Query["access_token"]; // Use access_token
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/RiderLocationHub") || path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerHub")))
             {
                 context.Token = accessToken;
             }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogError("Authentication failed: {Exception}", context.Exception);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogInformation("Token validated for user: {User}", context.Principal?.Identity?.Name);
             return Task.CompletedTask;
         }
     };

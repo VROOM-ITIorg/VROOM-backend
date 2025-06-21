@@ -148,25 +148,25 @@ namespace VROOM.Services
         }
 
 
-        private async Task SendWhatsAppMessage(string phoneNumber, string userMessage)
-        {
-            string formatedPhoneNumber = NormalizePhoneNumber(phoneNumber);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer ed2a766dcd8fdc7ba0dcb7958b263f03727be139e06a2ad294973eaf04d0a69f6bf58f4b4c810c93");
-            var payload = new
-            {
-                phone = formatedPhoneNumber,
-                message = userMessage
-            };
+        //private async Task SendWhatsAppMessage(string phoneNumber, string userMessage)
+        //{
+        //    string formatedPhoneNumber = NormalizePhoneNumber(phoneNumber);
+        //    var client = new HttpClient();
+        //    client.DefaultRequestHeaders.Add("Authorization", "Bearer ed2a766dcd8fdc7ba0dcb7958b263f03727be139e06a2ad294973eaf04d0a69f6bf58f4b4c810c93");
+        //    var payload = new
+        //    {
+        //        phone = formatedPhoneNumber,
+        //        message = userMessage
+        //    };
 
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.wassenger.com/v1/messages", content);
-            response.EnsureSuccessStatusCode();
+        //    var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        //    var response = await client.PostAsync("https://api.wassenger.com/v1/messages", content);
+        //    response.EnsureSuccessStatusCode();
 
 
-            _logger.LogInformation(response.Content.ToString());
+        //    _logger.LogInformation(response.Content.ToString());
 
-        }
+        //}
 
         private string NormalizePhoneNumber(string phoneNumber)
         {
@@ -217,7 +217,7 @@ namespace VROOM.Services
                     UserName = request.Email,
                     Email = request.Email,
                     Name = request.Name,
-                    PhoneNumber = request.phoneNumber,
+                    //PhoneNumber = request.phoneNumber,
                     ProfilePicture = request.ProfilePicture
                 };
 
@@ -263,14 +263,14 @@ namespace VROOM.Services
                 _logger.LogInformation("Adding rider to the repository for user: {Email}", request.Email);
                 riderRepository.Add(rider);
                 riderRepository.CustomSaveChanges();
-                await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
+                //await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
 
                 var result = new RiderVM
                 {
                     UserID = user.Id,
                     Name = user.Name,
                     Email = user.Email,
-                    phoneNumber = user.PhoneNumber,
+                    //phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
                     VehicleStatus = rider.VehicleStatus,
@@ -291,7 +291,6 @@ namespace VROOM.Services
                 return Result<RiderVM>.Success(result);
             }
         }
-
         public async Task<Result<RiderVM>> UpdateRiderAsync(RiderUpdateRequest request, string BusinessID, string riderUserId)
         {
             _logger.LogInformation("Updating rider with email: {Email}", request.Email);
@@ -826,6 +825,7 @@ namespace VROOM.Services
                     });
 
                     shipment.RiderID = riderId;
+                    shipment.ShipmentState = ShipmentStateEnum.Assigned;
                     shipmentRepository.Update(shipment);
                     shipmentRepository.CustomSaveChanges();
 
@@ -1253,7 +1253,7 @@ namespace VROOM.Services
 
                         if (distance > threshold)
                         {
-                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea };
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = shipment.EndLang, Lat = shipment.EndLat, Area = shipment.EndArea, orderId = order.Id };
                             shipment.waypoints.Add(waypoint);
                             shipment.EndLat = newLat;
                             shipment.EndLang = newLng;
@@ -1261,7 +1261,7 @@ namespace VROOM.Services
                         }
                         else
                         {
-                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = route.DestinationLang, Lat = route.DestinationLat, Area = route.DestinationArea };
+                            Waypoint waypoint = new Waypoint() { ShipmentID = shipment.Id, Lang = route.DestinationLang, Lat = route.DestinationLat, Area = route.DestinationArea, orderId = order.Id };
                             shipment.waypoints.Add(waypoint);
                         }
 
@@ -1501,7 +1501,7 @@ namespace VROOM.Services
 
                     var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
-                        .Where(r => !rejectedRiders.Contains(r.UserID) && r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, order))
+                        .Where(r => !rejectedRiders.Contains(r.UserID) && r.VehicleStatus == "Active" && IsVehicleSuitable(r.VehicleType, order))
                         .ToList();
 
                     if (!filteredRiders.Any())
@@ -1896,7 +1896,7 @@ namespace VROOM.Services
                     var result = await PrepareOrder(request.Order);
                     if (!result)
                     {
-                        _logger.LogWarning("Automatic assignment failed for order {OrderId}: {Error}", result);
+                        //_logger.LogWarning("Automatic assignment failed for order {OrderId}: {Error}", result);
                         return Result<string>.Failure("error in Automatic");
                     }
                     assignmentSuccess = true;

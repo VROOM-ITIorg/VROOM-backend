@@ -18,6 +18,7 @@ namespace VROOM.Models
 
         public virtual User User { get; set; }
         public virtual ICollection<Rider> Riders { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<RiderAssignment> RiderAssignments { get; set; }
     }
 }

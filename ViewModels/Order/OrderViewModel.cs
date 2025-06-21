@@ -46,7 +46,7 @@ namespace VROOM.ViewModels
         public string? RiderID { get; set; }
         public string? CustomerUsername { get; set; } // search for dropdown list
         public string? CustomerPhoneNumber { get; set; }
-        public TimeSpan? PrepareTime { get; set; }
+        public TimeSpan PrepareTime { get; set; }
         public RouteLocation RouteLocation { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }

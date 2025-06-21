@@ -16,7 +16,8 @@ namespace VROOM.Models
         //public string BusinessID { get; set; }
         public string CustomerID { get; set; }
         public string? RiderID { get; set; }
-        public TimeSpan? PrepareTime { get; set; }
+        public string BusinessID { get; set; }
+        public TimeSpan PrepareTime { get; set; }
         public string ItemsType { get; set; }
         public string Title { get; set; }
         public OrderStateEnum State { get; set; } = OrderStateEnum.Created;
@@ -37,6 +38,7 @@ namespace VROOM.Models
 
         public virtual Customer Customer { get; set; }
         public virtual Rider Rider { get; set; }
+        public virtual BusinessOwner Owner { get; set; }
         public virtual Payment Payment { get; set; }
         public virtual OrderRoute OrderRoute { get; set; }
         public virtual OrderRider OrderRider { get; set; }

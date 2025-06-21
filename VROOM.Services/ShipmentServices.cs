@@ -307,7 +307,7 @@ namespace VROOM.Services
 
             foreach (var order in orders)
             {
-                order.State = OrderStateEnum.Shipped;
+                order.State = OrderStateEnum.Created;
                 order.OrderRoute.Route.ShipmentID = shipment.Id;
                 orderRepository.Update(order);
                 routeRepository.Update(order.OrderRoute.Route);
@@ -473,7 +473,7 @@ namespace VROOM.Services
             var highestPriority = orders
                 .Select(o => o.OrderPriority)
                 .Min();
-            var prepareTime = orders.Max(o => o.PrepareTime ?? TimeSpan.Zero);
+            var prepareTime = orders.Max(o => o.PrepareTime );
 
             switch (highestPriority)
             {

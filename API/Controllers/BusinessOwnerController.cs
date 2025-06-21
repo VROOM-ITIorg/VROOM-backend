@@ -1,7 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
@@ -206,6 +207,32 @@ namespace API.Controllers
         {
             public string BusinessOwnerId { get; set; }
             public int OrderId { get; set; }
+        }
+
+
+        [HttpGet("stats")]
+        public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats()
+        {
+            try
+            {
+                // Extract the authenticated user's ID from JWT claims
+                var ownerUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(ownerUserId))
+                {
+                    return Unauthorized(new { Message = "User not authenticated." });
+                }
+
+                var stats = await _businessOwnerService.GetDashboardStatsAsync(ownerUserId);
+                return Ok(stats);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred while fetching dashboard stats.", Error = ex.Message });
+            }
         }
     }
 }

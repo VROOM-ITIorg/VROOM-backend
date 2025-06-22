@@ -149,7 +149,7 @@ namespace VROOM.Repositories
                         o => o.RiderID,
                         (r, orders) => new RiderPerformance
                         {
-                            RiderId = r.UserID,
+                            RiderName = r.User.Name,
                             AverageRating = r.Rating,
                             OrdersHandled = orders.Count()
                         })

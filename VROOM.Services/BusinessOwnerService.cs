@@ -1794,7 +1794,7 @@ namespace VROOM.Services
                 };
 
                 _confirmationStore[riderId] = message;
-
+                ShipmentDto shipment = await shipmentServices.GetShipmentByIdAsync(shipmentId);
                 // Prepare Notification
                 var shipmentData = new
                 {
@@ -1811,11 +1811,12 @@ namespace VROOM.Services
                     },
                     To = new
                     {
-                        Area = route.DestinationArea,
+                        Area = ((ZoneEnum)int.Parse(route.DestinationArea)).ToString(),
                         Lat = route.DestinationLat,
                         Lng = route.DestinationLang
                     },
-                    PickupTime = firstOrder.PrepareTime.ToString() ?? DateTime.UtcNow.ToString("o"),
+                    PickupTime = shipment.InTransiteBeginTime.ToString() ?? DateTime.UtcNow.ToString("o"),
+                    NumOfOrders = shipment.Waypoints.Count(),
                     OrderPriority = firstOrder.OrderPriority.ToString() ?? "Normal",
                     RiderId = riderId
                 };

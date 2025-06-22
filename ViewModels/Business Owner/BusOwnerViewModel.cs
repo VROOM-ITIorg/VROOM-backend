@@ -149,7 +149,7 @@ namespace VROOM.ViewModels
 
     public class RiderPerformance
     {
-        public string RiderId { get; set; }
+        public string RiderName { get; set; }
         public float AverageRating { get; set; }
         public int OrdersHandled { get; set; }
     }

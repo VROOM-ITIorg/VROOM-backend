@@ -111,7 +111,7 @@ namespace API.Controllers
             var success = await _businessOwnerService.AssignShipmentToRiderAsync(request.OrderId, request.RiderId);
             if (!success)
             {
-                return NotFound(new { message = "Unable to assign the order to the rider. Please check the details." });
+                return Ok(new { message = "Unable to assign the order to the rider. Please check the details." });
             }
 
             return Ok(new { message = "Order successfully assigned to the rider." });
@@ -185,7 +185,7 @@ namespace API.Controllers
             var result = await _businessOwnerService.CreateOrderAndAssignAsync(request);
             if (!result.IsSuccess)
             {
-                return BadRequest(new { error = result.Error });
+                return Ok(new { error = result.Error });
             }
 
             return Ok(new { message = result.Value });

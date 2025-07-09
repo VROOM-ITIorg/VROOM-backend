@@ -176,7 +176,7 @@ namespace VROOM.Services
                 InTransiteBeginTime = shipment.InTransiteBeginTime,
                 RealEndTime = shipment.RealEndTime,
                 ShipmentState = shipment.ShipmentState,
-                Waypoints = shipment.waypoints?.Select(w => new WaypointDto
+                Waypoints = shipment.waypoints?.Where(w => w.Order.RiderID != null && w.Order.State == OrderStateEnum.Shipped).Select(w => new WaypointDto
                 {
                     Latitude = w.Lat,
                     Longitude = w.Lang,
@@ -283,6 +283,7 @@ namespace VROOM.Services
 
             var newRoute = new Route
             {
+
                 OriginLat = shipment.BeginningLat,
                 OriginLang = shipment.BeginningLang,
                 OriginArea = shipment.BeginningArea,
@@ -307,7 +308,7 @@ namespace VROOM.Services
 
             foreach (var order in orders)
             {
-                order.State = OrderStateEnum.Created;
+                order.State = OrderStateEnum.Pending;
                 order.OrderRoute.Route.ShipmentID = shipment.Id;
                 orderRepository.Update(order);
                 routeRepository.Update(order.OrderRoute.Route);
@@ -442,9 +443,13 @@ namespace VROOM.Services
             foreach (var waypoint in waypoints)
             {
                 var order = orderRepository.GetOrderById(waypoint.orderId);
+                if(order.RiderID == rider.UserID)
+                {
                 order.State = OrderStateEnum.Shipped;
                 orderRepository.Update(order);
                 orderRepository.CustomSaveChanges();
+
+                }
             }
 
             rider.Status = RiderStatusEnum.OnDelivery;

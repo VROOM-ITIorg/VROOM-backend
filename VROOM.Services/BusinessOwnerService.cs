@@ -1,16 +1,3 @@
-using Hangfire;
-using Hangfire.Server;
-using Hubs;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using NuGet.Protocol.Core.Types;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -21,6 +8,20 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Hangfire;
+using Hangfire.Server;
+using Hubs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NuGet.Protocol.Core.Types;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -66,6 +67,7 @@ namespace VROOM.Services
         private readonly ConcurrentDictionary<string, ShipmentConfirmation> _confirmationStore;
         private readonly CustomerRepository customerRepository;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly JobRecordService jobRecordService;
         public BusinessOwnerService(
             UserManager<User> _userManager,
             BusinessOwnerRepository _businessOwnerRepo,
@@ -86,7 +88,8 @@ namespace VROOM.Services
             IHubContext<OwnerHub> _ownerContext,
             ConcurrentDictionary<string, ShipmentConfirmation> confirmationStore,
             CustomerRepository _customerRepository,
-            IServiceScopeFactory serviceScopeFactory
+            IServiceScopeFactory serviceScopeFactory,
+            JobRecordService _jobRecordService
             )
         {
             userManager = _userManager;
@@ -109,6 +112,7 @@ namespace VROOM.Services
             ownerContext = _ownerContext;
             customerRepository = _customerRepository;
             _serviceScopeFactory = serviceScopeFactory;
+            jobRecordService = _jobRecordService;
         }
 
 
@@ -677,7 +681,7 @@ namespace VROOM.Services
                     _logger.LogWarning($"Assign failed: Route {orderRoute.RouteID} not found.");
                     return false;
                 }
-
+                
                 var shipment = await shipmentRepository
                     .GetList(sh => !sh.IsDeleted && sh.waypoints.Any(w => w.orderId == orderId))
                     .Include(s => s.Routes)
@@ -710,16 +714,14 @@ namespace VROOM.Services
 
                 }
 
-                var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-                var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-                foreach (var ord in orders)
-                {
-                    if (ord.State != OrderStateEnum.Created && ord.State != OrderStateEnum.Pending)
+                //var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
+         
+                    if (order.State != OrderStateEnum.Created && order.State != OrderStateEnum.Pending)
                     {
-                        _logger.LogWarning($"Assign failed: Order ID {ord.Id} is in invalid state: {ord.State}");
+                        _logger.LogWarning($"Assign failed: Order ID {order.Id} is in invalid state: {order.State}");
                         return false;
                     }
-                }
+                
 
                 var rider = await riderRepository.GetAsync(riderId);
                 if (rider == null || rider.BusinessID != businessOwner.UserID || rider.Status != RiderStatusEnum.Available)
@@ -729,28 +731,26 @@ namespace VROOM.Services
                 }
 
                 // Temporarily assign all orders in the shipment to the rider
-                foreach (var ord in orders)
-                {
-                    ord.RiderID = riderId;
-                    ord.State = OrderStateEnum.Pending;
-                    ord.ModifiedBy = businessOwnerId;
-                    ord.ModifiedAt = DateTime.Now;
-                    orderRepository.Update(ord);
-                }
+
+                    order.RiderID = riderId;
+                    order.State = OrderStateEnum.Pending;
+                    order.ModifiedBy = businessOwnerId;
+                    order.ModifiedAt = DateTime.Now;
+                    orderRepository.Update(order);
+                
                 orderRepository.CustomSaveChanges();
 
                 // Notify rider and wait for response
-                var notificationSent = await NotifyRiderWithRetry(riderId, shipment.Id, orderIds, businessOwnerId, maxRetries: 2, retryDelay: TimeSpan.FromSeconds(5));
+                var notificationSent = await NotifyRiderWithRetry(riderId, shipment.Id, [orderId], businessOwnerId, maxRetries: 2, retryDelay: TimeSpan.FromSeconds(5));
                 if (!notificationSent)
                 {
                     _logger.LogWarning($"Failed to notify rider {riderId} for shipment {shipment.Id} after retries.");
                     // Reset order states
-                    foreach (var ord in orders)
-                    {
-                        ord.RiderID = null;
-                        ord.State = OrderStateEnum.Created;
-                        orderRepository.Update(ord);
-                    }
+                  
+                        order.RiderID = null;
+                        order.State = OrderStateEnum.Created;
+                        orderRepository.Update(order);
+                    
                     orderRepository.CustomSaveChanges();
                     return false;
                 }
@@ -768,12 +768,11 @@ namespace VROOM.Services
                     await ownerContext.Clients.User(businessOwnerId).SendAsync("ReceiveNotification", message);
 
                     // Reset order states
-                    foreach (var ord in orders)
-                    {
-                        ord.RiderID = null;
-                        ord.State = OrderStateEnum.Created;
-                        orderRepository.Update(ord);
-                    }
+                  
+                        order.RiderID = null;
+                        order.State = OrderStateEnum.Created;
+                        orderRepository.Update(order);
+                    
                     orderRepository.CustomSaveChanges();
                     return false;
                 }
@@ -784,11 +783,10 @@ namespace VROOM.Services
                 await ownerContext.Clients.User(businessOwnerId).SendAsync("ReceiveNotification", successMessage);
 
                 // Update all orders to Confirmed
-                foreach (var ord in orders)
-                {
-                    ord.State = OrderStateEnum.Confirmed;
-                    orderRepository.Update(ord);
-                }
+               
+                    order.State = OrderStateEnum.Confirmed;
+                    orderRepository.Update(order);
+                
 
                 // Update shipment state
                 shipment.ShipmentState = ShipmentStateEnum.Assigned;
@@ -1106,7 +1104,7 @@ namespace VROOM.Services
                 if (order.PrepareTime == null)
                 {
                     _logger.LogWarning($"PrepareTime is null for order {order.Id}. Using default preparation time.");
-                    setWaitingTime = TimeSpan.FromMinutes(10); 
+                    setWaitingTime = TimeSpan.FromMinutes(10);
                 }
                 else if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                 {
@@ -1114,14 +1112,14 @@ namespace VROOM.Services
                 }
                 else if (order.OrderPriority == OrderPriorityEnum.Urgent)
                 {
-                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(5);
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(3);
                 }
                 else
                 {
                     setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
                 }
 
-                var prepareTime = order.PrepareTime; 
+                var prepareTime = order.PrepareTime;
                 var minInTransiteTime = DateTime.Now.Add(prepareTime);
                 var highPriorityMinTime = DateTime.Now.Add(prepareTime + TimeSpan.FromMinutes(5));
 
@@ -1143,7 +1141,9 @@ namespace VROOM.Services
                     // إضافة الأمر إلى الـ Shipment الموجود
                     route.ShipmentID = shipment.Id;
                     routeRepository.Update(route);
-
+                    order.State = OrderStateEnum.Pending;
+                    orderRepository.Update(order);
+                    orderRepository.CustomSaveChanges();
                     var lastRoute = shipment.Routes?.OrderByDescending(r => r.DestinationLang)
                         .ThenByDescending(r => r.DestinationLat).FirstOrDefault();
 
@@ -1217,11 +1217,17 @@ namespace VROOM.Services
                     else
                     {
                         var jobId = $"AssignShipment_{shipment.Id}";
-                        if (!BackgroundJobExists(jobId))
+                        var jobExists = await jobRecordService.CheckIfJobExistsAsync(shipment.Id);
+                        if (!jobExists)
                         {
-                            var scheduledJobId = BackgroundJob.Schedule(() => AssignOrderAutomaticallyJobAsync(businessOwnerId, shipment.Id, jobId), setWaitingTime);
-                            _logger.LogInformation($"Scheduled job {jobId} for shipment {shipment.Id} with delay {setWaitingTime.TotalSeconds} seconds.");
+                            var hangfireJobId = BackgroundJob.Schedule(
+                                () => AssignOrderAutomaticallyJobAsync(businessOwnerId, shipment.Id, jobId),
+                                setWaitingTime);
+
+                            await jobRecordService.AddJobRecordAsync(jobId, shipment.Id, hangfireJobId);
+
                         }
+
                         transaction.Complete();
                         return true;
                     }
@@ -1246,11 +1252,14 @@ namespace VROOM.Services
 
                     route.ShipmentID = shipment.Id;
                     routeRepository.Update(route);
+                    order.State = OrderStateEnum.Pending;
+                    orderRepository.Update(order);
+                    orderRepository.CustomSaveChanges();
                     shipmentRepository.Update(shipment);
                     shipmentRepository.CustomSaveChanges();
                     routeRepository.CustomSaveChanges();
 
-                    // التعامل حسب الأولوية
+
                     if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
                     {
                         var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipment);
@@ -1265,10 +1274,14 @@ namespace VROOM.Services
                     else
                     {
                         var jobId = $"AssignShipment_{shipment.Id}";
-                        if (!BackgroundJobExists(jobId))
+                        var jobExists = await jobRecordService.CheckIfJobExistsAsync(shipment.Id);
+                        if (!jobExists)
                         {
-                            var scheduledJobId = BackgroundJob.Schedule(() => AssignOrderAutomaticallyJobAsync(businessOwnerId, shipment.Id, jobId), setWaitingTime);
-                            _logger.LogInformation($"Scheduled job {jobId} for shipment {shipment.Id} with delay {setWaitingTime.TotalSeconds} seconds.");
+                            var hangfireJobId = BackgroundJob.Schedule(
+                                () => AssignOrderAutomaticallyJobAsync(businessOwnerId, shipment.Id, jobId),
+                                setWaitingTime);
+
+                            await jobRecordService.AddJobRecordAsync(jobId, shipment.Id, hangfireJobId);
                         }
                         transaction.Complete();
                         return true;
@@ -1378,6 +1391,7 @@ namespace VROOM.Services
             if (shipment == null)
             {
                 logger.LogWarning($"Shipment {shipmentId} not found or deleted for Hangfire job {jobId}.");
+                await jobRecordService.UpdateJobStatusAsync(jobId, shipmentId, "Failed", "Shipment not found or deleted.");
                 return;
             }
 
@@ -1385,23 +1399,19 @@ namespace VROOM.Services
             if (!result.IsSuccess)
             {
                 logger.LogWarning($"Hangfire job {jobId} failed to assign shipment {shipmentId}: {result.Error}");
+                await jobRecordService.UpdateJobStatusAsync(jobId, shipmentId, "Failed", result.Error);
+            }
+            else
+            {
+                logger.LogInformation($"Hangfire job {jobId} successfully assigned shipment {shipmentId}.");
+                await jobRecordService.UpdateJobStatusAsync(jobId, shipmentId, "Completed");
             }
         }
-        private bool BackgroundJobExists(string jobId)
-        {
-            using var connection = JobStorage.Current.GetConnection();
-            var jobData = connection.GetJobData(jobId);
-            return jobData != null;
-        }
+
+
         public async Task<Result> AssignOrderAutomaticallyAsync(string businessOwnerId, Shipment shipment)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var businessOwnerRepo = scope.ServiceProvider.GetRequiredService<BusinessOwnerRepository>();
-            var orderRepository = scope.ServiceProvider.GetRequiredService<OrderRepository>();
-            var orderRouteRepository = scope.ServiceProvider.GetRequiredService<OrderRouteRepository>();
-            var routeRepository = scope.ServiceProvider.GetRequiredService<RouteRepository>();
-            var riderRepository = scope.ServiceProvider.GetRequiredService<RiderRepository>();
-            var shipmentRepository = scope.ServiceProvider.GetRequiredService<ShipmentRepository>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<BusinessOwnerService>>();
 
             var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
@@ -1438,11 +1448,11 @@ namespace VROOM.Services
 
                 foreach (var order in orders)
                 {
-                    if (order.State != OrderStateEnum.Created)
-                    {
-                        logger.LogInformation($"Order {order.Id} is not in Created state. Stopping assignment for shipment {shipment.Id}.");
-                        return Result.Failure($"Order {order.Id} is not pending.");
-                    }
+                    //if (order.State != OrderStateEnum.Pending)
+                    //{
+                    //    logger.LogInformation($"Order {order.Id} is not in Created state. Stopping assignment for shipment {shipment.Id}.");
+                    //    return Result.Failure($"Order {order.Id} is not pending.");
+                    //}
 
                     var orderRoute = orderRouteRepository.GetOrderRouteByOrderID(order.Id);
                     if (orderRoute == null)
@@ -1470,7 +1480,7 @@ namespace VROOM.Services
 
                     orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
                     orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-                    if (orders.Any(o => o.State != OrderStateEnum.Created))
+                    if (orders.Any(o => o.State != OrderStateEnum.Pending))
                     {
                         logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
                         return Result.Failure("One or more orders are no longer pending.");
@@ -1478,7 +1488,7 @@ namespace VROOM.Services
 
                     var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
-                        .Where(r => !rejectedRiders.Contains(r.UserID) && r.VehicleStatus == "Good")
+                        .Where(r => r.VehicleStatus == "Good")
                         .ToList();
 
                     if (!filteredRiders.Any())
@@ -1567,15 +1577,7 @@ namespace VROOM.Services
                             await NotifyRiderConfirmationAsync(rider.UserID, shipment.Id, false, confirmation == ConfirmationStatus.Rejected ? "Shipment rejected." : "Response timed out.");
 
 
-                            foreach (var order in orders)
-                            {
-                                order.RiderID = null;
-                                order.State = OrderStateEnum.Created;
-                                order.ModifiedBy = businessOwnerId;
-                                order.ModifiedAt = DateTime.Now;
-                                orderRepository.Update(order);
-                            }
-                            orderRepository.CustomSaveChanges();
+            
                             continue;
                         }
                     }
@@ -1588,7 +1590,15 @@ namespace VROOM.Services
                         await Task.Delay(delayBetweenCycles);
                     }
                 }
-
+                foreach (var order in orders)
+                {
+                    order.RiderID = null;
+                    order.State = OrderStateEnum.Created;
+                    order.ModifiedBy = businessOwnerId;
+                    order.ModifiedAt = DateTime.Now;
+                    orderRepository.Update(order);
+                }
+                orderRepository.CustomSaveChanges();
                 logger.LogWarning($"Failed to assign shipment {shipment.Id} after {maxCycles} cycles.");
                 return Result.Failure("No rider accepted the shipment after maximum attempts.");
             }
@@ -1609,9 +1619,9 @@ namespace VROOM.Services
                 {
                     return confirmation.Status;
                 }
-                await Task.Delay(1000); 
+                await Task.Delay(1000);
             }
-            return ConfirmationStatus.Pending; 
+            return ConfirmationStatus.Pending;
         }
         // Helper methods
         private bool IsVehicleSuitable(VehicleTypeEnum vehicleType, Order order)
@@ -1968,6 +1978,177 @@ namespace VROOM.Services
         //}
 
 
+        public async Task CheckAndAssignOverdueShipments()
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var currentTime = DateTime.Now.AddMinutes(-2);
+            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
+                .Include(s => s.waypoints)
+                .Include(s => s.Routes)
+                .ToListAsync();
+
+            foreach (var shipment in overdueShipments)
+            {
+
+                var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
+                var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
+                var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
+
+                var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipment);
+                if (result.IsSuccess)
+                {
+                    _logger.LogInformation($"Shipment {shipment.Id} assigned automatically.");
+                    continue;
+                }
+
+                _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
+
+                var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good").ToList();
+
+                if (suitableRiders.Any())
+                {
+                    var firstOrder = orders.First();
+                    var firstOrderRoute = orderRouteRepository.GetOrderRouteByOrderID(firstOrder.Id);
+                    var firstRoute = await routeRepository.GetAsync(firstOrderRoute.RouteID);
+
+                    var scoredRiders = suitableRiders
+                        .Select(r =>
+                        {
+                            var distance = Haversine(firstRoute.OriginLat, firstRoute.OriginLang, r.Lat, r.Lang);
+                            var scoreDistance = CalculateDistanceScore(distance, suitableRiders, firstRoute.OriginLat, firstRoute.OriginLang) * 0.5;
+                            var scoreExperience = GetExperienceScore(r.ExperienceLevel) * 0.2;
+                            var scoreRating = r.Rating * 20 * 0.3;
+                            var totalScore = scoreDistance + scoreExperience + scoreRating;
+                            return new { Rider = r, TotalScore = totalScore, Distance = distance };
+                        })
+                        .OrderByDescending(x => x.TotalScore)
+                        .ToList();
+
+                    var bestRider = scoredRiders.First();
+                    _logger.LogWarning($"Forced assignment for shipment {shipment.Id}. Assigning best rider {bestRider.Rider.UserID} due to passed delivery time (Score: {bestRider.TotalScore:F2}).");
+
+                    foreach (var order in orders)
+                    {
+                        order.RiderID = bestRider.Rider.UserID;
+                        order.State = OrderStateEnum.Confirmed;
+                        order.ModifiedBy = businessOwnerId;
+                        order.ModifiedAt = DateTime.Now;
+                        orderRepository.Update(order);
+                    }
+
+                    shipment.ShipmentState = ShipmentStateEnum.Assigned;
+                    shipment.RiderID = bestRider.Rider.UserID;
+                    shipmentRepository.Update(shipment);
+                    shipmentRepository.CustomSaveChanges();
+                    orderRepository.CustomSaveChanges();
+
+                    bestRider.Rider.Status = RiderStatusEnum.OnDelivery;
+                    riderRepository.Update(bestRider.Rider);
+                    riderRepository.CustomSaveChanges();
+
+                    await NotifyRiderConfirmationAsync(bestRider.Rider.UserID, shipment.Id, true, "Shipment assigned due to passed delivery time.");
+                    _logger.LogInformation($"Shipment {shipment.Id} forcefully assigned to rider {bestRider.Rider.UserID} successfully.");
+                }
+                else
+                {
+                    _logger.LogWarning($"No available riders for forced assignment of shipment {shipment.Id}. Notifying owner.");
+                }
+            }
+        }
+
+
+        public async Task CheckOrderCreatedWithoutShipments()
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var currentTime = DateTime.Now;
+
+            var orderCreatedWithoutShipment = await orderRepository.GetList(o =>
+                             o.State == OrderStateEnum.Created &&
+                             !o.IsDeleted &&
+                             o.OrderRoute != null && o.OrderRoute.Route != null &&
+                             (o.OrderRoute.Route.ShipmentID == null || o.OrderRoute.Route.Shipment.ShipmentState == ShipmentStateEnum.InTransit || o.OrderRoute.Route.Shipment.ShipmentState == ShipmentStateEnum.Delivered)
+                             )
+                             .Include(o => o.OrderRoute)
+                             .ThenInclude(or => or.Route)
+                             .ToListAsync();
+
+            if (!orderCreatedWithoutShipment.Any())
+            {
+                _logger.LogInformation("مافيش طلبات معمول ليها Created أو ليها شحنة InTransit أو Delivered.");
+                return;
+            }
+
+            var ordersByShipment = orderCreatedWithoutShipment.GroupBy(o => o.OrderRoute.Route.ShipmentID).ToList();
+
+            foreach (var ordersGroup in ordersByShipment)
+            {
+                var shipmentId = ordersGroup.Key ?? 0;
+                var orders = ordersGroup.ToList();
+
+                var firstOrder = orders.OrderBy(o => o.Date).First();
+                var firstOrderRoute = firstOrder.OrderRoute.Route;
+
+                var lastOrderRoute = orders.Last().OrderRoute.Route;
+                var shipment = await shipmentRepository.GetAsync(shipmentId);
+
+                DateTime? inTransiteBegin;
+                if (shipment != null && shipment.InTransiteBeginTime.HasValue)
+                {
+                    // لو فيه شحنة قديمة، استخدم InTransiteBeginTime بتاعتها كقاعدة
+                    inTransiteBegin = shipment.InTransiteBeginTime.Value;
+                }
+                else
+                {
+                    // لو مافيش شحنة قديمة، استخدم CreatedAt بتاع أول طلب
+                    inTransiteBegin = firstOrder.Date;
+                }
+
+
+                // أضف وقت بناءً على الأولوية
+                TimeSpan additionalTime;
+                if (firstOrder.PrepareTime == null)
+                {
+                    _logger.LogWarning($"PrepareTime is null for order {firstOrder.Id}. Using default preparation time.");
+                    additionalTime = TimeSpan.FromMinutes(10);
+                }
+                else if (firstOrder.OrderPriority == OrderPriorityEnum.HighUrgent)
+                {
+                    additionalTime = firstOrder.PrepareTime;
+                }
+                else if (firstOrder.OrderPriority == OrderPriorityEnum.Urgent)
+                {
+                    additionalTime = firstOrder.PrepareTime + TimeSpan.FromMinutes(3);
+                }
+                else
+                {
+                    additionalTime = firstOrder.PrepareTime + TimeSpan.FromMinutes(10);
+                }
+
+                inTransiteBegin = inTransiteBegin.Value.Add(additionalTime);
+
+
+
+                var addShipmentVM = new AddShipmentVM
+                {
+                    startTime = DateTime.Now,
+                    InTransiteBeginTime = inTransiteBegin,
+                    OrderIds = orders.Select(o => o.Id).ToList(),
+                    BeginningLat = firstOrderRoute.OriginLat,
+                    BeginningLang = firstOrderRoute.OriginLang,
+                    BeginningArea = firstOrderRoute.OriginArea,
+                    EndLat = lastOrderRoute.DestinationLat,
+                    EndLang = lastOrderRoute.DestinationLang,
+                    EndArea = lastOrderRoute.DestinationArea,
+                    zone = orders.First().zone,
+                    RiderID = null,
+
+                };
+
+                var newShipment = await shipmentServices.CreateShipment(addShipmentVM);
+
+            }
+        }
         public async Task<DashboardStatsDto> GetDashboardStatsAsync(string ownerUserId)
         {
             if (string.IsNullOrEmpty(ownerUserId))

@@ -152,7 +152,7 @@ namespace VROOM.ViewModels
         public string Email { get; set; }
         public string Password { get; set; }
         public string ProfilePicture { get; set; }
-        public string phoneNumber {  get; set; } 
+        public string? phoneNumber {  get; set; } 
         public VehicleTypeEnum VehicleType { get; set; }
         public string VehicleStatus { get; set; }
         public float ExperienceLevel { get; set; }

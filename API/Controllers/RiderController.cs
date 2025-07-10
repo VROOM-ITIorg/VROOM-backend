@@ -281,43 +281,10 @@ namespace API.Controllers
 
         [HttpPost("update-delivery-status")]
         [Authorize(Roles = "Rider")]
-        public Task<Order> UpdateDeliveryStatusAsync(string riderId, int orderId, OrderStateEnum newState)
+        public async Task<Order> UpdateDeliveryStatusAsync(string riderId, int orderId, OrderStateEnum newState)
         {
-            try
-            {
-                _logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
-                    orderId, riderId, newState);
-
-                var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
-                if (order == null)
-                {
-                    _logger.LogWarning("Order not found for OrderId={OrderId}", orderId);
-                    throw new InvalidOperationException($"Order with ID {orderId} not found.");
-                }
-
-                if (order.RiderID != riderId)
-                {
-                    _logger.LogWarning("Rider mismatch for OrderId={OrderId}, ExpectedRiderId={ExpectedRiderId}, ProvidedRiderId={ProvidedRiderId}",
-                        orderId, order.RiderID, riderId);
-                    throw new InvalidOperationException("Rider is not assigned to this order.");
-                }
-
-                order.State = newState;
-                order.ModifiedAt = DateTime.UtcNow;
-
-                _logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
-                _context.SaveChanges();
-
-                _logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
-                return Task.FromResult(order);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
-                throw;
-            }
+            return await _riderService.UpdateDeliveryStatusAsync(riderId, orderId, newState);
         }
-
 
         [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]

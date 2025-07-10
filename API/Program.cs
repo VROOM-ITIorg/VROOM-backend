@@ -26,9 +26,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
 .AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-    });
+{
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+});
 
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -100,7 +100,7 @@ builder.Services.AddIdentity<User, IdentityRole>()
 //    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddHangfireServer();
 
-// Add repositories and services
+
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RiderRepository>();
 builder.Services.AddScoped<RoleRepository>();
@@ -127,7 +127,9 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-
+builder.Services.AddScoped<PayPalService>();
+builder.Services.AddScoped<JobRecordService>();
+builder.Services.AddScoped<JobRecordRepository>();
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
@@ -153,24 +155,38 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 
-    // Handle JWT token for SignalR
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            var accessToken = context.Request.Query["access_token"];
+            var accessToken = context.Request.Query["access_token"]; // Use access_token
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/riderHub"))
+            if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/RiderLocationHub") || path.StartsWithSegments("/riderHub") || path.StartsWithSegments("/ownerHub")))
             {
                 context.Token = accessToken;
             }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogError("Authentication failed: {Exception}", context.Exception);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>()
+                .LogInformation("Token validated for user: {User}", context.Principal?.Identity?.Name);
             return Task.CompletedTask;
         }
     };
 });
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -213,11 +229,14 @@ app.UseSwaggerUI(c =>
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
-app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
+app.UseCors("AllowAngularApp"); 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 //app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
 
 // Map SignalR Hub
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
@@ -227,16 +246,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
 
-// Seed roles
-//using (var scope = app.Services.CreateScope())
-//{
-//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-//    foreach (var role in roles)
-//    {
-//        if (!await roleManager.RoleExistsAsync(role))
-//            await roleManager.CreateAsync(new IdentityRole(role));
-//    }
-//}
+//Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
 
 app.Run();

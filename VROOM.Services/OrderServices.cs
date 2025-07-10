@@ -91,6 +91,11 @@ namespace VROOM.Services
 
             var customer = await customerService.CheckForCustomer(new CustomerAddViewModel { Username = orderVM.CustomerUsername, Name = orderVM.CustomerUsername, PhoneNumber = orderVM.CustomerPhoneNumber, BussnisOwnerId = BussinsId });
 
+            var owner = await businessOwnerRepository.GetAsync(BussinsId);
+            orderVM.RouteLocation.OriginLat = owner.User.Address.Lat;
+            orderVM.RouteLocation.OriginLang = owner.User.Address.Lang;
+            orderVM.RouteLocation.OriginArea = owner.User.Address.Area;
+
             var route = await routeService.CreateRoute(orderVM.RouteLocation);
 
             var order = new Order
@@ -108,7 +113,9 @@ namespace VROOM.Services
                 CustomerPriority = orderVM.CustomerPriority,
                 OrderPrice = orderVM.OrderPrice,
                 DeliveryPrice = orderVM.DeliveryPrice,
-                Date = DateTime.Now
+                Date = DateTime.Now,
+                zone = orderVM.zone,
+                BusinessID = BussinsId
             };
 
             orderRepository.Add(order);

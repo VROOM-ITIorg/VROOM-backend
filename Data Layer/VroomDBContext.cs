@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using VROOM.Models;
+using VROOM.Models.JobRecords;
 using VROOM.Models.Map;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -32,6 +33,7 @@ namespace VROOM.Data
         public DbSet<Shipment> Shipments { get; set; }
         public DbSet<RiderRouteIssue> RiderRouteIssues { get; set; }
 
+        public DbSet<JobRecord> JobRecords { get; set; }
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Data source = .; Initial catalog = VROOMfn; Integrated security= true; trustservercertificate = true;MultipleActiveResultSets=True");

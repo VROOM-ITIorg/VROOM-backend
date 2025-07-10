@@ -119,4 +119,75 @@ namespace VROOM.ViewModels
         public DateTime SubscriptionExpiryDate { get; set; }
 
     }
+
+    public class DashboardStatsDto
+    {
+        public List<OrderStatusCount> OrdersByStatus { get; set; }
+        public List<MonthlyRevenue> MonthlyRevenues { get; set; }
+        public List<RiderPerformance> RiderPerformances { get; set; }
+        public List<OrderPriorityCount> OrderPriorities { get; set; }
+        public List<ZoneOrderCount> TopZones { get; set; } // New
+        public List<ShipmentStatusCount> ShipmentStatuses { get; set; } // New
+        public double AverageShipmentDurationHours { get; set; } // New
+        public List<ItemTypeCount> OrdersByItemType { get; set; } // New
+        public List<CustomerPriorityCount> CustomerPriorities { get; set; } // New
+        public List<IssueTypeCount> IssuesByType { get; set; } // New
+    }
+
+    public class OrderStatusCount
+    {
+        public string Status { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class MonthlyRevenue
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public decimal TotalRevenue { get; set; }
+    }
+
+    public class RiderPerformance
+    {
+        public string RiderName { get; set; }
+        public float AverageRating { get; set; }
+        public int OrdersHandled { get; set; }
+    }
+
+    public class OrderPriorityCount
+    {
+        public string Priority { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class ZoneOrderCount
+    {
+        public string Zone { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class ShipmentStatusCount
+    {
+        public string Status { get; set; }
+        public int ShipmentCount { get; set; }
+    }
+
+    public class ItemTypeCount
+    {
+        public string ItemType { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class CustomerPriorityCount
+    {
+        public string Priority { get; set; }
+        public int OrderCount { get; set; }
+    }
+
+    public class IssueTypeCount
+    {
+        public string Type { get; set; }
+        public int IssueCount { get; set; }
+    }
+
 }

@@ -100,7 +100,7 @@ builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 builder.Services.AddHangfireServer();
 
-// Add repositories and services
+
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RiderRepository>();
 builder.Services.AddScoped<RoleRepository>();
@@ -127,7 +127,9 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
-
+builder.Services.AddScoped<PayPalService>();
+builder.Services.AddScoped<JobRecordService>();
+builder.Services.AddScoped<JobRecordRepository>();
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
 if (string.IsNullOrEmpty(jwtSecret) || jwtSecret.Length < 16)
@@ -184,6 +186,8 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -225,11 +229,14 @@ app.UseSwaggerUI(c =>
 app.UseStaticFiles();
 
 // Apply CORS before routing and authentication
-app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
+app.UseCors("AllowAngularApp"); 
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
 
 // Map SignalR Hub
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
@@ -239,16 +246,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
 
-// Seed roles
-//using (var scope = app.Services.CreateScope())
-//{
-//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-//    foreach (var role in roles)
-//    {
-//        if (!await roleManager.RoleExistsAsync(role))
-//            await roleManager.CreateAsync(new IdentityRole(role));
-//    }
-//}
+//Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
 
 app.Run();

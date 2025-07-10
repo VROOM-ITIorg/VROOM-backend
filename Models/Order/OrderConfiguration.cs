@@ -23,6 +23,11 @@ namespace VROOM.Models
                 .HasForeignKey(o => o.RiderID).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder
+               .HasOne(o => o.Owner)
+               .WithMany(bw => bw.Orders)
+               .HasForeignKey(o => o.BusinessID).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder
                 .HasOne(o => o.Payment)
                 .WithOne(p => p.Order)
                 .HasForeignKey<Payment>(p => p.OrderID);

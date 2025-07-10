@@ -83,7 +83,7 @@ namespace VROOM.ViewModels
         public string PhoneNumber { get; init; }
 
         [Display(Name = "Profile Picture")]
-        public IFormFile? ProfilePicture { get; init; }
+        public string? ProfilePicture { get; init; }
 
         public string? ImagePath { get; set; }
     }
@@ -139,6 +139,9 @@ namespace VROOM.ViewModels
 
         public LocationDto Location { get; init; }
         public RiderStatusEnum Status { get; init; }
+        [Display(Name = "Profile Picture")]
+        public string? ProfilePicture { get; init; }
+
     }
 
     public class RiderRegisterRequest

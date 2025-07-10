@@ -10,6 +10,7 @@ using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
+using Microsoft.AspNetCore.Http;
 
 namespace VROOM.Services
 {

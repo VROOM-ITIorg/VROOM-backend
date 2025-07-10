@@ -93,12 +93,12 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // Add Hangfire
-builder.Services.AddHangfire(configuration => configuration
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
-builder.Services.AddHangfireServer();
+//builder.Services.AddHangfire(configuration => configuration
+//    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+//    .UseSimpleAssemblyNameTypeSerializer()
+//    .UseRecommendedSerializerSettings()
+//    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
+//builder.Services.AddHangfireServer();
 
 // Add repositories and services
 builder.Services.AddHttpClient();
@@ -217,7 +217,7 @@ app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHangfireDashboard();
+//app.UseHangfireDashboard();
 
 // Map SignalR Hub
 app.MapHub<RiderLocationHub>("/RiderLocationHub");

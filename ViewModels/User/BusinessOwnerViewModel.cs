@@ -19,5 +19,7 @@ namespace ViewModels.User
         public Address? Address { get; set; }
         public string? BankAccount { get; set; }
         public string? BusinessType { get; set; }
+
+
     }
 }

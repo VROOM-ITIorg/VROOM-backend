@@ -1112,7 +1112,7 @@ namespace VROOM.Services
                 }
                 else if (order.OrderPriority == OrderPriorityEnum.Urgent)
                 {
-                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(3);
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(1);
                 }
                 else
                 {
@@ -1437,7 +1437,9 @@ namespace VROOM.Services
                 }
 
 
-                var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId ,weight = w.Order.Weight}).ToList();
+                var orderIds =  orderIds_Weights.Select(o => o.id).ToList();
+
                 var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
                 if (!orders.Any())
                 {
@@ -1478,17 +1480,20 @@ namespace VROOM.Services
                 while (currentCycle < maxCycles)
                 {
 
-                    orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-                    orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-                    if (orders.Any(o => o.State != OrderStateEnum.Pending))
-                    {
-                        logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
-                        return Result.Failure("One or more orders are no longer pending.");
-                    }
+                     orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                     orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted);
+                     var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
+
+                    var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
+                    //if (orders.Any(o => o.State != OrderStateEnum.Pending))
+                    //{
+                    //    logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
+                    //    return Result.Failure("One or more orders are no longer pending.");
+                    //}
 
                     var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
-                        .Where(r => r.VehicleStatus == "Good")
+                        .Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType,orderHasMaxWeight))
                         .ToList();
 
                     if (!filteredRiders.Any())

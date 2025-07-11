@@ -1987,16 +1987,19 @@ namespace VROOM.Services
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var currentTime = DateTime.Now.AddMinutes(-2);
-            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
+            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState == ShipmentStateEnum.Created && !s.IsDeleted)
                 .Include(s => s.waypoints)
                 .Include(s => s.Routes)
                 .ToListAsync();
 
             foreach (var shipment in overdueShipments)
             {
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                var orderIds = orderIds_Weights.Select(o => o.id).ToList();
+                var orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
+                var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
 
-                var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-                var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
+                var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
                 var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
 
                 var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipment);
@@ -2009,7 +2012,8 @@ namespace VROOM.Services
                 _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
 
                 var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
-                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good").ToList();
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
+                        .ToList();
 
                 if (suitableRiders.Any())
                 {

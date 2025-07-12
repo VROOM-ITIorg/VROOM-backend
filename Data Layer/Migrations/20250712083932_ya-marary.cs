@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace VROOM.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class yamarary : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,6 +53,25 @@ namespace VROOM.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JobRecords",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    JobId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShipmentId = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ScheduledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HangfireJobId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JobRecords", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -316,7 +335,8 @@ namespace VROOM.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CustomerID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RiderID = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PrepareTime = table.Column<TimeSpan>(type: "time", nullable: true),
+                    BusinessID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PrepareTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     ItemsType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -337,6 +357,11 @@ namespace VROOM.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_BusinessOwners_BusinessID",
+                        column: x => x.BusinessID,
+                        principalTable: "BusinessOwners",
+                        principalColumn: "UserID");
                     table.ForeignKey(
                         name: "FK_Orders_Customers_CustomerID",
                         column: x => x.CustomerID,
@@ -717,6 +742,11 @@ namespace VROOM.Data.Migrations
                 column: "RouteID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_BusinessID",
+                table: "Orders",
+                column: "BusinessID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerID",
                 table: "Orders",
                 column: "CustomerID");
@@ -802,6 +832,9 @@ namespace VROOM.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Feedbacks");
+
+            migrationBuilder.DropTable(
+                name: "JobRecords");
 
             migrationBuilder.DropTable(
                 name: "Notifications");

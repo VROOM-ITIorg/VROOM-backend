@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250710151144_InitialCreating")]
-    partial class InitialCreating
+    [Migration("20250712084201_ya-marary2")]
+    partial class yamarary2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

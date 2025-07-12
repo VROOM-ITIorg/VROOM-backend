@@ -99,7 +99,14 @@ builder.Services.AddIdentity<User, IdentityRole>()
 //    .UseRecommendedSerializerSettings()
 //    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 //builder.Services.AddHangfireServer();
+// Add Hangfire
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
 
+builder.Services.AddHangfireServer();
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RiderRepository>();
@@ -234,9 +241,30 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 //app.UseHangfireDashboard();
+app.UseHangfireDashboard();
+using (var scope = app.Services.CreateScope())
+{
+    // Seed roles
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
 
-RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
-RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
+    // Setup recurring jobs
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<BusinessOwnerService>(
+        "check-overdue-shipments",
+        service => service.CheckAndAssignOverdueShipments(),
+        Cron.Minutely());
+
+    recurringJobManager.AddOrUpdate<BusinessOwnerService>(
+        "check-orders-without-shipment",
+        service => service.CheckOrderCreatedWithoutShipments(),
+        Cron.Minutely());
+}
 
 // Map SignalR Hub
 app.MapHub<RiderLocationHub>("/RiderLocationHub");

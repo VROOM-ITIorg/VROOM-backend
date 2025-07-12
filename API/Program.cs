@@ -242,29 +242,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 //app.UseHangfireDashboard();
 app.UseHangfireDashboard();
-using (var scope = app.Services.CreateScope())
-{
-    // Seed roles
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
 
-    // Setup recurring jobs
-    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-    recurringJobManager.AddOrUpdate<BusinessOwnerService>(
-        "check-overdue-shipments",
-        service => service.CheckAndAssignOverdueShipments(),
-        Cron.Minutely());
-
-    recurringJobManager.AddOrUpdate<BusinessOwnerService>(
-        "check-orders-without-shipment",
-        service => service.CheckOrderCreatedWithoutShipments(),
-        Cron.Minutely());
-}
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.MinuteInterval(3));
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
 
 // Map SignalR Hub
 app.MapHub<RiderLocationHub>("/RiderLocationHub");

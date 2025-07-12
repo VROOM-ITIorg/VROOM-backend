@@ -1305,25 +1305,25 @@ public class BusinessOwnerService
                 return false;
             }
 
-            // تحديد setWaitingTime
-            TimeSpan setWaitingTime;
-            if (order.PrepareTime == null)
-            {
-                _logger.LogWarning($"PrepareTime is null for order {order.Id}. Using default preparation time.");
-                setWaitingTime = TimeSpan.FromMinutes(10);
-            }
-            else if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
-            {
-                setWaitingTime = order.PrepareTime;
-            }
-            else if (order.OrderPriority == OrderPriorityEnum.Urgent)
-            {
-                setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(3);
-            }
-            else
-            {
-                setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
-            }
+                // تحديد setWaitingTime
+                TimeSpan setWaitingTime;
+                if (order.PrepareTime == null)
+                {
+                    _logger.LogWarning($"PrepareTime is null for order {order.Id}. Using default preparation time.");
+                    setWaitingTime = TimeSpan.FromMinutes(10);
+                }
+                else if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                {
+                    setWaitingTime = order.PrepareTime;
+                }
+                else if (order.OrderPriority == OrderPriorityEnum.Urgent)
+                {
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(1);
+                }
+                else
+                {
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
+                }
 
             var prepareTime = order.PrepareTime;
             var minInTransiteTime = DateTime.Now.Add(prepareTime);
@@ -1643,13 +1643,15 @@ public class BusinessOwnerService
             }
 
 
-            var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-            var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-            if (!orders.Any())
-            {
-                logger.LogWarning($"No valid orders found in shipment {shipment.Id}.");
-                return Result.Failure("No valid orders found in shipment.");
-            }
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId ,weight = w.Order.Weight}).ToList();
+                var orderIds =  orderIds_Weights.Select(o => o.id).ToList();
+
+                var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
+                if (!orders.Any())
+                {
+                    logger.LogWarning($"No valid orders found in shipment {shipment.Id}.");
+                    return Result.Failure("No valid orders found in shipment.");
+                }
 
 
             foreach (var order in orders)
@@ -1684,18 +1686,21 @@ public class BusinessOwnerService
             while (currentCycle < maxCycles)
             {
 
-                orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-                orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-                if (orders.Any(o => o.State != OrderStateEnum.Pending))
-                {
-                    logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
-                    return Result.Failure("One or more orders are no longer pending.");
-                }
+                     orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                     orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted);
+                     var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
 
-                var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
-                var filteredRiders = riders
-                    .Where(r => r.VehicleStatus == "Good")
-                    .ToList();
+                    var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
+                    //if (orders.Any(o => o.State != OrderStateEnum.Pending))
+                    //{
+                    //    logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
+                    //    return Result.Failure("One or more orders are no longer pending.");
+                    //}
+
+                    var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
+                    var filteredRiders = riders
+                        .Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType,orderHasMaxWeight))
+                        .ToList();
 
                 if (!filteredRiders.Any())
                 {
@@ -2184,21 +2189,24 @@ public class BusinessOwnerService
     //}
 
 
-    public async Task CheckAndAssignOverdueShipments()
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var currentTime = DateTime.Now.AddMinutes(-2);
-        var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
-            .Include(s => s.waypoints)
-            .Include(s => s.Routes)
-            .ToListAsync();
-
-        foreach (var shipment in overdueShipments)
+        public async Task CheckAndAssignOverdueShipments()
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var currentTime = DateTime.Now.AddMinutes(-2);
+            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState == ShipmentStateEnum.Created && !s.IsDeleted)
+                .Include(s => s.waypoints)
+                .Include(s => s.Routes)
+                .ToListAsync();
 
-            var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-            var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
-            var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
+            foreach (var shipment in overdueShipments)
+            {
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                var orderIds = orderIds_Weights.Select(o => o.id).ToList();
+                var orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
+                var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
+
+                var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
+                var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
 
             var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipment);
             if (result.IsSuccess)
@@ -2209,8 +2217,9 @@ public class BusinessOwnerService
 
             _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
 
-            var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
-            var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good").ToList();
+                var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
+                        .ToList();
 
             if (suitableRiders.Any())
             {

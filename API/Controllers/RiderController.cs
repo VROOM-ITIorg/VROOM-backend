@@ -337,7 +337,7 @@ namespace API.Controllers
 
         [HttpGet("riderShipment")]
         [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> GetRiderShipments()
+        public IActionResult GetRiderShipments()
         {
             try
             {
@@ -358,7 +358,7 @@ namespace API.Controllers
                     return BadRequest(new { message = "Business ID not found in token." });
                 }
 
-                var ridersShipments = await _riderManager.GetRiderShipments(riderId);
+                var ridersShipments =  _riderManager.GetRiderShipments(riderId);
 
                 return Ok(ridersShipments);
             }

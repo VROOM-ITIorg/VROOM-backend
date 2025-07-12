@@ -96,16 +96,19 @@ namespace VROOM.Repositories
             return await context.Riders.Where(r => r.BusinessID == businessOwnerId && r.Status == RiderStatusEnum.Available).ToListAsync();
         }
 
-        public async Task<List<ShowShipment>> GetRiderShipments(string riderId)
+        public List<ShowShipment> GetRiderShipments(string riderId)
         {
-            return await context.Shipments.Where(r => r.RiderID == riderId && r.ShipmentState == ShipmentStateEnum.Assigned).Select(s=> new ShowShipment { 
+            return await context.Shipments.Where(r => r.RiderID == riderId && r.ShipmentState == ShipmentStateEnum.Assigned).Select(s => new ShowShipment
+            {
                 id = s.Id,
                 beginningArea = s.BeginningArea,
                 endArea = s.EndArea,
-                routes = s.Routes.Select(r=> new routesFront { Id = r.Id,OrderIds = r.OrderRoutes}).ToList(),
+                routes = s.Routes.Select(r => new routesFront { Id = r.Id, OrderIds = r.OrderRoutes }).ToList(),
                 realEndTime = s.RealEndTime,
-                shipmentState= s.ShipmentState
+                shipmentState = s.ShipmentState
             }).ToListAsync();
+
+
         } 
 
         public async Task<List<Rider>> GetRidersForBusinessOwnerAsync(string businessOwnerId)

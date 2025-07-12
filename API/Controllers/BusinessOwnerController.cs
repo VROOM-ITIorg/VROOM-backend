@@ -3,11 +3,17 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
+//using ViewModels.Business_Owner;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
 using VROOM.ViewModels;
 using static VROOM.Services.BusinessOwnerService;
+using Microsoft.AspNetCore.Identity;
+using ViewModels.User;
 
 namespace API.Controllers
 {
@@ -32,6 +38,64 @@ namespace API.Controllers
             _userService = userService;
         }
 
+        // GET: api/BusinessOwner/Profile
+        [Authorize(Roles = "BusinessOwner")]
+        [HttpGet("Profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var currentOwnerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrWhiteSpace(currentOwnerId))
+                {
+                    return Unauthorized(new { error = "You are not authorized to access this profile." });
+                }
+
+                var result = await _businessOwnerService.GetProfileAsync(currentOwnerId);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(new { error = result.Error });
+                }
+
+                return Ok(result.Value);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { error = "An unexpected error occurred while retrieving the profile." });
+            }
+        }
+        // PUT: api/BusinessOwner/Profile
+[Authorize(Roles = "BusinessOwner")]
+[HttpPut("Profile")]
+[Consumes("multipart/form-data")]
+public async Task<IActionResult> UpdateProfile([FromForm] BusinessOwnerProfileVM model)
+{
+    try
+    {
+        var currentOwnerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(currentOwnerId))
+        {
+            return Unauthorized(new { error = "You are not authorized to update this profile." });
+        }
+
+        if (model == null)
+        {
+            return BadRequest(new { error = "Profile data is required." });
+        }
+
+        var result = await _businessOwnerService.UpdateProfileAsync(currentOwnerId, model);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new { error = result.Error });
+        }
+
+        return Ok(new { message = "Profile updated successfully." });
+    }
+    catch (Exception)
+    {
+        return StatusCode(500, new { error = "An unexpected error occurred while updating the profile." });
+    }
+}
         [HttpPost("register")]
         public async Task<IActionResult> RegisterBusinessOwner([FromBody] BusinessOwnerRegisterRequest request)
         {

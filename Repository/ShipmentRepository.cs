@@ -1,21 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VROOM.Data;
 using VROOM.Models;
+using System.Threading.Tasks;
 
 namespace VROOM.Repositories
 {
-
     public class ShipmentRepository : BaseRepository<Shipment>
     {
-        private readonly VroomDbContext _context;
-
-
         public ShipmentRepository(VroomDbContext context) : base(context) { }
+
+        public async Task<Shipment> GetShipmentByIdAsync(int shipmentId)
+        {
+            return await context.Shipments
+                .FirstOrDefaultAsync(s => s.Id == shipmentId && !s.IsDeleted);
+        }
+    }
 
 
 
@@ -92,6 +91,4 @@ namespace VROOM.Repositories
         //}
     }
 
-
-}
 

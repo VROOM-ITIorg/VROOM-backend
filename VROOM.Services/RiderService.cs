@@ -319,8 +319,8 @@ namespace VROOM.Services
             if (shipment != null)
             {
                 shipment.ShipmentState = ShipmentStateEnum.Delivered; // Fixed from Delivered
-                shipment.RealEndTime = DateTime.UtcNow;
-                shipment.ModifiedAt = DateTime.UtcNow;
+                shipment.RealEndTime = DateTime.Now;
+                shipment.ModifiedAt = DateTime.Now;
             }
         }
 

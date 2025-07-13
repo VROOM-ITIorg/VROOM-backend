@@ -379,7 +379,7 @@ namespace API.Controllers
 
                 var ridersShipments =  _riderManager.GetRiderShipments(riderId);
 
-                return Ok(ridersShipments);
+                return Ok(ridersShipments.Result);
             }
             catch (Exception ex)
             {

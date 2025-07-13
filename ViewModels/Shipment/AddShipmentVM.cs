@@ -42,7 +42,7 @@ namespace ViewModels.Shipment
 
     public class routesFront
     {
-        public int id { get; set; }
+        public int Id { get; set; }
         public ICollection<OrderRoute> OrderIds { get; set; }
     }
 

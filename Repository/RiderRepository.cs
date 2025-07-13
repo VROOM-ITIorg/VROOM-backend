@@ -96,7 +96,7 @@ namespace VROOM.Repositories
             return await context.Riders.Where(r => r.BusinessID == businessOwnerId && r.Status == RiderStatusEnum.Available).ToListAsync();
         }
 
-        public List<ShowShipment> GetRiderShipments(string riderId)
+        public async Task<List<ShowShipment>> GetRiderShipments(string riderId)
         {
             return await context.Shipments.Where(r => r.RiderID == riderId && r.ShipmentState == ShipmentStateEnum.Assigned).Select(s => new ShowShipment
             {

@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ViewModels.Order;
 using VROOM.Models;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace API.Controllers
 {

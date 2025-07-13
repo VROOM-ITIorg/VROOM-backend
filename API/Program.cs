@@ -15,9 +15,9 @@ using VROOM.Repository;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Hubs;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Add services to the container
 builder.Services.AddControllers()
@@ -25,10 +25,10 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     })
-.AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-});
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 
 builder.Services.AddControllers()
                 .AddNewtonsoftJson();
@@ -57,29 +57,30 @@ builder.Services.AddCors(options =>
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "VROOM API", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "VROOM API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "Please enter JWT with Bearer into field (e.g., Bearer <token>)",
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
             new string[] { }
         }
     });
+    c.CustomSchemaIds(type => type.FullName); // Resolve schemaId conflicts
 });
 
 // Configure DbContext with lazy loading
@@ -127,6 +128,9 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
+builder.Services.AddScoped<FeedbackRepository>();
+builder.Services.AddScoped<IWhatsAppNotificationService, WhatsAppNotificationService>();
+
 
 // Configure JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Key"] ?? "ShampooShampooShampooShampooShampooShampoo";
@@ -198,40 +202,26 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 // Custom middleware to log request body for /api/user/register
-//app.Use(async (context, next) =>
-//{
-//    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
-//    {
-//        context.Request.EnableBuffering();
-//        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
-//        Console.WriteLine($"Request Body: {body}");
-//        context.Request.Body.Position = 0; // Reset the stream position
-//    }
-//    await next();
-//});
-
-
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-// Enable Swagger middleware
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+app.Use(async (context, next) =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "VROOM API v1");
-    c.RoutePrefix = string.Empty; // Set Swagger UI at the root (e.g., https://localhost:5001/)
+    if (context.Request.Path.StartsWithSegments("/api/user/register") && context.Request.Method == "POST")
+    {
+        context.Request.EnableBuffering();
+        var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+        Console.WriteLine($"Request Body: {body}");
+        context.Request.Body.Position = 0; // Reset the stream position
+    }
+    await next();
 });
-//app.UseAuthorization();
-app.UseStaticFiles();
 
-// Apply CORS before routing and authentication
+app.UseStaticFiles();
 app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
 
-// Map SignalR Hub
+app.MapControllers();
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
 app.MapHub<RiderHub>("/riderHub");
 app.MapHub<OwnerHub>("/ownerHub");
@@ -240,15 +230,15 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=index}");
 
 // Seed roles
-//using (var scope = app.Services.CreateScope())
-//{
-//    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-//    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
-//    foreach (var role in roles)
-//    {
-//        if (!await roleManager.RoleExistsAsync(role))
-//            await roleManager.CreateAsync(new IdentityRole(role));
-//    }
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { RoleConstants.Customer, RoleConstants.BusinessOwner, RoleConstants.Rider, RoleConstants.Admin };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+}
 
 app.Run();

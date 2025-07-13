@@ -76,8 +76,8 @@ namespace VROOM.Services
                     RiderId = l.UserID,
                     Latitude = l.Lat,
                     Longitude = l.Lang,
-                    LastUpdated = l.Lastupdated
-                })
+                    LastUpdated = (DateTime)l.Lastupdated
+                }  )
                 .FirstOrDefaultAsync();
 
             return location;

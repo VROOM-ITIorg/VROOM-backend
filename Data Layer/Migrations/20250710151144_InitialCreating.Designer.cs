@@ -12,8 +12,8 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    [Migration("20250617215638_hhehe")]
-    partial class hhehe
+    [Migration("20250710151144_InitialCreating")]
+    partial class InitialCreating
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -329,6 +329,43 @@ namespace VROOM.Data.Migrations
                     b.ToTable("Issues");
                 });
 
+            modelBuilder.Entity("VROOM.Models.JobRecords.JobRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HangfireJobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ShipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobRecords");
+                });
+
             modelBuilder.Entity("VROOM.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -382,6 +419,10 @@ namespace VROOM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BusinessID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("CustomerID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -425,7 +466,7 @@ namespace VROOM.Data.Migrations
                     b.Property<int>("OrderPriority")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan?>("PrepareTime")
+                    b.Property<TimeSpan>("PrepareTime")
                         .HasColumnType("time");
 
                     b.Property<string>("RiderID")
@@ -446,6 +487,8 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BusinessID");
 
                     b.HasIndex("CustomerID");
 
@@ -1043,6 +1086,12 @@ namespace VROOM.Data.Migrations
 
             modelBuilder.Entity("VROOM.Models.Order", b =>
                 {
+                    b.HasOne("VROOM.Models.BusinessOwner", "Owner")
+                        .WithMany("Orders")
+                        .HasForeignKey("BusinessID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("VROOM.Models.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerID")
@@ -1055,6 +1104,8 @@ namespace VROOM.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Owner");
 
                     b.Navigation("Rider");
                 });
@@ -1222,6 +1273,8 @@ namespace VROOM.Data.Migrations
 
             modelBuilder.Entity("VROOM.Models.BusinessOwner", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("RiderAssignments");
 
                     b.Navigation("Riders");

@@ -5,7 +5,7 @@
 namespace VROOM.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class hheheا : Migration
+    public partial class InitialCreatation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

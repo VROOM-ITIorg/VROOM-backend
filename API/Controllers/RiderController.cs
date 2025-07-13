@@ -13,6 +13,8 @@ using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Services;
 using ViewModels.Order;
+using System.Linq;
+using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -93,7 +95,8 @@ namespace API.Controllers
                         completedShipments = shipments?.Count(s => s.ShipmentState == ShipmentStateEnum.Delivered) ?? 0,
                         assignedOrders = orders?.Count(o => o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Confirmed) ?? 0,
                         completedOrders = orders?.Count(o => o.State == OrderStateEnum.Delivered) ?? 0
-                    }
+                    },
+                    profilePicture = rider.User?.ProfilePicture
                 });
             }
             catch (Exception ex)
@@ -104,7 +107,7 @@ namespace API.Controllers
 
         [HttpPut("{riderId}")]
         [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> UpdateRiderProfile(string riderId, [FromBody] UpdateRiderDto dto)
+        public async Task<IActionResult> UpdateRiderProfile(string riderId, [FromForm] UpdateRiderDto dto, [FromForm] IFormFile? profilePicture)
         {
             try
             {
@@ -114,7 +117,7 @@ namespace API.Controllers
 
                 var rider = await _context.Riders
                     .Include(r => r.User)
-                    .FirstOrDefaultAsync(r => r.UserID == riderId);
+                    .FirstOrDefaultAsync(r => r.UserID == riderId && !r.User.IsDeleted);
 
                 if (rider == null)
                     return NotFound(new { error = "The rider does not exist." });
@@ -140,6 +143,7 @@ namespace API.Controllers
                 if (!string.IsNullOrEmpty(dto.Email))
                 {
                     rider.User.Email = dto.Email;
+                    rider.User.UserName = dto.Email; // ????? UserName ?? IdentityUser
                     rider.User.ModifiedBy = riderId;
                     rider.User.ModifiedAt = modifiedAt;
                     isModified = true;
@@ -158,7 +162,7 @@ namespace API.Controllers
                 }
                 if (dto.Lang.HasValue)
                 {
-                    rider.Lang = dto.Lang.Value;
+                    rider.Lang = dto.Lang.Value; // Using Lang
                     isModified = true;
                 }
                 if (!string.IsNullOrEmpty(dto.Area))
@@ -167,10 +171,58 @@ namespace API.Controllers
                     isModified = true;
                 }
 
+                // Handle profile picture
+                if (profilePicture != null)
+                {
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                    var extension = Path.GetExtension(profilePicture.FileName).ToLower();
+                    if (!allowedExtensions.Contains(extension))
+                    {
+                        return BadRequest(new { error = "Only JPG, JPEG, and PNG images are allowed." });
+                    }
+
+                    var maxSizeInBytes = 5 * 1024 * 1024; // 5 ????
+                    if (profilePicture.Length > maxSizeInBytes)
+                    {
+                        return BadRequest(new { error = "Image size must be less than 5MB." });
+                    }
+
+                    var fileName = $"{riderId}_{Guid.NewGuid()}{extension}";
+                    var filePath = Path.Combine("wwwroot/images", fileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await profilePicture.CopyToAsync(stream);
+                    }
+                    rider.User.ProfilePicture = $"/images/{fileName}";
+                    rider.User.ModifiedBy = riderId;
+                    rider.User.ModifiedAt = modifiedAt;
+                    isModified = true;
+                }
+
                 if (isModified)
                 {
                     await _context.SaveChangesAsync();
-                    return Ok(new { message = "Rider data updated successfully." });
+                    var riderVM = new RiderVM
+                    {
+                        UserID = rider.UserID,
+                        Name = rider.User?.Name,
+                        Email = rider.User?.Email,
+                        phoneNumber = rider.User?.PhoneNumber,
+                        BusinessID = rider.BusinessID,
+                        VehicleType = rider.VehicleType,
+                        VehicleStatus = rider.VehicleStatus,
+                        ExperienceLevel = rider.ExperienceLevel,
+                        Location = new LocationDto
+                        {
+                            Lat = rider.Lat,
+                            Lang = rider.Lang,
+                            Area = rider.Area
+                        },
+                        Status = rider.Status,
+                        ProfilePicture = rider.User?.ProfilePicture
+                    };
+                    return Ok(new { message = "Rider data updated successfully.", data = riderVM });
                 }
 
                 return Ok(new { message = "No changes were made." });
@@ -215,6 +267,9 @@ namespace API.Controllers
         {
             try
             {
+                //_logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
+                //    orderId, riderId, newState);
+
                 var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
                 if (order == null)
                 {
@@ -231,15 +286,20 @@ namespace API.Controllers
 
                 order.State = newState;
                 order.ModifiedAt = DateTime.UtcNow;
+
+                //_logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
                 _context.SaveChanges();
-                await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
-                return await Task.FromResult(order);
+
+                //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
+                return Task.FromResult(order);
             }
             catch (Exception ex)
             {
+                //_logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
                 throw;
             }
         }
+
 
         [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]

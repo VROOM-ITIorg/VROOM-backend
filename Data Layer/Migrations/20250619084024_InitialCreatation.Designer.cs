@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VROOM.Data;
 
@@ -11,9 +12,11 @@ using VROOM.Data;
 namespace VROOM.Data.Migrations
 {
     [DbContext(typeof(VroomDbContext))]
-    partial class VroomDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250619084024_InitialCreatation")]
+    partial class InitialCreatation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,43 +236,28 @@ namespace VROOM.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("Message");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifiedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ModifiedAt")
-                        .HasDefaultValueSql("GETDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("ModifiedBy");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Rating")
-                        .HasColumnType("int")
-                        .HasColumnName("Rating");
+                        .HasColumnType("int");
 
                     b.Property<string>("RiderID")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("RiderID");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("UserId");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -277,7 +265,7 @@ namespace VROOM.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Feedbacks", (string)null);
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("VROOM.Models.Issues", b =>
@@ -341,43 +329,6 @@ namespace VROOM.Data.Migrations
                     b.ToTable("Issues");
                 });
 
-            modelBuilder.Entity("VROOM.Models.JobRecords.JobRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HangfireJobId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JobId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ScheduledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ShipmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("JobRecords");
-                });
-
             modelBuilder.Entity("VROOM.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -431,10 +382,6 @@ namespace VROOM.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BusinessID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("CustomerID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -478,7 +425,7 @@ namespace VROOM.Data.Migrations
                     b.Property<int>("OrderPriority")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("PrepareTime")
+                    b.Property<TimeSpan?>("PrepareTime")
                         .HasColumnType("time");
 
                     b.Property<string>("RiderID")
@@ -499,8 +446,6 @@ namespace VROOM.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BusinessID");
 
                     b.HasIndex("CustomerID");
 
@@ -629,7 +574,7 @@ namespace VROOM.Data.Migrations
                     b.Property<double>("Lang")
                         .HasColumnType("float");
 
-                    b.Property<DateTime?>("Lastupdated")
+                    b.Property<DateTime>("Lastupdated")
                         .HasColumnType("datetime2");
 
                     b.Property<double>("Lat")
@@ -1098,12 +1043,6 @@ namespace VROOM.Data.Migrations
 
             modelBuilder.Entity("VROOM.Models.Order", b =>
                 {
-                    b.HasOne("VROOM.Models.BusinessOwner", "Owner")
-                        .WithMany("Orders")
-                        .HasForeignKey("BusinessID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("VROOM.Models.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerID")
@@ -1116,8 +1055,6 @@ namespace VROOM.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
-
-                    b.Navigation("Owner");
 
                     b.Navigation("Rider");
                 });
@@ -1285,8 +1222,6 @@ namespace VROOM.Data.Migrations
 
             modelBuilder.Entity("VROOM.Models.BusinessOwner", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("RiderAssignments");
 
                     b.Navigation("Riders");

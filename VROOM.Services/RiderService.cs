@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -10,6 +11,7 @@ using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
+using Microsoft.AspNetCore.Http;
 
 namespace VROOM.Services
 {
@@ -249,48 +251,86 @@ namespace VROOM.Services
 
         public async Task<Order> UpdateDeliveryStatusAsync(string riderId, int orderId, OrderStateEnum newState)
         {
-            var rider = await _riderRepository.GetAsync(riderId);
-            if (rider == null)
-                throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
+            
 
-            var orderRider = await _orders
-                .FirstOrDefaultAsync(or => or.Id == orderId && or.RiderID == riderId && !or.IsDeleted);
-            if (orderRider == null)
-                throw new KeyNotFoundException($"Order with ID {orderId} not found or not assigned to this rider.");
+            var order =  ValidateOrderAsync(riderId, orderId, newState);
+            await UpdateOrderStatusAsync(order, newState);
+            await HandleShipmentAndRiderUpdatesAsync(orderId, riderId);
 
-            var order = await _orders
-                .FirstOrDefaultAsync(o => o.Id == orderId && !o.IsDeleted);
+            await _context.SaveChangesAsync();
+
+            return order;
+        }
+
+        private Order ValidateOrderAsync(string riderId, int orderId, OrderStateEnum newState)
+        {
+            var order =  _orderRepository.GetOrderById(orderId);
             if (order == null)
-                throw new KeyNotFoundException($"Order with ID {orderId} not found.");
-
-            if (!IsValidStateTransition(order.State, newState))
-                throw new InvalidOperationException($"Cannot transition from {order.State} to {newState}.");
-
-            order.State = newState;
-            order.ModifiedBy = rider.UserID;
-            order.ModifiedAt = DateTime.UtcNow;
-
-            if (newState == OrderStateEnum.Delivered || newState == OrderStateEnum.Cancelled)
             {
-                orderRider.IsDeleted = true;
-                orderRider.ModifiedBy = rider.UserID;
-                orderRider.ModifiedAt = DateTime.UtcNow;
-
-                bool hasOtherActiveOrders = await _orders
-                    .AnyAsync(or =>
-                        or.RiderID == riderId &&
-                        !or.IsDeleted &&
-                        or.Id != orderId);
-
-                if (!hasOtherActiveOrders)
-                {
-                    rider.Status = RiderStatusEnum.Available; //change shipment to delivered??
-                }
+                throw new InvalidOperationException($"Order with ID {orderId} not found.");
             }
 
-            _orderRepository.CustomSaveChanges();
-            _riderRepository.CustomSaveChanges();
+            if (order.RiderID != riderId)
+            {
+                
+                throw new InvalidOperationException("Rider is not assigned to this order.");
+            }
+
+            if (newState != OrderStateEnum.Delivered)
+            {
+                
+                throw new InvalidOperationException("Only 'Delivered' status updates are supported.");
+            }
+
             return order;
+        }
+
+        private async Task UpdateOrderStatusAsync(Order order, OrderStateEnum newState)
+        {
+            order.State = newState;
+            order.ModifiedAt = DateTime.UtcNow;
+        }
+
+        private async Task HandleShipmentAndRiderUpdatesAsync(int orderId, string riderId)
+        {
+            var orderRoute = await _orderRepository.GetOrderRouteByOrderIdAsync(orderId);
+            if (orderRoute?.Route?.Shipment == null || orderRoute.Route.Shipment.IsDeleted)
+            {
+                return;
+            }
+
+            var shipmentId = orderRoute.Route.ShipmentID;
+            var shipmentOrders = await _orderRepository.GetOrdersByShipmentIdAsync((int)shipmentId);
+            if (IsShipmentComplete(shipmentOrders, orderId))
+            {
+                await UpdateShipmentStatusAsync((int)shipmentId);
+                await UpdateRiderStatusAsync(riderId);
+            }
+        }
+
+        private bool IsShipmentComplete(List<Order> shipmentOrders, int currentOrderId)
+        {
+            return shipmentOrders.All(o => o.State == OrderStateEnum.Delivered || o.Id == currentOrderId);
+        }
+
+        private async Task UpdateShipmentStatusAsync(int shipmentId)
+        {
+            var shipment = await _shipmentRepository.GetShipmentByIdAsync(shipmentId);
+            if (shipment != null)
+            {
+                shipment.ShipmentState = ShipmentStateEnum.Delivered; // Fixed from Delivered
+                shipment.RealEndTime = DateTime.UtcNow;
+                shipment.ModifiedAt = DateTime.UtcNow;
+            }
+        }
+
+        private async Task UpdateRiderStatusAsync(string riderId)
+        {
+            var rider = await _riderRepository.GetRiderByIdAsync(riderId);
+            if (rider != null)
+            {
+                rider.Status = RiderStatusEnum.Available;
+            }
         }
         public async Task<List<Order>> StartDeliveriesAsync(string riderId, List<int> orderIds)
         {

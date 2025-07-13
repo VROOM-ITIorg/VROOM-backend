@@ -208,6 +208,26 @@ namespace VROOM.Repositories
             return (priceRange.MinPrice ?? 0, priceRange.MaxPrice ?? 5000);
         }
 
+        public async Task<OrderRoute> GetOrderRouteByOrderIdAsync(int orderId)
+        {
+            return await context.OrderRoutes
+                .Include(or => or.Route)
+                .ThenInclude(r => r.Shipment)
+                .FirstOrDefaultAsync(or => or.OrderID == orderId && !or.IsDeleted);
+        }
+
+        public async Task<List<Order>> GetOrdersByShipmentIdAsync(int shipmentId)
+        {
+            return await context.OrderRoutes
+                .Where(or => or.Route.ShipmentID == shipmentId && !or.IsDeleted)
+                .Include(or => or.Order)
+                .Include(or => or.Route)
+                .Where(or => or.Route != null && !or.Route.IsDeleted)
+                .Select(or => or.Order)
+                .Where(o => o != null && !o.IsDeleted)
+                .ToListAsync();
+        }
+
         public async Task<(List<Order> Data, int TotalCount)> GetPaginatedOrdersAsync(
             Expression<Func<Order, bool>> filter = null,
             int pageSize = 4,

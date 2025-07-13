@@ -94,14 +94,14 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // Add Hangfire
-builder.Services.AddHangfire(configuration => configuration
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
-builder.Services.AddHangfireServer();
+//builder.Services.AddHangfire(configuration => configuration
+//    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+//    .UseSimpleAssemblyNameTypeSerializer()
+//    .UseRecommendedSerializerSettings()
+//    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DB")));
+//builder.Services.AddHangfireServer();
 
-// Add repositories and services
+
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<RiderRepository>();
 builder.Services.AddScoped<RoleRepository>();
@@ -128,6 +128,9 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, ShipmentConfirmat
 builder.Services.AddScoped<NotificationRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<IssueService>();
+builder.Services.AddScoped<PayPalService>();
+builder.Services.AddScoped<JobRecordService>();
+builder.Services.AddScoped<JobRecordRepository>();
 builder.Services.AddScoped<FeedbackRepository>();
 builder.Services.AddScoped<IWhatsAppNotificationService, WhatsAppNotificationService>();
 
@@ -188,6 +191,8 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -215,11 +220,16 @@ app.Use(async (context, next) =>
 });
 
 app.UseStaticFiles();
+
+// Apply CORS before routing and authentication
 app.UseCors("AllowAngularApp"); // áÇÒã Êßæä ÞÈá UseRouting
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseHangfireDashboard();
+//app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
+RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
 
 app.MapControllers();
 app.MapHub<RiderLocationHub>("/RiderLocationHub");
@@ -229,7 +239,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=index}");
 
-// Seed roles
+//Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -240,5 +250,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
     }
 }
+// Seed roles
 
 app.Run();

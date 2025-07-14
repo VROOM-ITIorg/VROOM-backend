@@ -1223,7 +1223,6 @@ namespace VROOM.Services
                     sh => sh.waypoints
                 );
 
-                using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 if (shipment != null)
                 {
                     route.ShipmentID = shipment.Id;
@@ -1298,7 +1297,6 @@ namespace VROOM.Services
                             _logger.LogWarning($"Failed to assign high-priority shipment {shipment.Id}: {result.Error}");
                             return false;
                         }
-                        transaction.Complete();
                         return true;
                     }
                     else
@@ -1313,7 +1311,6 @@ namespace VROOM.Services
                             await _jobRecordService.AddJobRecordAsync(jobId, shipment.Id, hangfireJobId);
                         }
 
-                        transaction.Complete();
                         return true;
                     }
                 }
@@ -1351,7 +1348,6 @@ namespace VROOM.Services
                             _logger.LogWarning($"Failed to assign high-priority shipment {shipment.Id}: {result.Error}");
                             return false;
                         }
-                        transaction.Complete();
                         return true;
                     }
                     else
@@ -1365,7 +1361,6 @@ namespace VROOM.Services
                                 setWaitingTime);
                             await _jobRecordService.AddJobRecordAsync(jobId, shipment.Id, hangfireJobId);
                         }
-                        transaction.Complete();
                         return true;
                     }
                 }

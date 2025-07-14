@@ -21,7 +21,7 @@ namespace VROOM.Models
         public string UserID { get; set; }
         public RiderStatusEnum Status { get; set; } = RiderStatusEnum.Unavailable;
         public VehicleTypeEnum VehicleType { get; set; }
-        public VehicleTypeStatus VehicleStatus { get; set; } = VehicleTypeStatus.Good;
+        public VehicleTypeStatus? VehicleStatus { get; set; } = VehicleTypeStatus.Good;
         public double Lang { get; set; }
         public double Lat { get; set; }
         public string Area { get; set; }

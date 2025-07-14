@@ -211,7 +211,7 @@ namespace API.Controllers
                         phoneNumber = rider.User?.PhoneNumber,
                         BusinessID = rider.BusinessID,
                         VehicleType = rider.VehicleType,
-                        VehicleStatus = rider.VehicleStatus,
+                        VehicleStatus = rider.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                         ExperienceLevel = rider.ExperienceLevel,
                         Location = new LocationDto
                         {
@@ -364,7 +364,7 @@ namespace API.Controllers
 
         [HttpGet("riderShipment")]
         [Authorize(Roles = "Rider")]
-        public async Task<IActionResult> GetRiderShipments()
+        public IActionResult GetRiderShipments()
         {
             try
             {
@@ -384,8 +384,9 @@ namespace API.Controllers
                     return BadRequest(new { message = "Rider ID not found in token." });
                 }
 
-                var ridersShipments = await _riderManager.GetRiderShipments(riderId);
-                return Ok(ridersShipments);
+                var ridersShipments =  _riderManager.GetRiderShipments(riderId);
+
+                return Ok(ridersShipments.Result);
             }
             catch (Exception ex)
             {

@@ -2046,7 +2046,7 @@ namespace VROOM.Services
 
             var overdueShipments = await _shipmentRepository.GetListLocalOrDbAsync(
                 s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState == ShipmentStateEnum.Created && !s.IsDeleted,
-                true,
+                false,
                 s => s.waypoints,
                 s => s.Routes);
 

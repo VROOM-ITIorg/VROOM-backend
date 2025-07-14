@@ -36,7 +36,8 @@ namespace VROOM.Repositories
                 Rating = feedbackRequest.Rating,
                 Message = feedbackRequest.Message,
                 ModifiedBy = customerId,
-                ModifiedAt = DateTime.Now
+                ModifiedAt = DateTime.Now,
+                IsDeleted = false
             };
 
             await _context.Feedbacks.AddAsync(feedback);

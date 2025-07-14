@@ -14,5 +14,7 @@ namespace ViewModels.Feedback
 
         [MaxLength(500, ErrorMessage = "Message cannot exceed 500 characters.")]
         public string Message { get; set; }
+
+        public string? sendCustomerId { get; set; }
     }
 }

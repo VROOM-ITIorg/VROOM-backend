@@ -1531,11 +1531,11 @@ namespace VROOM.Services
                     }
                 }
 
-                int maxCycles = 3;
-                int currentCycle = 0;
-                var attemptedRiders = new HashSet<string>();
-                var rejectedRiders = new HashSet<string>();
-                TimeSpan delayBetweenCycles = TimeSpan.FromSeconds(10);
+            int maxCycles = 3;
+            int currentCycle = 0;
+            var attemptedRiders = new HashSet<string>();
+            var rejectedRiders = new HashSet<string>();
+            TimeSpan delayBetweenCycles = TimeSpan.FromSeconds(10);
 
                 while (currentCycle < maxCycles)
                 {

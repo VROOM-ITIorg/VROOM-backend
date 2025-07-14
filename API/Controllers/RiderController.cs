@@ -290,8 +290,9 @@ namespace API.Controllers
                 //_logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
                 _context.SaveChanges();
 
+                await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
                 //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
-                return Task.FromResult(order);
+                return await Task.FromResult(order);
             }
             catch (Exception ex)
             {
@@ -394,36 +395,36 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("test-whatsapp")]
-        [AllowAnonymous] // For manual testing, remove in production
-        public async Task<IActionResult> TestWhatsAppNotification()
-        {
-            try
-            {
-                var order = new Order
-                {
-                    Id = 123,
-                    CustomerID = "bc85afee-d96f-4b58-8ee8-5e1c16bd407f",
-                    RiderID = "1115f839-5aca-4aab-ad4a-630e679fb14a",
-                    Customer = new Customer
-                    {
-                        User = new User
-                        {
-                            Name = "customer",
-                            PhoneNumber = "+201124945557" // Replace with your test phone number  
-                        }
-                    },
-                    Title = "Test Order"
-                };
+        //[HttpPost("test-whatsapp")]
+        //[AllowAnonymous] // For manual testing, remove in production
+        //public async Task<IActionResult> TestWhatsAppNotification()
+        //{
+        //    try
+        //    {
+        //        var order = new Order
+        //        {
+        //            Id = 123,
+        //            CustomerID = "bc85afee-d96f-4b58-8ee8-5e1c16bd407f",
+        //            RiderID = "1115f839-5aca-4aab-ad4a-630e679fb14a",
+        //            Customer = new Customer
+        //            {
+        //                User = new User
+        //                {
+        //                    Name = "customer",
+        //                    PhoneNumber = "+201124945557" // Replace with your test phone number  
+        //                }
+        //            },
+        //            Title = "Test Order"
+        //        };
 
-                var result = await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
-                return Ok(new { Success = result, Message = "WhatsApp notification triggered" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send WhatsApp notification");
-                return StatusCode(500, new { error = "An error occurred while sending WhatsApp notification.", details = ex.Message });
-            }
-        }
+        //        var result = await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
+        //        return Ok(new { Success = result, Message = "WhatsApp notification triggered" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Failed to send WhatsApp notification");
+        //        return StatusCode(500, new { error = "An error occurred while sending WhatsApp notification.", details = ex.Message });
+        //    }
+        //}
     }
 }

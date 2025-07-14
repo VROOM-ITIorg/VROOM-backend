@@ -251,7 +251,7 @@ namespace VROOM.Services
                         BusinessID = "",
                         Status = RiderStatusEnum.Unavailable,
                         VehicleType = VehicleTypeEnum.Motorcycle,
-                        VehicleStatus = "Unknown",
+                        VehicleStatus = VehicleTypeStatus.Unknowen,
                         Lang = 0,
                         Lat = 0,
                         Area = "Unknown",

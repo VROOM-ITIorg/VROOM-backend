@@ -1,6 +1,8 @@
 ﻿using LinqKit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ViewModels;
@@ -20,6 +22,44 @@ namespace VROOM.Services
         //    orderRepository = _orderRepository;
         //    riderManager = _riderManager;
         //}
+
+        private readonly UserManager<User> userManager;
+        private OrderRepository orderRepository;
+        private BusinessOwnerRepository businessOwnerRepository;
+        private RiderRepository riderRepository;
+        private NotificationService notificationService;
+        private CustomerServices customerService;
+        private OrderRouteServices orderRouteServices;
+        private RouteServices routeService;
+        private readonly ShipmentRepository shipmentRepository;
+        private readonly RouteRepository routeRepository;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public OrderService(
+            OrderRepository _orderRepository,
+            NotificationService _notificationService,
+            CustomerServices _customerService,
+            RouteServices _routeServices,
+            RiderRepository _riderRepository,
+            OrderRouteServices _orderRouteServices,
+            ShipmentRepository _shipmentRepository,
+            RouteRepository _routeRepository,
+            IHttpContextAccessor _httpContextAccessor,
+            BusinessOwnerRepository _businessOwnerRepository,
+            UserManager<User> _userManager
+            )
+        {
+            orderRepository = _orderRepository;
+            notificationService = _notificationService;
+            customerService = _customerService;
+            routeService = _routeServices;
+            riderRepository = _riderRepository;
+            orderRouteServices = _orderRouteServices;
+            shipmentRepository = _shipmentRepository;
+            routeRepository = _routeRepository;
+            httpContextAccessor = _httpContextAccessor;
+            businessOwnerRepository = _businessOwnerRepository;
+            userManager = _userManager;
+        }
 
         public List<OrderDetailsViewModel> GetActiveOrder()
         {
@@ -48,41 +88,6 @@ namespace VROOM.Services
                 DeliveryTime = 30.5f,
                 CustomerRating = 4
             }).ToList();
-        }
-
-        private OrderRepository orderRepository;
-        private BusinessOwnerRepository businessOwnerRepository;
-        private RiderRepository riderRepository;
-        private NotificationService notificationService;
-        private CustomerServices customerService;
-        private OrderRouteServices orderRouteServices;
-        private RouteServices routeService;
-        private readonly ShipmentRepository shipmentRepository;
-        private readonly RouteRepository routeRepository;
-        private readonly IHttpContextAccessor httpContextAccessor;
-        public OrderService(
-            OrderRepository _orderRepository,
-            NotificationService _notificationService,
-            CustomerServices _customerService,
-            RouteServices _routeServices,
-            RiderRepository _riderRepository,
-            OrderRouteServices _orderRouteServices,
-            ShipmentRepository _shipmentRepository,
-            RouteRepository _routeRepository,
-            IHttpContextAccessor _httpContextAccessor,
-            BusinessOwnerRepository _businessOwnerRepository
-            )
-        {
-            orderRepository = _orderRepository;
-            notificationService = _notificationService;
-            customerService = _customerService;
-            routeService = _routeServices;
-            riderRepository = _riderRepository;
-            orderRouteServices = _orderRouteServices;
-            shipmentRepository = _shipmentRepository;
-            routeRepository = _routeRepository;
-            httpContextAccessor = _httpContextAccessor;
-            businessOwnerRepository = _businessOwnerRepository;
         }
 
         public async Task<Order> CreateOrder(OrderCreateViewModel orderVM, string BussinsId)
@@ -155,7 +160,19 @@ namespace VROOM.Services
         }
         public async Task<int> GetTotalOrders(OrderFilter filter = null)
         {
-            var query = orderRepository.GetList(o => o.IsDeleted != true);
+            var businessOwnerId = httpContextAccessor.HttpContext?.User?
+             .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(businessOwnerId))
+            {
+                Console.WriteLine("Failed to retrieve riders: Business Owner ID not found in token.");
+                return -1;
+            }
+
+            // Verify Business Owner exists
+            var businessOwner = await businessOwnerRepository.GetAsync(businessOwnerId);
+
+            var query = orderRepository.GetList(o => o.IsDeleted != true && o.BusinessID == businessOwner.UserID);
 
             if (filter != null)
             {
@@ -175,9 +192,41 @@ namespace VROOM.Services
 
             return await query.CountAsync();
         }
-        public async Task<List<OrderListDetailsViewModel>> GetAllOrders(OrderFilter filter = null,int pageNumber = 1, int pageSize = 1)
+        public async Task<Result<OrderListResponseViewModel>> GetAllOrders(OrderFilter filter = null,int pageNumber = 1, int pageSize = 1)
         {
-            var query = orderRepository.GetList(o => o.IsDeleted != true);
+            // Extract Business Owner ID from the HTTP context
+            var businessOwnerId = httpContextAccessor.HttpContext?.User?
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(businessOwnerId))
+            {
+                Console.WriteLine("Failed to retrieve riders: Business Owner ID not found in token.");
+                return Result<OrderListResponseViewModel>.Failure("Business Owner ID not found in token.");
+            }
+
+            // Verify Business Owner exists
+            var businessOwner = await businessOwnerRepository.GetAsync(businessOwnerId);
+            if (businessOwner == null)
+            {
+                Console.WriteLine("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                return Result<OrderListResponseViewModel>.Failure("Business Owner not found.");
+            }
+
+            // Verify the caller is a Business Owner
+            var roles = await userManager.GetRolesAsync(businessOwner.User);
+            if (!roles.Contains(RoleConstants.BusinessOwner))
+            {
+                Console.WriteLine("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                return Result<OrderListResponseViewModel>.Failure("Caller is not a Business Owner.");
+            }
+
+            var query = orderRepository.GetList(o => o.IsDeleted != true && o.BusinessID == businessOwner.UserID);
+
+            int _pendingOrdersCount = query.Count(r => r.State == OrderStateEnum.Pending);
+            
+            int _fullFilledOrdersCount = query.Count(r => r.State == OrderStateEnum.Delivered);
+
+            int _cancelledOrdersCount = query.Count(r => r.State == OrderStateEnum.Cancelled);
 
             // Apply filters if provided
             if (filter != null)
@@ -227,7 +276,14 @@ namespace VROOM.Services
                     Date = o.Date
                 })
                 .ToListAsync(); // Materialize the query
-            return orders;
+
+            return Result<OrderListResponseViewModel>.Success(new OrderListResponseViewModel
+            {
+                ordersDetails = orders,
+                cancelledOrdersCount = _cancelledOrdersCount,
+                fullFilledOrdersCount = _fullFilledOrdersCount,
+                pendingOrdersCount = _pendingOrdersCount
+            });
         }
         // We need to AssignOrderToRider with two diffrenet way (Manually and Automatically)
 

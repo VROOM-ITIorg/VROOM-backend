@@ -219,14 +219,14 @@ public class BusinessOwnerService
 
             }
 
-            var user = new User
-            {
-                UserName = request.Email,
-                Email = request.Email,
-                Name = request.Name,
-                //PhoneNumber = request.phoneNumber,
-                ProfilePicture = request.ProfilePicture
-            };
+                var user = new User
+                {
+                    UserName = request.Email,
+                    Email = request.Email,
+                    Name = request.Name,
+                    PhoneNumber = request.phoneNumber,
+                    ProfilePicture = request.ProfilePicture
+                };
 
             _logger.LogInformation("Attempting to create user: {Email}", request.Email);
 
@@ -272,24 +272,24 @@ public class BusinessOwnerService
             riderRepository.CustomSaveChanges();
             //await SendWhatsAppMessage(user.PhoneNumber, $"Greating, You are a rider for {businessOwner.User.Name} Business now, try to login with your username: {rider.User.UserName} and password : {request.Password} , You are his slave now congrates!😊");
 
-            var result = new RiderVM
-            {
-                UserID = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                //phoneNumber = user.PhoneNumber,
-                BusinessID = rider.BusinessID,
-                VehicleType = rider.VehicleType,
-                VehicleStatus = rider.VehicleStatus,
-                ExperienceLevel = rider.ExperienceLevel,
-                Location = new LocationDto
+                var result = new RiderVM
                 {
-                    Lat = rider.Lat,
-                    Lang = rider.Lang,
-                    Area = rider.Area
-                },
-                Status = rider.Status
-            };
+                    UserID = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    phoneNumber = user.PhoneNumber,
+                    BusinessID = rider.BusinessID,
+                    VehicleType = rider.VehicleType,
+                    VehicleStatus = rider.VehicleStatus,
+                    ExperienceLevel = rider.ExperienceLevel,
+                    Location = new LocationDto
+                    {
+                        Lat = rider.Lat,
+                        Lang = rider.Lang,
+                        Area = rider.Area
+                    },
+                    Status = rider.Status
+                };
 
             scope.Complete();
 
@@ -526,25 +526,25 @@ public class BusinessOwnerService
                 return Result<RiderVM>.Failure("Rider not found.");
             }
 
-            // Update rider properties only if provided
-            if (!string.IsNullOrEmpty(BusinessID))
-                rider.BusinessID = BusinessID;
-            if (request.VehicleType != default)
-                rider.VehicleType = request.VehicleType;
-            if (!string.IsNullOrEmpty(request.VehicleStatus))
-                rider.VehicleStatus = request.VehicleStatus;
-            if (request.ExperienceLevel != default)
-                rider.ExperienceLevel = request.ExperienceLevel;
-            if (request.Location != null)
-            {
-                // Update only provided location fields
-                if (request.Location.Lat != default)
-                    rider.Lat = request.Location.Lat;
-                if (request.Location.Lang != default)
-                    rider.Lang = request.Location.Lang;
-                if (!string.IsNullOrEmpty(request.Location.Area))
-                    rider.Area = request.Location.Area;
-            }
+                // Update rider properties only if provided
+                if (!string.IsNullOrEmpty(BusinessID))
+                    rider.BusinessID = BusinessID;
+                if (request.VehicleType != default)
+                    rider.VehicleType = request.VehicleType;
+                if (!string.IsNullOrEmpty(request.VehicleStatus.ToString()))
+                    rider.VehicleStatus = request.VehicleStatus.Value;
+                if (request.ExperienceLevel != default)
+                    rider.ExperienceLevel = request.ExperienceLevel;
+                if (request.Location != null)
+                {
+                    // Update only provided location fields
+                    if (request.Location.lat != default)
+                        rider.Lat = request.Location.lat;
+                    if (request.Location.lang != default)
+                        rider.Lang = request.Location.lang;
+                    if (!string.IsNullOrEmpty(request.Location.area))
+                        rider.Area = request.Location.area;
+                }
 
             _logger.LogInformation("Updating rider in repository for user: {Email}", user.Email);
             riderRepository.Update(rider);
@@ -735,8 +735,8 @@ public class BusinessOwnerService
                 customerRepository.Add(customer);
                 await customerRepository.CustomSaveChangesAsync();
 
-                // Enqueue the Hangfire background job
-                BackgroundJob.Enqueue(() => LogCustomerCreation(user.Id, user.Email, user.PhoneNumber));
+                    // Enqueue the Hangfire background job
+                    //BackgroundJob.Enqueue(() => LogCustomerCreation(user.Id, user.Email, user.PhoneNumber));
 
                 var customerVM = new CustomerVM
                 {
@@ -1059,88 +1059,93 @@ public class BusinessOwnerService
 
             _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
 
-            return new OrderDetailsViewModel
-            {
-                Id = order.Id,
-                Title = order.Title,
-                State = order.State.ToString(),
-                RiderName = order.Rider.User.Name,
-                CustomerName = order.Customer.User.Name,
-                BusinessOwner = order.Rider.BusinessOwner.User.Name,
-                Priority = order.OrderPriority.ToString(),
-                OrderPrice = order.OrderPrice,
-                DeliveryPrice = order.DeliveryPrice,
-                Date = order.Date
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Exception occurred while Rider was viewing Order {orderId}.");
-            return null;
-        }
-    }
-
-    public async Task<Result<List<RiderVM>>> GetRiders()
-    {
-        try
-        {
-            // Extract Business Owner ID from the HTTP context
-            var businessOwnerId = _httpContextAccessor.HttpContext?.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(businessOwnerId))
-            {
-                _logger.LogWarning("Failed to retrieve riders: Business Owner ID not found in token.");
-                return Result<List<RiderVM>>.Failure("Business Owner ID not found in token.");
-            }
-
-            // Verify Business Owner exists
-            var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
-            if (businessOwner == null)
-            {
-                _logger.LogWarning("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
-                return Result<List<RiderVM>>.Failure("Business Owner not found.");
-            }
-
-            // Verify the caller is a Business Owner
-            var roles = await userManager.GetRolesAsync(businessOwner.User);
-            if (!roles.Contains(RoleConstants.BusinessOwner))
-            {
-                _logger.LogWarning("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
-                return Result<List<RiderVM>>.Failure("Caller is not a Business Owner.");
-            }
-
-            // Fetch riders associated with the Business Owner
-            var riders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
-
-            // Map riders to RiderVM
-            var riderVMs = riders.Select(r => new RiderVM
-            {
-                UserID = r.UserID,
-                Name = r.User.Name,
-                Email = r.User.Email,
-                BusinessID = r.BusinessID,
-                VehicleType = r.VehicleType,
-                VehicleStatus = r.VehicleStatus,
-                ExperienceLevel = r.ExperienceLevel,
-                Location = new LocationDto
+                return new OrderDetailsViewModel
                 {
-                    Lat = r.Lat,
-                    Lang = r.Lang,
-                    Area = r.Area
-                },
-                Status = r.Status
-            }).ToList();
-
-            _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
-            return Result<List<RiderVM>>.Success(riderVMs);
+                    Id = order.Id,
+                    Title = order.Title,
+                    State = order.State.ToString(),
+                    RiderName = order.Rider.User.Name,
+                    CustomerName = order.Customer.User.Name,
+                    BusinessOwner = order.Rider.BusinessOwner.User.Name,
+                    Priority = order.OrderPriority.ToString(),
+                    OrderPrice = order.OrderPrice,
+                    DeliveryPrice = order.DeliveryPrice,
+                    Date = order.Date
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Exception occurred while Rider was viewing Order {orderId}.");
+                return null;
+            }
         }
-        catch (Exception ex)
+        public async Task<Result<RiderDashboardResult>> GetRiders()
         {
-            //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
-            return Result<List<RiderVM>>.Failure("An error occurred while retrieving riders.");
+            try
+            {
+                // Extract Business Owner ID from the HTTP context
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(businessOwnerId))
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Business Owner ID not found in token.");
+                    return Result<RiderDashboardResult>.Failure("Business Owner ID not found in token.");
+                }
+
+                // Verify Business Owner exists
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                if (businessOwner == null)
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
+                    return Result<RiderDashboardResult>.Failure("Business Owner not found.");
+                }
+
+                // Verify the caller is a Business Owner
+                var roles = await userManager.GetRolesAsync(businessOwner.User);
+                if (!roles.Contains(RoleConstants.BusinessOwner))
+                {
+                    _logger.LogWarning("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
+                    return Result<RiderDashboardResult>.Failure("Caller is not a Business Owner.");
+                }
+
+                // Fetch riders associated with the Business Owner
+                var riders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+
+                int onDeliveryCount = riders.Count(r => r.Status == RiderStatusEnum.OnDelivery);
+
+                // Count riders with Available status
+                int availableCount = riders.Count(r => r.Status == RiderStatusEnum.Available);
+
+                // Map riders to RiderVM
+                var riderVMs = riders.Select(r => new RiderVM
+                {
+                    UserID = r.UserID,
+                    Name = r.User.Name,
+                    Email = r.User.Email,
+                    phoneNumber = r.User.PhoneNumber,
+                    BusinessID = r.BusinessID,
+                    VehicleType = r.VehicleType,
+                    VehicleStatus = r.VehicleStatus,
+                    ExperienceLevel = r.ExperienceLevel,
+                    Location = new LocationDto
+                    {
+                        Lat = r.Lat,
+                        Lang = r.Lang,
+                        Area = r.Area
+                    },
+                    Status = r.Status
+                }).ToList();
+
+                _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
+                return Result<RiderDashboardResult>.Success(new RiderDashboardResult { riderVMs = riderVMs,OnDeliveryCount = onDeliveryCount, AvailableCount = availableCount });
+            }
+            catch (Exception ex)
+            {
+                //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
+                return Result<RiderDashboardResult>.Failure("An error occurred while retrieving riders.");
+            }
         }
-    }
 
     public async Task<Result<List<CustomerVM>>> GetCustomers()
     {
@@ -1306,25 +1311,25 @@ public class BusinessOwnerService
                 return false;
             }
 
-            // تحديد setWaitingTime
-            TimeSpan setWaitingTime;
-            if (order.PrepareTime == null)
-            {
-                _logger.LogWarning($"PrepareTime is null for order {order.Id}. Using default preparation time.");
-                setWaitingTime = TimeSpan.FromMinutes(10);
-            }
-            else if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
-            {
-                setWaitingTime = order.PrepareTime;
-            }
-            else if (order.OrderPriority == OrderPriorityEnum.Urgent)
-            {
-                setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(3);
-            }
-            else
-            {
-                setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
-            }
+                // تحديد setWaitingTime
+                TimeSpan setWaitingTime;
+                if (order.PrepareTime == null)
+                {
+                    _logger.LogWarning($"PrepareTime is null for order {order.Id}. Using default preparation time.");
+                    setWaitingTime = TimeSpan.FromMinutes(10);
+                }
+                else if (order.OrderPriority == OrderPriorityEnum.HighUrgent)
+                {
+                    setWaitingTime = order.PrepareTime;
+                }
+                else if (order.OrderPriority == OrderPriorityEnum.Urgent)
+                {
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(1);
+                }
+                else
+                {
+                    setWaitingTime = order.PrepareTime + TimeSpan.FromMinutes(10);
+                }
 
             var prepareTime = order.PrepareTime;
             var minInTransiteTime = DateTime.Now.Add(prepareTime);
@@ -1693,10 +1698,10 @@ public class BusinessOwnerService
                     return Result.Failure("One or more orders are no longer pending.");
                 }
 
-                var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
-                var filteredRiders = riders
-                    .Where(r => r.VehicleStatus == "Good")
-                    .ToList();
+                    var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
+                    var filteredRiders = riders
+                        .Where(r => r.VehicleStatus == VehicleTypeStatus.Good)
+                        .ToList();
 
                 if (!filteredRiders.Any())
                 {
@@ -2185,14 +2190,14 @@ public class BusinessOwnerService
     //}
 
 
-    public async Task CheckAndAssignOverdueShipments()
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var currentTime = DateTime.Now.AddMinutes(-2);
-        var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
-            .Include(s => s.waypoints)
-            .Include(s => s.Routes)
-            .ToListAsync();
+        public async Task CheckAndAssignOverdueShipments()
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var currentTime = DateTime.Now.AddMinutes(-5);
+            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
+                .Include(s => s.waypoints)
+                .Include(s => s.Routes)
+                .ToListAsync();
 
         foreach (var shipment in overdueShipments)
         {
@@ -2210,8 +2215,8 @@ public class BusinessOwnerService
 
             _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
 
-            var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
-            var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good").ToList();
+                var availableRiders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == VehicleTypeStatus.Good).ToList();
 
             if (suitableRiders.Any())
             {

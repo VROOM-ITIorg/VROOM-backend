@@ -115,7 +115,6 @@ namespace VROOM.Repositories
             return await dbSet.ToListAsync();
         }
 
-        public IQueryable<T> GetList(Expression<Func<T, bool>> filter = null)
 
         public IQueryable<T> GetList(Expression<Func<T, bool>> filter = null)
         {

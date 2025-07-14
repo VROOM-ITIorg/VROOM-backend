@@ -22,7 +22,7 @@ using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.ViewModels;
 using ViewModels.Order;
-namespace VROOM.Services;
+using System.Security.Claims;
 
 namespace VROOM.Services
 {
@@ -235,7 +235,7 @@ namespace VROOM.Services
                     phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
-                    VehicleStatus = rider.VehicleStatus,
+                    VehicleStatus = rider.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                     ExperienceLevel = rider.ExperienceLevel,
                     Location = new LocationDto
                     {
@@ -311,18 +311,18 @@ namespace VROOM.Services
                     rider.BusinessID = BusinessID;
                 if (request.VehicleType != default)
                     rider.VehicleType = request.VehicleType;
-                if (!string.IsNullOrEmpty(request.VehicleStatus))
+                if (!string.IsNullOrEmpty(request.VehicleStatus.ToString()))
                     rider.VehicleStatus = request.VehicleStatus;
                 if (request.ExperienceLevel != default)
                     rider.ExperienceLevel = request.ExperienceLevel;
                 if (request.Location != null)
                 {
-                    if (request.Location.Lat != default)
-                        rider.Lat = request.Location.Lat;
-                    if (request.Location.Lang != default)
-                        rider.Lang = request.Location.Lang;
-                    if (!string.IsNullOrEmpty(request.Location.Area))
-                        rider.Area = request.Location.Area;
+                    if (request.Location.lat != default)
+                        rider.Lat = request.Location.lat;
+                    if (request.Location.lang != default)
+                        rider.Lang = request.Location.lang;
+                    if (!string.IsNullOrEmpty(request.Location.area))
+                        rider.Area = request.Location.area;
                 }
 
                 _logger.LogInformation("Updating rider in repository for user: {Email}", user.Email);
@@ -337,7 +337,7 @@ namespace VROOM.Services
                     phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
-                    VehicleStatus = rider.VehicleStatus,
+                    VehicleStatus = rider.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                     ExperienceLevel = rider.ExperienceLevel,
                     Location = new LocationDto
                     {
@@ -987,7 +987,7 @@ namespace VROOM.Services
                 }
 
                 // Verify Business Owner exists
-                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
+                var businessOwner = await _businessOwnerRepo.GetAsync(businessOwnerId);
                 if (businessOwner == null)
                 {
                     _logger.LogWarning("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
@@ -995,7 +995,7 @@ namespace VROOM.Services
                 }
 
                 // Verify the caller is a Business Owner
-                var roles = await userManager.GetRolesAsync(businessOwner.User);
+                var roles = await _userManager.GetRolesAsync(businessOwner.User);
                 if (!roles.Contains(RoleConstants.BusinessOwner))
                 {
                     _logger.LogWarning("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
@@ -1003,7 +1003,7 @@ namespace VROOM.Services
                 }
 
                 // Fetch riders associated with the Business Owner
-                var riders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+                var riders = await _riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
 
                 int onDeliveryCount = riders.Count(r => r.Status == RiderStatusEnum.OnDelivery);
 
@@ -1019,7 +1019,7 @@ namespace VROOM.Services
                     phoneNumber = r.User.PhoneNumber,
                     BusinessID = r.BusinessID,
                     VehicleType = r.VehicleType,
-                    VehicleStatus = r.VehicleStatus,
+                    VehicleStatus = r.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                     ExperienceLevel = r.ExperienceLevel,
                     Location = new LocationDto
                     {
@@ -1551,7 +1551,7 @@ namespace VROOM.Services
                     var orderHasMaxWeight = (await _orderRepository.GetListLocalOrDbAsync(o => o.Weight == maxWeights)).FirstOrDefault();
                     var riders = await _riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
-                        .Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
+                        .Where(r => r.VehicleStatus == VehicleTypeStatus.Good && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
                         .ToList();
 
                     if (!filteredRiders.Any())
@@ -2047,14 +2047,6 @@ namespace VROOM.Services
         public async Task CheckAndAssignOverdueShipments()
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var currentTime = DateTime.Now.AddMinutes(-5);
-            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
-                .Include(s => s.waypoints)
-                .Include(s => s.Routes)
-                .ToListAsync();
-        public async Task CheckAndAssignOverdueShipments()
-        {
-            using var scope = _serviceScopeFactory.CreateScope();
             var currentTime = DateTime.Now.AddMinutes(-2);
 
             var overdueShipments = await _shipmentRepository.GetListLocalOrDbAsync(
@@ -2105,7 +2097,7 @@ namespace VROOM.Services
                 _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
 
                 var availableRiders = await _riderRepository.GetListLocalOrDbAsync(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted && r.Status == RiderStatusEnum.Available, true, r => r.User);
-                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == "Good" && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight)).ToList();
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == VehicleTypeStatus.Good && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight)).ToList();
 
                 if (suitableRiders.Any())
                 {

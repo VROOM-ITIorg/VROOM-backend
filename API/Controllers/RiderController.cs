@@ -211,7 +211,7 @@ namespace API.Controllers
                         phoneNumber = rider.User?.PhoneNumber,
                         BusinessID = rider.BusinessID,
                         VehicleType = rider.VehicleType,
-                        VehicleStatus = rider.VehicleStatus,
+                        VehicleStatus = rider.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                         ExperienceLevel = rider.ExperienceLevel,
                         Location = new LocationDto
                         {

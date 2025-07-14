@@ -68,6 +68,8 @@ builder.Services.AddScoped(typeof(RouteServices));
 builder.Services.AddScoped(typeof(OrderRouteServices));
 builder.Services.AddScoped(typeof(ShipmentRepository));
 builder.Services.AddScoped(typeof(ShipmentServices));
+builder.Services.AddScoped(typeof(FeedbackRepository));
+
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<ConcurrentDictionary<string, ShipmentConfirmation>>();

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ViewModels.Order;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace Delivery_System.Controllers
 {

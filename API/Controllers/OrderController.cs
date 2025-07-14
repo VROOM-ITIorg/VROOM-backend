@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using ViewModels.Order;
 using VROOM.Models;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace API.Controllers
 {
@@ -92,7 +92,13 @@ namespace API.Controllers
 
             var orders = await orderService.GetAllOrders(filter, pageNumber, pageSize);
             var totalCount = await orderService.GetTotalOrders(filter); // Assume this method exists
-            return Ok(new { data = orders, totalItems = totalCount });
+            return Ok(new { 
+                data = orders.Value.ordersDetails, 
+                totalItems = totalCount, 
+                cancelledOrders = orders.Value.cancelledOrdersCount ,
+                fullfilledOrders = orders.Value.fullFilledOrdersCount,
+                pendingOrders = orders.Value.pendingOrdersCount
+            });
         }
 
         //// update order status

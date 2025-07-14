@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
-//using ViewModels.Business_Owner;
+using ViewModels.Order;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
@@ -202,7 +202,7 @@ public async Task<IActionResult> UpdateProfile([FromForm] BusinessOwnerProfileVM
             {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Value);
+            return Ok(result);
         }
 
         [HttpGet("customers")]

@@ -21,6 +21,8 @@ using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
 using VROOM.ViewModels;
+using ViewModels.Order;
+namespace VROOM.Services;
 
 namespace VROOM.Services
 {
@@ -182,6 +184,7 @@ namespace VROOM.Services
                     UserName = request.Email,
                     Email = request.Email,
                     Name = request.Name,
+                    PhoneNumber = request.phoneNumber,
                     ProfilePicture = request.ProfilePicture
                 };
 
@@ -229,6 +232,7 @@ namespace VROOM.Services
                     UserID = user.Id,
                     Name = user.Name,
                     Email = user.Email,
+                    phoneNumber = user.PhoneNumber,
                     BusinessID = rider.BusinessID,
                     VehicleType = rider.VehicleType,
                     VehicleStatus = rider.VehicleStatus,
@@ -946,7 +950,8 @@ namespace VROOM.Services
                     return null;
                 }
 
-                _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
+            _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
+
                 return new OrderDetailsViewModel
                 {
                     Id = order.Id,
@@ -967,38 +972,51 @@ namespace VROOM.Services
                 return null;
             }
         }
-
-        public async Task<Result<List<RiderVM>>> GetRiders()
+        public async Task<Result<RiderDashboardResult>> GetRiders()
         {
             try
             {
-                var businessOwnerId = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                // Extract Business Owner ID from the HTTP context
+                var businessOwnerId = _httpContextAccessor.HttpContext?.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
                 if (string.IsNullOrEmpty(businessOwnerId))
                 {
                     _logger.LogWarning("Failed to retrieve riders: Business Owner ID not found in token.");
-                    return Result<List<RiderVM>>.Failure("Business Owner ID not found in token.");
+                    return Result<RiderDashboardResult>.Failure("Business Owner ID not found in token.");
                 }
 
-                var businessOwner = await _businessOwnerRepo.GetLocalOrDbAsync(b => b.UserID == businessOwnerId);
+                // Verify Business Owner exists
+                var businessOwner = await businessOwnerRepo.GetAsync(businessOwnerId);
                 if (businessOwner == null)
                 {
                     _logger.LogWarning("Failed to retrieve riders: Business Owner with ID {BusinessOwnerId} not found.", businessOwnerId);
-                    return Result<List<RiderVM>>.Failure("Business Owner not found.");
+                    return Result<RiderDashboardResult>.Failure("Business Owner not found.");
                 }
 
-                var roles = await _userManager.GetRolesAsync(businessOwner.User);
+                // Verify the caller is a Business Owner
+                var roles = await userManager.GetRolesAsync(businessOwner.User);
                 if (!roles.Contains(RoleConstants.BusinessOwner))
                 {
                     _logger.LogWarning("Failed to retrieve riders: Caller with ID {BusinessOwnerId} is not a Business Owner.", businessOwnerId);
-                    return Result<List<RiderVM>>.Failure("Caller is not a Business Owner.");
+                    return Result<RiderDashboardResult>.Failure("Caller is not a Business Owner.");
                 }
 
-                var riders = await _riderRepository.GetListLocalOrDbAsync(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted, true, r => r.User);
+                // Fetch riders associated with the Business Owner
+                var riders = await riderRepository.GetRidersForBusinessOwnerAsync(businessOwnerId);
+
+                int onDeliveryCount = riders.Count(r => r.Status == RiderStatusEnum.OnDelivery);
+
+                // Count riders with Available status
+                int availableCount = riders.Count(r => r.Status == RiderStatusEnum.Available);
+
+                // Map riders to RiderVM
                 var riderVMs = riders.Select(r => new RiderVM
                 {
                     UserID = r.UserID,
                     Name = r.User.Name,
                     Email = r.User.Email,
+                    phoneNumber = r.User.PhoneNumber,
                     BusinessID = r.BusinessID,
                     VehicleType = r.VehicleType,
                     VehicleStatus = r.VehicleStatus,
@@ -1013,12 +1031,12 @@ namespace VROOM.Services
                 }).ToList();
 
                 _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
-                return Result<List<RiderVM>>.Success(riderVMs);
+                return Result<RiderDashboardResult>.Success(new RiderDashboardResult { riderVMs = riderVMs,OnDeliveryCount = onDeliveryCount, AvailableCount = availableCount });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.");
-                return Result<List<RiderVM>>.Failure("An error occurred while retrieving riders.");
+                //  _logger.LogError(ex, "An error occurred while retrieving riders for Business Owner with ID {BusinessOwnerId}.", businessOwnerId);
+                return Result<RiderDashboardResult>.Failure("An error occurred while retrieving riders.");
             }
         }
 
@@ -2025,6 +2043,15 @@ namespace VROOM.Services
         //    }
         //}
 
+
+        public async Task CheckAndAssignOverdueShipments()
+        {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var currentTime = DateTime.Now.AddMinutes(-5);
+            var overdueShipments = await shipmentRepository.GetList(s => s.InTransiteBeginTime.HasValue && s.InTransiteBeginTime.Value <= currentTime && s.ShipmentState != ShipmentStateEnum.Assigned && !s.IsDeleted)
+                .Include(s => s.waypoints)
+                .Include(s => s.Routes)
+                .ToListAsync();
         public async Task CheckAndAssignOverdueShipments()
         {
             using var scope = _serviceScopeFactory.CreateScope();

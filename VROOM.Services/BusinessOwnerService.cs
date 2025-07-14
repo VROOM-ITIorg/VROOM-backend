@@ -1614,7 +1614,7 @@ namespace VROOM.Services
                             continue;
                         }
 
-                        var confirmation = await WaitForRiderShipmentResponseAsync(rider.UserID, shipment.Id, timeoutSeconds: 30);
+                        var confirmation = await WaitForRiderShipmentResponseAsync(rider.UserID, shipment.Id, timeoutSeconds: 20);
                         if (confirmation == ConfirmationStatus.Accepted)
                         {
                             orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds.Contains(o.Id));

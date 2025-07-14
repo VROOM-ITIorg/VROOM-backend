@@ -202,7 +202,7 @@ public async Task<IActionResult> UpdateProfile([FromForm] BusinessOwnerProfileVM
             {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Value);
+            return Ok(result);
         }
 
         [HttpGet("customers")]

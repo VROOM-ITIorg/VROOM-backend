@@ -228,8 +228,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
 
-RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
-RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
+//RecurringJob.AddOrUpdate<BusinessOwnerService>("check-overdue-shipments", service => service.CheckAndAssignOverdueShipments(), Cron.Minutely());
+//RecurringJob.AddOrUpdate<BusinessOwnerService>("check-orders-without-shipment", service => service.CheckOrderCreatedWithoutShipments(), Cron.Minutely());
 
 app.MapControllers();
 app.MapHub<RiderLocationHub>("/RiderLocationHub");

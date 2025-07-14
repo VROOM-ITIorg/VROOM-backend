@@ -29,7 +29,7 @@ namespace VROOM.Models
         public float ExperienceLevel { get; set; }
         public float Rating { get; set; }
 
-        public DateTime Lastupdated { get; set; }
+        public DateTime ? Lastupdated { get; set; }
 
         public virtual BusinessOwner BusinessOwner { get; set; }
         public virtual User User { get; set; }

@@ -11,6 +11,7 @@ using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Repository;
+using Microsoft.AspNetCore.Http;
 
 namespace VROOM.Services
 {
@@ -77,8 +78,8 @@ namespace VROOM.Services
                     RiderId = l.UserID,
                     Latitude = l.Lat,
                     Longitude = l.Lang,
-                    LastUpdated = l.Lastupdated
-                })
+                    LastUpdated = (DateTime)l.Lastupdated
+                }  )
                 .FirstOrDefaultAsync();
 
             return location;

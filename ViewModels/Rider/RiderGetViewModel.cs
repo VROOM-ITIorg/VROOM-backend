@@ -19,5 +19,6 @@ namespace ViewModels
         public float ExperienceLevel { get; init; }
         public LocationDto Location { get; init; }
         public RiderStatusEnum Status { get; init; }
+        public string? ProfilePicture { get; set; }
     }
 }

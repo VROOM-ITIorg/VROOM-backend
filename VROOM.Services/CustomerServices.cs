@@ -1,8 +1,10 @@
-﻿using System;
+﻿// VROOM.Services/CustomerServices.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ViewModels.Feedback;
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Repositories;
@@ -12,31 +14,36 @@ namespace VROOM.Services
 {
     public class CustomerServices
     {
-        private CustomerRepository customerRepository;
-        private UserRepository userRepository;
-        private UserService userService;
+        private readonly CustomerRepository customerRepository;
+        private readonly UserRepository userRepository;
+        private readonly UserService userService;
+        private readonly FeedbackRepository feedbackRepository;
 
-        public CustomerServices(CustomerRepository _customerRepository, UserRepository _userRepository, UserService _userService)
+        public CustomerServices(CustomerRepository _customerRepository, UserRepository _userRepository, UserService _userService, FeedbackRepository _feedbackRepository)
         {
             customerRepository = _customerRepository;
             userRepository = _userRepository;
             userService = _userService;
+            feedbackRepository = _feedbackRepository;
         }
+
         public async Task<Customer> CheckForCustomer(CustomerAddViewModel CustomerAddVM)
         {
-            var isThereCustomer =  await customerRepository.GetByUsernameAsync(CustomerAddVM.Username);
+            var isThereCustomer = await customerRepository.GetByUsernameAsync(CustomerAddVM.Username);
 
-            // if there are a customer we will return him but if not we will create one
             if (isThereCustomer == null)
             {
-               
-                // here we will create a customer
                 return await userService.AddNewCustomerAsync(CustomerAddVM);
             }
             else
             {
                 return isThereCustomer;
             }
+        }
+
+        public async Task<bool> AddFeedbackAsync(string customerId, FeedbackRequest feedbackRequest)
+        {
+            return await feedbackRepository.AddFeedbackAsync(customerId, feedbackRequest);
         }
     }
 }

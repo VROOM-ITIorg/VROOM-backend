@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ViewModels;
+using ViewModels.Order;
 using ViewModels.User;
 using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Repository;
-using VROOM.ViewModels;
 
 namespace VROOM.Services
 {

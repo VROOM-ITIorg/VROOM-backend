@@ -7,29 +7,29 @@ using ViewModels.Route;
 using VROOM.Models;
 
 
-namespace VROOM.ViewModels
+namespace ViewModels.Order
 {
-    //public class OrderViewModel
-    //{
-    //    public int Id { get; set; }
-    //    public string CustomerID { get; set; }
-    //    public int RiderID { get; set; }
-    //    public string ItemsType { get; set; }
-    //    public string Title { get; set; }
-    //    public bool IsBreakable { get; set; }
-    //    public string Notes { get; set; }
-    //    public string Details { get; set; }
-    //    public float Weight { get; set; }
-    //    public string Priority { get; set; }
-    //    public OrderStateEnum State { get; set; }
-    //    public decimal OrderPrice { get; set; }
-    //    public decimal DeliveryPrice { get; set; }
-    //    public DateTime Date { get; set; }
-    //    public string RiderName { get; set; }
-    //    public string CustomerName { get; set; }
-    //    public string BusinessOwner { get; set; }
-    //    public List<OrderPerformanceReportViewModel> PerformanceReports { get; set; }
-    //}
+    public class OrderViewModel
+    {
+        public int Id { get; set; }
+        public string CustomerID { get; set; }
+        public int RiderID { get; set; }
+        public string ItemsType { get; set; }
+        public string Title { get; set; }
+        public bool IsBreakable { get; set; }
+        public string Notes { get; set; }
+        public string Details { get; set; }
+        public float Weight { get; set; }
+        public string Priority { get; set; }
+        public OrderStateEnum State { get; set; }
+        public decimal OrderPrice { get; set; }
+        public decimal DeliveryPrice { get; set; }
+        public DateTime Date { get; set; }
+        public string RiderName { get; set; }
+        public string CustomerName { get; set; }
+        public string BusinessOwner { get; set; }
+        public List<OrderPerformanceReportViewModel> PerformanceReports { get; set; }
+    }
 
     public class OrderPerformanceReportViewModel
     {
@@ -67,7 +67,7 @@ namespace VROOM.ViewModels
         public string Title { get; set; }
         public DateTime Date { get; set; }
         public string CustomerName { get; set; }
-        public string Priority { get; set; } // ممكن تستبدلها بـ enum لو عندك مستويات ثابتة
+        public string Priority { get; set; } 
         public string State { get; set; }
         public string RiderName { get; set; }
     }
@@ -120,5 +120,35 @@ namespace VROOM.ViewModels
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
+
+
+    public class OrderFeedbackViewModel
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string BusinessOwner { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerID { get; set; }
+        public string RiderID { get; set; }
+        public string RiderName { get; set; }
+        public string Priority { get; set; } 
+        public string State { get; set; }
+        public bool IsBreakable { get; set; }
+        public string Details { get; set; }
+        public string Notes { get; set; }
+        public float Weight { get; set; }
+        public decimal OrderPrice { get; set; }
+        public decimal DeliveryPrice { get; set; }
+        public DateTime Date { get; set; }
+        public string CustomerPhone { get; set; }
+
+
+        public int? shipmentId { get; set; }
+    }
+
+
+
+
+
 }
 

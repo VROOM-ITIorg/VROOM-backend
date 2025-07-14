@@ -1649,13 +1649,15 @@ public class BusinessOwnerService
             }
 
 
-            var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-            var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-            if (!orders.Any())
-            {
-                logger.LogWarning($"No valid orders found in shipment {shipment.Id}.");
-                return Result.Failure("No valid orders found in shipment.");
-            }
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId ,weight = w.Order.Weight}).ToList();
+                var orderIds =  orderIds_Weights.Select(o => o.id).ToList();
+
+                var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
+                if (!orders.Any())
+                {
+                    logger.LogWarning($"No valid orders found in shipment {shipment.Id}.");
+                    return Result.Failure("No valid orders found in shipment.");
+                }
 
 
             foreach (var order in orders)
@@ -1690,13 +1692,16 @@ public class BusinessOwnerService
             while (currentCycle < maxCycles)
             {
 
-                orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-                orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted);
-                if (orders.Any(o => o.State != OrderStateEnum.Pending))
-                {
-                    logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
-                    return Result.Failure("One or more orders are no longer pending.");
-                }
+                     orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                     orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted);
+                     var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
+
+                    var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
+                    //if (orders.Any(o => o.State != OrderStateEnum.Pending))
+                    //{
+                    //    logger.LogInformation($"One or more orders in shipment {shipment.Id} are no longer pending. Stopping assignment.");
+                    //    return Result.Failure("One or more orders are no longer pending.");
+                    //}
 
                     var riders = await riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
@@ -2199,12 +2204,15 @@ public class BusinessOwnerService
                 .Include(s => s.Routes)
                 .ToListAsync();
 
-        foreach (var shipment in overdueShipments)
-        {
+            foreach (var shipment in overdueShipments)
+            {
+                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+                var orderIds = orderIds_Weights.Select(o => o.id).ToList();
+                var orders = orderRepository.GetList(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
+                var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
 
-            var orderIds = shipment.waypoints?.Select(w => w.orderId).ToList() ?? new List<int>();
-            var orders = orderRepository.GetList(o => orderIds.Contains(o.Id) && !o.IsDeleted && o.State == OrderStateEnum.Created);
-            var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
+                var orderHasMaxWeight = orderRepository.GetList(o => o.Weight == maxWeights).FirstOrDefault();
+                var businessOwnerId = shipment.waypoints.FirstOrDefault().Order.BusinessID;
 
             var result = await AssignOrderAutomaticallyAsync(businessOwnerId, shipment);
             if (result.IsSuccess)

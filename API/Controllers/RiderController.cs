@@ -267,9 +267,10 @@ namespace API.Controllers
         {
             try
             {
-                //_logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
-                //    orderId, riderId, newState);
+                _logger.LogInformation("Executing UpdateDeliveryStatusAsync for OrderId={OrderId}, RiderId={RiderId}, NewState={NewState}",
+                    orderId, riderId, newState);
 
+                // Your existing validation
                 var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
                 if (order == null)
                 {
@@ -284,23 +285,20 @@ namespace API.Controllers
                     throw new InvalidOperationException("Rider is not assigned to this order.");
                 }
 
-                order.State = newState;
-                order.ModifiedAt = DateTime.UtcNow;
-
-                //_logger.LogInformation("Saving changes for OrderId={OrderId}", orderId);
-                _context.SaveChanges();
+                
+                 await _riderService.UpdateDeliveryStatusAsync(riderId, orderId, newState);
 
                 await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
-                //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
-                return await Task.FromResult(order);
+                _logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
+                return order;
+
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
+                _logger.LogError(ex, "Failed to update delivery status for OrderId={OrderId}", orderId);
                 throw;
             }
         }
-
 
         [HttpGet("AllRiders")]
         [Authorize(Roles = "Admin,BusinessOwner")]

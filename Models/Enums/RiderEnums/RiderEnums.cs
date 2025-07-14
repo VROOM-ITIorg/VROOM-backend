@@ -14,8 +14,15 @@ namespace VROOM.Models
     }
     public enum VehicleTypeEnum
     {
+        Motorcycle,
         Car,
         Van,
-        Motorcycle
    }
+    public enum VehicleTypeStatus
+    {
+        Unknowen,
+        Bad,
+        Good,
+        Excellant
+    }
 }

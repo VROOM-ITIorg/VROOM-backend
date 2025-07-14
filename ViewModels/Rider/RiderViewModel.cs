@@ -95,7 +95,7 @@ namespace VROOM.ViewModels
 
         public VehicleTypeEnum VehicleType { get; init; }
 
-        public string VehicleStatus { get; init; }
+        public VehicleTypeStatus VehicleStatus { get; init; }
 
         public float ExperienceLevel { get; init; }
 
@@ -112,11 +112,11 @@ namespace VROOM.ViewModels
     }
     public record LocationDtoUpdate
     {
-        public double Lat { get; init; }
+        public double lat { get; init; }
 
-        public double Lang { get; init; }
+        public double lang { get; init; }
 
-        public string? Area { get; init; }
+        public string? area { get; init; }
     }
 
 
@@ -133,7 +133,7 @@ namespace VROOM.ViewModels
         public string phoneNumber { get; init; }
         public VehicleTypeEnum VehicleType { get; init; }
 
-        public string VehicleStatus { get; init; }
+        public VehicleTypeStatus VehicleStatus { get; init; }
 
         public float ExperienceLevel { get; init; }
 
@@ -151,7 +151,7 @@ namespace VROOM.ViewModels
         public string ProfilePicture { get; set; }
         public string? phoneNumber {  get; set; } 
         public VehicleTypeEnum VehicleType { get; set; }
-        public string VehicleStatus { get; set; }
+        public VehicleTypeStatus VehicleStatus { get; set; }
         public float ExperienceLevel { get; set; }
         public LocationDto Location { get; set; }
     }
@@ -164,9 +164,16 @@ namespace VROOM.ViewModels
         public string? ProfilePicture { get; set; }
         public string? phoneNumber { get; set; }
         public VehicleTypeEnum VehicleType { get; set; } 
-        public string? VehicleStatus { get; set; }
+        public VehicleTypeStatus? VehicleStatus { get; set; }
         public float ExperienceLevel { get; set; } 
         public LocationDtoUpdate? Location { get; set; }
+    }
+
+    public class RiderDashboardResult
+    {
+        public List<RiderVM> riderVMs { get; set; }
+        public int OnDeliveryCount { get; set; }
+        public int AvailableCount { get; set; }
     }
 
 }

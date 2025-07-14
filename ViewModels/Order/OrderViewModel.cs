@@ -71,6 +71,17 @@ namespace VROOM.ViewModels
         public string State { get; set; }
         public string RiderName { get; set; }
     }
+
+    public class OrderListResponseViewModel
+    {
+        public List<OrderListDetailsViewModel> ordersDetails { get; set; }
+
+        public int pendingOrdersCount { get; set; }
+
+        public int fullFilledOrdersCount { get; set; }
+        public int cancelledOrdersCount { get; set; }
+
+    }
     public class OrderDetailsViewModel
     {
         public int Id { get; set; }

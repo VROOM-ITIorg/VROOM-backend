@@ -138,7 +138,7 @@ namespace API.Controllers
             {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Value);
+            return Ok(result);
         }
 
         [HttpGet("customers")]

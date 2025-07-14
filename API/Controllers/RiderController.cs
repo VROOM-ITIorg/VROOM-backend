@@ -291,7 +291,7 @@ namespace API.Controllers
                 _context.SaveChanges();
 
                 //_logger.LogInformation("Successfully updated OrderId={OrderId} to State={NewState}", orderId, newState);
-                return Task.FromResult(order);
+                return await Task.FromResult(order);
             }
             catch (Exception ex)
             {

@@ -1540,7 +1540,7 @@ namespace VROOM.Services
                 while (currentCycle < maxCycles)
                 {
                     orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
-                    orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted, true);
+                    orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted, false);
                     var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
 
                     var orderHasMaxWeight = (await _orderRepository.GetListLocalOrDbAsync(o => o.Weight == maxWeights)).FirstOrDefault();

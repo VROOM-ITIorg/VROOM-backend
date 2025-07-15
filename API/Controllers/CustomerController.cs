@@ -99,7 +99,7 @@ namespace API.Controllers
         }
 
         [HttpPost("feedback")]
-        [Authorize(Roles = "Customer")] // Requires customer to be logged in
+        //[Authorize(Roles = "Customer")] // Requires customer to be logged in
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackRequest feedbackRequest)
@@ -109,8 +109,7 @@ namespace API.Controllers
                 return BadRequest(new { error = "Feedback request or RiderId is required." });
             }
 
-            var customerId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(customerId))
+            if (string.IsNullOrEmpty(feedbackRequest.sendCustomerId))
             {
                 return Unauthorized(new { error = "Customer ID not found in token." });
             }
@@ -121,7 +120,7 @@ namespace API.Controllers
             //    return Unauthorized(new { error = "You are not authorized to submit feedback for this customer." });
             //}
 
-            var success = await _feedbackRepository.AddFeedbackAsync(customerId, feedbackRequest);
+            var success = await _feedbackRepository.AddFeedbackAsync(feedbackRequest.sendCustomerId, feedbackRequest);
             if (!success)
             {
                 return BadRequest(new { error = "Feedback already exists for this rider or failed to save." });

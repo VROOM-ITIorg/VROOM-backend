@@ -11,9 +11,10 @@ using VROOM.Models;
 using VROOM.Repositories;
 using VROOM.Services;
 using VROOM.ViewModels;
-using static VROOM.Services.BusinessOwnerService;
 using Microsoft.AspNetCore.Identity;
 using ViewModels.User;
+using static VROOM.Services.BusinessOwnerService;
+
 
 namespace API.Controllers
 {

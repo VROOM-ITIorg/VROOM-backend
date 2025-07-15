@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using VROOM.Services;
 using VROOM.ViewModels;
@@ -17,12 +18,14 @@ namespace API.Controllers
         }
 
         // Get all notifications for a user
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserNotifications(string userId)
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUserNotifications()
         {
-            var notifications = await notificationService.GetUserNotificationsAsync(userId);
+            var userid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var notifications = await notificationService.GetUserNotificationsAsync(userid);
             return Ok(notifications);
         }
+
 
         //  Send order status update notification
         //[HttpPost("order-status")]

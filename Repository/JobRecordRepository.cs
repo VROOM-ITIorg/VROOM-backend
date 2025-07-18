@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
-using VROOM.Models.JobRecords;
-using VROOM.Repositories;
+using VROOM.Models;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public class JobRecordRepository : BaseRepository<JobRecord>
     {

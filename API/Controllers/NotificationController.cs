@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using VROOM.Services;
-using VROOM.ViewModels;
 
 namespace API.Controllers
 {

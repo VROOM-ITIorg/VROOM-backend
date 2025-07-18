@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
 using VROOM.Models;
-using System.Threading.Tasks;
 
 namespace VROOM.Repositories
 {

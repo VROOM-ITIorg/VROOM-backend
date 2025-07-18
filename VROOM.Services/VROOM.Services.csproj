@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hubs\Hubs.csproj" />
-    <ProjectReference Include="..\Repository\VROOM.Repository.csproj" />
+    <ProjectReference Include="..\Repository\VROOM.Repositories.csproj" />
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
   </ItemGroup>
 

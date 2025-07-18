@@ -1,17 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Core.Types;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Threading.Tasks;
-using ViewModels.Shipment;
+﻿using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
-using VROOM.Repository;
-using Microsoft.AspNetCore.Http;
 
 namespace VROOM.Services
 {
@@ -37,8 +29,9 @@ namespace VROOM.Services
         private readonly Microsoft.EntityFrameworkCore.DbSet<OrderRider> _orderRiders;
         private readonly ShipmentServices _shipmentServices;
         private readonly OrderService _orderService;
+        private readonly FeedbackRepository _feedbackRepository;
 
-        public RiderService(RiderRepository riderRepository, VroomDbContext context, OrderRepository orderRepository, ShipmentRepository shipmentRepository, ShipmentServices shipmentServices, OrderRouteRepository orderRouteRepository, RouteRepository routeRepository, OrderService orderService)
+        public RiderService(RiderRepository riderRepository, VroomDbContext context, OrderRepository orderRepository, ShipmentRepository shipmentRepository, ShipmentServices shipmentServices, OrderRouteRepository orderRouteRepository, RouteRepository routeRepository, OrderService orderService, FeedbackRepository feedbackRepository)
         {
             _riderRepository = riderRepository ?? throw new ArgumentNullException(nameof(riderRepository));
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -50,6 +43,7 @@ namespace VROOM.Services
             _orderService = orderService;
             _orderRepository = orderRepository;
             _shipmentRepository = shipmentRepository;
+            _feedbackRepository = feedbackRepository;
         }
 
         public Rider RegisterRiderAsync(Rider rider)
@@ -85,14 +79,40 @@ namespace VROOM.Services
             return location;
         }
 
-        public async Task<Rider> GetRiderProfileAsync(string riderId)
+        public async Task<RiderProfileDto> GetRiderProfileAsync(string riderId)
         {
-            var rider = await _riderRepository.GetAsync(riderId);
 
-            if (rider == null)
-                throw new KeyNotFoundException($"Rider with ID {riderId} not found.");
+            var rider = await _riderRepository.GetLocalOrDbAsync(r => r.UserID == riderId);
+            var shipments = await _shipmentRepository.GetListLocalOrDbAsync(s => s.RiderID == riderId && !s.IsDeleted,true);
+            var orders = await _orderRepository.GetListLocalOrDbAsync(o => o.RiderID == riderId && !o.IsDeleted, true);
 
-            return rider;
+            var feedbacks = _context.Feedbacks.FromSql($"SELECT TOP 3 * FROM Feedbacks WHERE RiderID = {riderId} ORDER BY ModifiedAt DESC")
+                .Select(f => new { Comment = f.Message, f.Rating, f.ModifiedAt })
+                .ToList();
+
+            RiderProfileDto riderProfileDto = new()
+            {
+                id = rider.UserID,
+                name = rider.User?.Name,
+                email = rider.User?.Email,
+                phone = rider.User?.PhoneNumber,
+                status = rider.Status.ToString(),
+                vehicleType = rider.VehicleType.ToString(),
+                vehicleStatus = rider.VehicleStatus,
+                location = new LocationDto{ latitude = rider.Lat, longitude = rider.Lang, area = rider.Area },
+                experienceLevel = rider.ExperienceLevel,
+                rating = rider.Rating,
+                feedbacks = feedbacks,
+                stats = new
+                {
+                    assignedShipments = shipments.Count(s => s.ShipmentState == ShipmentStateEnum.Assigned),
+                    completedShipments = shipments?.Count(s => s.ShipmentState == ShipmentStateEnum.Delivered) ?? 0,
+                    assignedOrders = orders?.Count(o => o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Confirmed) ?? 0,
+                    completedOrders = orders?.Count(o => o.State == OrderStateEnum.Delivered) ?? 0
+                },
+                profilePicture = rider.User?.ProfilePicture
+            };
+            return  riderProfileDto;
         }
 
 

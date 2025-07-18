@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using VROOM.Data;
-using VROOM.Repositories;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public class TransactionWork<T> where T : class
     {

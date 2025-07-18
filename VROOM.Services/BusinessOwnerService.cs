@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Transactions;
 using Hangfire;
 using Hubs;
@@ -13,27 +10,19 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ViewModels.Order;
 using ViewModels.Shipment;
 using ViewModels.User;
-using VROOM.Data;
 using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
-using VROOM.Repository;
 using VROOM.ViewModels;
-using ViewModels.Order;
-using System.Security.Claims;
+using static NuGet.Packaging.PackagingConstants;
+using LocationDto = VROOM.ViewModels.LocationDto;
 
 namespace VROOM.Services
 {
-    public class CreateOrderWithAssignmentRequest
-    {
-        public OrderCreateViewModel Order { get; set; }
-        public string AssignmentType { get; set; } // "Manual" or "Automatic"
-        public string? RiderId { get; set; } // Required for manual assignment
-    }
-
-    public class BusinessOwnerService
+       public class BusinessOwnerService
     {
         private readonly UserManager<User> _userManager;
         private readonly BusinessOwnerRepository _businessOwnerRepo;
@@ -184,7 +173,7 @@ namespace VROOM.Services
                     UserName = request.Email,
                     Email = request.Email,
                     Name = request.Name,
-                    PhoneNumber = request.phoneNumber,
+                    PhoneNumber = NormalizePhoneNumber(request.phoneNumber),
                     ProfilePicture = request.ProfilePicture
                 };
 
@@ -825,7 +814,7 @@ namespace VROOM.Services
                         EndArea = route.DestinationArea,
                         zone = order.zone,
                         MaxConsecutiveDeliveries = 10,
-                        OrderIds = [ order.Id ]
+                        OrderIds = [order.Id]
                     });
 
                     route.ShipmentID = shipment.Id;
@@ -909,16 +898,6 @@ namespace VROOM.Services
             }
         }
 
-        public class CustomerRegisterRequest
-        {
-            public string Name { get; set; }
-            public string Email { get; set; }
-            public string PhoneNumber { get; set; }
-            public string Password { get; set; }
-            public string ProfilePicture { get; set; }
-            public LocationDto Location { get; set; }
-        }
-
         public async Task<OrderDetailsViewModel?> ViewAssignedOrderAsync(int orderId)
         {
             try
@@ -950,7 +929,7 @@ namespace VROOM.Services
                     return null;
                 }
 
-            _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
+                _logger.LogInformation($"Rider {riderId} successfully viewed Order {orderId}.");
 
                 return new OrderDetailsViewModel
                 {
@@ -1031,7 +1010,7 @@ namespace VROOM.Services
                 }).ToList();
 
                 _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
-                return Result<RiderDashboardResult>.Success(new RiderDashboardResult { riderVMs = riderVMs,OnDeliveryCount = onDeliveryCount, AvailableCount = availableCount });
+                return Result<RiderDashboardResult>.Success(new RiderDashboardResult { riderVMs = riderVMs, OnDeliveryCount = onDeliveryCount, AvailableCount = availableCount });
             }
             catch (Exception ex)
             {
@@ -1328,7 +1307,7 @@ namespace VROOM.Services
                         EndArea = route.DestinationArea,
                         zone = order.zone,
                         MaxConsecutiveDeliveries = 10,
-                        OrderIds = [ order.Id ]
+                        OrderIds = [order.Id]
                     });
 
                     route.ShipmentID = shipment.Id;
@@ -1488,12 +1467,16 @@ namespace VROOM.Services
                 logger.LogWarning($"Business owner with ID {businessOwnerId} not found.");
                 return Result.Failure("Business owner not found.");
             }
+            var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
+            var orderIds = orderIds_Weights.Select(o => o.id).ToList();
+
+            var orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds.Contains(o.Id) && !o.IsDeleted, false);
 
             try
             {
                 shipment = await _shipmentRepository.GetLocalOrDbAsync(
                     s => s.Id == shipment.Id && !s.IsDeleted,
-                    true,
+                    false,
                     s => s.waypoints,
                     s => s.Routes
                 );
@@ -1504,10 +1487,7 @@ namespace VROOM.Services
                     return Result.Failure("Shipment not found.");
                 }
 
-                var orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
-                var orderIds = orderIds_Weights.Select(o => o.id).ToList();
 
-                var orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds.Contains(o.Id) && !o.IsDeleted, true);
                 if (!orders.Any())
                 {
                     logger.LogWarning($"No valid orders found in shipment {shipment.Id}.");
@@ -1531,17 +1511,17 @@ namespace VROOM.Services
                     }
                 }
 
-            int maxCycles = 3;
-            int currentCycle = 0;
-            var attemptedRiders = new HashSet<string>();
-            var rejectedRiders = new HashSet<string>();
-            TimeSpan delayBetweenCycles = TimeSpan.FromSeconds(10);
+                int maxCycles = 3;
+                int currentCycle = 0;
+                var attemptedRiders = new HashSet<string>();
+                var rejectedRiders = new HashSet<string>();
+                TimeSpan delayBetweenCycles = TimeSpan.FromSeconds(10);
 
                 while (currentCycle < maxCycles)
                 {
                     orderIds_Weights = shipment.waypoints?.Select(w => new { id = w.orderId, weight = w.Order.Weight }).ToList();
                     orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds_Weights.Select(o => o.id).Contains(o.Id) && !o.IsDeleted, true);
-                    var maxWeights = orderIds_Weights.Select(o => o.weight).ToList().Max();
+                    var maxWeights = _orderRepository.GetMaxWeight(shipment.Id);
 
                     var orderHasMaxWeight = (await _orderRepository.GetListLocalOrDbAsync(o => o.Weight == maxWeights)).FirstOrDefault();
                     var riders = await _riderRepository.GetAvaliableRiders(businessOwnerId);
@@ -1594,7 +1574,6 @@ namespace VROOM.Services
                         foreach (var order in orders)
                         {
                             order.RiderID = rider.UserID;
-                            order.State = OrderStateEnum.Pending;
                             order.ModifiedBy = businessOwnerId;
                             order.ModifiedAt = DateTime.Now;
                             _orderRepository.Update(order);
@@ -1612,7 +1591,6 @@ namespace VROOM.Services
                         var confirmation = await WaitForRiderShipmentResponseAsync(rider.UserID, shipment.Id, timeoutSeconds: 20);
                         if (confirmation == ConfirmationStatus.Accepted)
                         {
-                            orders = await _orderRepository.GetListLocalOrDbAsync(o => orderIds.Contains(o.Id));
                             foreach (var order in orders)
                             {
                                 order.State = OrderStateEnum.Confirmed;
@@ -1665,6 +1643,14 @@ namespace VROOM.Services
             }
             catch (Exception ex)
             {
+                foreach (var order in orders)
+                {
+                    order.RiderID = null;
+                    order.State = OrderStateEnum.Created;
+                    order.ModifiedBy = businessOwnerId;
+                    order.ModifiedAt = DateTime.Now;
+                    _orderRepository.Update(order);
+                }
                 logger.LogError(ex, $"Error assigning shipment {shipment.Id} for business owner {businessOwnerId}.");
                 return Result.Failure("An error occurred while assigning the shipment.");
             }
@@ -1751,17 +1737,6 @@ namespace VROOM.Services
                 return 100;
 
             return 100 * (dMax - distance) / (dMax - dMin);
-        }
-
-        private int GetMaxWeight(VehicleTypeEnum type)
-        {
-            switch (type)
-            {
-                case VehicleTypeEnum.Motorcycle: return 50;
-                case VehicleTypeEnum.Car: return 100;
-                case VehicleTypeEnum.Van: return 200;
-                default: return 0;
-            }
         }
 
         private double GetExperienceScore(float experienceLevel)
@@ -1970,74 +1945,6 @@ namespace VROOM.Services
                 return Result<string>.Failure($"An error occurred while creating and assigning the order: {ex.Message}");
             }
         }
-
-
-        //private void StartShipmentConfirmationTimer(string riderId, int shipmentId, string businessOwnerId)
-        //{
-        //    var timer = new Timer(async _ =>
-        //    {
-        //        if (_confirmationStore.TryGetValue(riderId, out var message) && message.Status == ConfirmationStatus.Pending)
-        //        {
-        //            await HandleRiderShipmentTimeout(riderId, shipmentId, businessOwnerId);
-        //        }
-        //    }, null, TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
-        //}
-
-
-        //private async Task HandleRiderShipmentTimeout(string riderId, int shipmentId, string businessOwnerId)
-        //{
-        //    _logger.LogWarning($"Rider {riderId} did not respond within 30 seconds for shipment {shipmentId}");
-
-        //    // Remove the confirmation to prevent re-processing
-        //    _confirmationStore.TryRemove(riderId, out _);
-
-        //    // Check if we should try reassigning
-        //    var order = await orderRepository.GetAsync(shipmentId);
-        //    if (order == null || order.IsDeleted || order.State != OrderStateEnum.Pending)
-        //    {
-        //        _logger.LogWarning($"Cannot reassign shipment {shipmentId}: Invalid order state or order not found.");
-        //        return;
-        //    }
-
-        //    await AssignShipmentToAnotherRider(shipmentId, businessOwnerId);
-        //}
-
-
-        //private async Task AssignShipmentToAnotherRider(int orderId, string businessOwnerId)
-        //{
-        //    var order = await orderRepository.GetAsync(orderId);
-        //    if (order == null || order.IsDeleted)
-        //    {
-        //        _logger.LogWarning($"Cannot reassign order {orderId}: Order not found or deleted.");
-        //        return;
-        //    }
-
-        //    var shipmentId = order.OrderRoute?.Route?.ShipmentID;
-        //    if (!shipmentId.HasValue)
-        //    {
-        //        _logger.LogWarning($"Cannot reassign order {orderId}: Shipment ID not found.");
-        //        return;
-        //    }
-
-        //    var shipment = await shipmentRepository.GetAsync(shipmentId.Value);
-        //    if (shipment == null)
-        //    {
-        //        _logger.LogWarning($"Cannot reassign order {orderId}: Shipment {shipmentId} not found.");
-        //        return;
-        //    }
-
-        //    var result = await AssignOrderAutomaticallyAsync(businessOwnerId, orderId, shipment);
-
-        //    if (result.IsSuccess)
-        //    {
-        //        _logger.LogInformation($"Shipment {shipmentId} reassigned to another rider.");
-        //    }
-        //    else
-        //    {
-        //        _logger.LogWarning($"No available riders for shipment {shipmentId} after timeout.");
-        //    }
-        //}
-
 
         public async Task CheckAndAssignOverdueShipments()
         {

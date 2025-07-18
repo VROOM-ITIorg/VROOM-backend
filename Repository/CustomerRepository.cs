@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using VROOM.Data;
 using VROOM.Models;
-using VROOM.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public class CustomerRepository : BaseRepository<Customer>
     {

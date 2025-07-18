@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using VROOM.Data;
 using VROOM.Models;
-using VROOM.Repositories;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public class UserRepository : BaseRepository<User>
     {

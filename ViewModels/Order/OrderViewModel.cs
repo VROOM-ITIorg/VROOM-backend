@@ -146,9 +146,12 @@ namespace ViewModels.Order
         public int? shipmentId { get; set; }
     }
 
-
-
-
+    public class CreateOrderWithAssignmentRequest
+    {
+        public OrderCreateViewModel Order { get; set; }
+        public string AssignmentType { get; set; } // "Manual" or "Automatic"
+        public string? RiderId { get; set; } // Required for manual assignment
+    }
 
 }
 

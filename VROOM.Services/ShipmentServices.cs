@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using VROOM.Models;
 using VROOM.Repositories;
-using VROOM.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Shipment;
 using VROOM.Models.Dtos;
 using VROOM.Data;
 using Microsoft.Extensions.Logging;
-using VROOM.Repository;
-using ViewModels.Route;
 
 namespace VROOM.Services
 {

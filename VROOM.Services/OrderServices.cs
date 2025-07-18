@@ -16,13 +16,6 @@ namespace VROOM.Services
 {
     public class OrderService
     {
-        //private readonly OrderRepository orderRepository;
-        //private readonly RiderManager riderManager;
-        //public OrderServices (OrderRepository _orderRepository, RiderManager _riderManager) { 
-        //    orderRepository = _orderRepository;
-        //    riderManager = _riderManager;
-        //}
-
         private readonly UserManager<User> userManager;
         private OrderRepository orderRepository;
         private BusinessOwnerRepository businessOwnerRepository;

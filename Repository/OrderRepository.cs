@@ -289,7 +289,10 @@ namespace VROOM.Repositories
             return (data, totalCount);
         }
 
-
+        public float GetMaxWeight(int shipmentId)
+        {
+           return context.Database.SqlQuery<float>($"SELECT MAX(o.Weight) AS Value FROM Waypoint AS w LEFT JOIN Orders AS o ON w.orderId = o.Id WHERE ShipmentID = {shipmentId} GROUP BY ShipmentID").FirstOrDefault();
+        }
 
     }
 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VROOM.Models.JobRecords;
-using VROOM.Repository;
+﻿using VROOM.Models;
+using VROOM.Repositories;
 
 namespace VROOM.Services
 {

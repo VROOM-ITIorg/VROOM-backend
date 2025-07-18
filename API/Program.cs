@@ -9,11 +9,8 @@ using VROOM.Repositories;
 using VROOM.Services;
 using System.Text.Json.Serialization;
 using Hangfire;
-using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using VROOM.Repository;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc;
 using Hubs;
 using Microsoft.OpenApi.Models;
 

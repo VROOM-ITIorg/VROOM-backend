@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminDashboard", "Delivery 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{C63696E3-8325-4280-9929-81F35A90C20E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VROOM.Repository", "Repository\VROOM.Repository.csproj", "{B1C65183-CB1A-4358-8734-2A9B28DF9826}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VROOM.Repositories", "Repository\VROOM.Repositories.csproj", "{B1C65183-CB1A-4358-8734-2A9B28DF9826}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModels", "ViewModels\ViewModels.csproj", "{E5DBAEFA-8E3A-4EBF-83EF-5823A131478A}"
 EndProject

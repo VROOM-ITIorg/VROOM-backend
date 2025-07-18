@@ -1,15 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VROOM.Data;
+﻿using VROOM.Data;
 using VROOM.Models;
-using VROOM.Repositories;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public class OrderRouteRepository : BaseRepository<OrderRoute>
     {

@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +9,6 @@ using VROOM.Models;
 using VROOM.Models.Dtos;
 using VROOM.Repositories;
 using VROOM.Services;
-using ViewModels.Order;
-using System.Linq;
 using VROOM.ViewModels;
 
 namespace API.Controllers
@@ -58,46 +53,9 @@ namespace API.Controllers
         {
             try
             {
-                var currentRiderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (currentRiderId != riderId)
-                    return Unauthorized(new { error = "You are not authorized to access this rider's data." });
+               var riderProfileDto = await _riderService.GetRiderProfileAsync(riderId);
 
-                var rider = await _riderService.GetRiderProfileAsync(riderId);
-                var shipments = await _context.Shipments
-                    .Where(s => s.RiderID == riderId && !s.IsDeleted)
-                    .ToListAsync();
-                var orders = await _context.Orders
-                    .Where(o => o.RiderID == riderId && !o.IsDeleted)
-                    .ToListAsync();
-                var feedbacks = await _context.Feedbacks
-                    .Where(f => f.RiderID == riderId && !f.IsDeleted)
-                    .OrderByDescending(f => f.ModifiedAt)
-                    .Take(3)
-                    .Select(f => new { Comment = f.Message, f.Rating, f.ModifiedAt })
-                    .ToListAsync();
-
-                return Ok(new
-                {
-                    id = rider.UserID,
-                    name = rider.User?.Name,
-                    email = rider.User?.Email,
-                    phone = rider.User?.PhoneNumber,
-                    status = rider.Status.ToString(),
-                    vehicleType = rider.VehicleType.ToString(),
-                    vehicleStatus = rider.VehicleStatus,
-                    location = new { latitude = rider.Lat, longitude = rider.Lang, area = rider.Area },
-                    experienceLevel = rider.ExperienceLevel,
-                    rating = rider.Rating,
-                    feedbacks,
-                    stats = new
-                    {
-                        assignedShipments = shipments.Count(s => s.ShipmentState == ShipmentStateEnum.Assigned),
-                        completedShipments = shipments?.Count(s => s.ShipmentState == ShipmentStateEnum.Delivered) ?? 0,
-                        assignedOrders = orders?.Count(o => o.State == OrderStateEnum.Pending || o.State == OrderStateEnum.Confirmed) ?? 0,
-                        completedOrders = orders?.Count(o => o.State == OrderStateEnum.Delivered) ?? 0
-                    },
-                    profilePicture = rider.User?.ProfilePicture
-                });
+                return Ok(riderProfileDto);
             }
             catch (Exception ex)
             {
@@ -213,12 +171,12 @@ namespace API.Controllers
                         VehicleType = rider.VehicleType,
                         VehicleStatus = rider.VehicleStatus ?? VehicleTypeStatus.Unknowen,
                         ExperienceLevel = rider.ExperienceLevel,
-                        Location = new LocationDto
-                        {
-                            Lat = rider.Lat,
-                            Lang = rider.Lang,
-                            Area = rider.Area
-                        },
+                        //Location = new LocationDto
+                        //{
+                        //    Lat = rider.Lat,
+                        //    Lang = rider.Lang,
+                        //    Area = rider.Area
+                        //},
                         Status = rider.Status,
                         ProfilePicture = rider.User?.ProfilePicture
                     };
@@ -394,36 +352,5 @@ namespace API.Controllers
             }
         }
 
-        //[HttpPost("test-whatsapp")]
-        //[AllowAnonymous] // For manual testing, remove in production
-        //public async Task<IActionResult> TestWhatsAppNotification()
-        //{
-        //    try
-        //    {
-        //        var order = new Order
-        //        {
-        //            Id = 123,
-        //            CustomerID = "bc85afee-d96f-4b58-8ee8-5e1c16bd407f",
-        //            RiderID = "1115f839-5aca-4aab-ad4a-630e679fb14a",
-        //            Customer = new Customer
-        //            {
-        //                User = new User
-        //                {
-        //                    Name = "customer",
-        //                    PhoneNumber = "+201124945557" // Replace with your test phone number  
-        //                }
-        //            },
-        //            Title = "Test Order"
-        //        };
-
-        //        var result = await _whatsAppNotificationService.SendFeedbackRequestAsync(order);
-        //        return Ok(new { Success = result, Message = "WhatsApp notification triggered" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Failed to send WhatsApp notification");
-        //        return StatusCode(500, new { error = "An error occurred while sending WhatsApp notification.", details = ex.Message });
-        //    }
-        //}
     }
 }

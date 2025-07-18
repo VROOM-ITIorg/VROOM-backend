@@ -1,16 +1,15 @@
-﻿// VROOM.Repositories/FeedbackRepository.cs
-using VROOM.Data;
+﻿using VROOM.Data;
 using VROOM.Models;
 using Microsoft.EntityFrameworkCore;
 using ViewModels.Feedback;
 
 namespace VROOM.Repositories
 {
-    public class FeedbackRepository
+    public class FeedbackRepository : BaseRepository<Feedback>
     {
         private readonly VroomDbContext _context;
 
-        public FeedbackRepository(VroomDbContext context)
+        public FeedbackRepository(VroomDbContext context) : base (context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -23,12 +22,6 @@ namespace VROOM.Repositories
 
         public async Task<bool> AddFeedbackAsync(string customerId, FeedbackRequest feedbackRequest)
         {
-            //var existingFeedback = await GetByCustomerAndRiderAsync(customerId, feedbackRequest.RiderId);
-            //if (existingFeedback != null)
-            //{
-            //    return false; // Prevent duplicate feedback
-            //}
-
             var feedback = new Feedback
             {
                 RiderID = feedbackRequest.RiderId,

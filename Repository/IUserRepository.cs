@@ -1,13 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VROOM.Models;
-using VROOM.Repositories;
 
-namespace VROOM.Repository
+namespace VROOM.Repositories
 {
     public interface IUserRepository
     {

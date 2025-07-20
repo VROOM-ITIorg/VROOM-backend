@@ -66,37 +66,37 @@ namespace API.Controllers
             }
         }
         // PUT: api/BusinessOwner/Profile
-[Authorize(Roles = "BusinessOwner")]
-[HttpPut("Profile")]
-[Consumes("multipart/form-data")]
-public async Task<IActionResult> UpdateProfile([FromForm] BusinessOwnerProfileVM model)
-{
-    try
-    {
-        var currentOwnerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrWhiteSpace(currentOwnerId))
+        [Authorize(Roles = "BusinessOwner")]
+        [HttpPut("Profile")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateProfile([FromForm] BusinessOwnerProfileVM model)
         {
-            return Unauthorized(new { error = "You are not authorized to update this profile." });
-        }
+            try
+            {
+                var currentOwnerId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrWhiteSpace(currentOwnerId))
+                {
+                    return Unauthorized(new { error = "You are not authorized to update this profile." });
+                }
 
-        if (model == null)
-        {
-            return BadRequest(new { error = "Profile data is required." });
-        }
+                if (model == null)
+                {
+                    return BadRequest(new { error = "Profile data is required." });
+                }
 
-        var result = await _businessOwnerService.UpdateProfileAsync(currentOwnerId, model);
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new { error = result.Error });
-        }
+                var result = await _businessOwnerService.UpdateProfileAsync(currentOwnerId, model);
+                if (!result.IsSuccess)
+                {
+                    return BadRequest(new { error = result.Error });
+                }
 
-        return Ok(new { message = "Profile updated successfully." });
-    }
-    catch (Exception)
-    {
-        return StatusCode(500, new { error = "An unexpected error occurred while updating the profile." });
-    }
-}
+                return Ok(new { message = "Profile updated successfully." });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { error = "An unexpected error occurred while updating the profile." });
+            }
+        }
         [HttpPost("register")]
         public async Task<IActionResult> RegisterBusinessOwner([FromBody] BusinessOwnerRegisterRequest request)
         {

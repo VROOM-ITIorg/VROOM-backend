@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ViewModels;
 using ViewModels.Order;
 using ViewModels.Shipment;
 using ViewModels.User;
@@ -19,6 +20,7 @@ using VROOM.Repositories;
 using VROOM.ViewModels;
 using static NuGet.Packaging.PackagingConstants;
 using LocationDto = VROOM.ViewModels.LocationDto;
+using RiderVM = VROOM.ViewModels.RiderVM;
 
 namespace VROOM.Services
 {
@@ -604,7 +606,7 @@ namespace VROOM.Services
                         UserName = request.Email,
                         Email = request.Email,
                         Name = request.Name,
-                        PhoneNumber = request.PhoneNumber,
+                        PhoneNumber = NormalizePhoneNumber(request.PhoneNumber),
                         ProfilePicture = request.ProfilePicture,
                         Address = new Address
                         {
@@ -1006,7 +1008,8 @@ namespace VROOM.Services
                         Lang = r.Lang,
                         Area = r.Area
                     },
-                    Status = r.Status
+                    Status = r.Status,
+                    ProfilePicture = r.User.ProfilePicture
                 }).ToList();
 
                 _logger.LogInformation("Successfully retrieved {RiderCount} riders for Business Owner with ID {BusinessOwnerId}.", riderVMs.Count, businessOwnerId);
@@ -1526,7 +1529,7 @@ namespace VROOM.Services
                     var orderHasMaxWeight = (await _orderRepository.GetListLocalOrDbAsync(o => o.Weight == maxWeights)).FirstOrDefault();
                     var riders = await _riderRepository.GetAvaliableRiders(businessOwnerId);
                     var filteredRiders = riders
-                        .Where(r => r.VehicleStatus == VehicleTypeStatus.Good && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
+                        .Where(r => r.VehicleStatus == VehicleTypeStatus.Good || r.VehicleStatus == VehicleTypeStatus.Excellant && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
                         .ToList();
 
                     if (!filteredRiders.Any())
@@ -1999,7 +2002,8 @@ namespace VROOM.Services
                 _logger.LogWarning($"Automatic assignment failed for shipment {shipment.Id}: {result.Error}. Attempting forced assignment.");
 
                 var availableRiders = await _riderRepository.GetListLocalOrDbAsync(r => r.BusinessID == businessOwnerId && !r.User.IsDeleted && r.Status == RiderStatusEnum.Available, true, r => r.User);
-                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == VehicleTypeStatus.Good && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight)).ToList();
+                var suitableRiders = availableRiders.Where(r => r.VehicleStatus == VehicleTypeStatus.Good || r.VehicleStatus == VehicleTypeStatus.Excellant && IsVehicleSuitable(r.VehicleType, orderHasMaxWeight))
+                        .ToList();
 
                 if (suitableRiders.Any())
                 {
